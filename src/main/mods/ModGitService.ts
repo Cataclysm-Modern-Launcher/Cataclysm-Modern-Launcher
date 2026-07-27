@@ -4,20 +4,10 @@ import { dirname } from "node:path";
 
 import git from "isomorphic-git";
 import http from "isomorphic-git/http/node";
+import { ClonedMod } from "./types/ClonedMod";
+import { ModGitState } from "./types/ModGitState";
 
-export type ClonedMod = {
-    branch: string;
-    commit: string;
-};
-
-export type ModGitState = {
-    localCommit: string;
-    remoteCommit: string;
-    hasUnpushedCommits: boolean;
-    updateAvailable: boolean;
-};
-
-export class ModGitService {
+class ModGitService {
     async clone(sourceUrl: string, targetPath: string, branch?: string): Promise<ClonedMod> {
         await rm(targetPath, { recursive: true, force: true });
         await mkdir(targetPath, { recursive: true });

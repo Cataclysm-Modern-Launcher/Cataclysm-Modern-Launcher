@@ -3,8 +3,8 @@ import { join, relative } from "node:path";
 
 import { DiscoveredMod } from "../../shared/mods/DiscoveredMod";
 import { translate } from "../LocalizationService";
-import { fileExists } from "./fileExists";
-import { readValidatedModInfo } from "./readValidatedModInfo";
+import { fileExists } from "../utils/fileExists";
+import { readValidatedModInfo } from "./utils/readValidatedModInfo";
 
 class ModDiscoveryService {
     async discover(rootPath: string): Promise<DiscoveredMod[]> {

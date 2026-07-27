@@ -1,10 +1,4 @@
-export type ModInfoEntry = {
-    type: "MOD_INFO";
-    id?: string;
-    ident?: string;
-    name?: string;
-    description?: string;
-};
+import { ModInfoEntry } from "../types/ModInfoEntry";
 
 export function isModInfoEntry(value: unknown): value is ModInfoEntry {
     if (typeof value !== "object" || value === null) return false;

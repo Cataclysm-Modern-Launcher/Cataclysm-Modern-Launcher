@@ -1,6 +1,6 @@
 import { access } from "node:fs/promises";
 
-import { isNodeError } from "../utils/isNodeError";
+import { isNodeError } from "./isNodeError";
 
 export async function fileExists(path: string): Promise<boolean> {
     try {

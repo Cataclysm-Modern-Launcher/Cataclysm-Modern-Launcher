@@ -23,14 +23,16 @@ import { gameBundleService } from "./GameBundleService";
 import { translate } from "./LocalizationService";
 import { workspaceService } from "./WorkspaceService";
 import { modDeploymentService } from "./mods/ModDeploymentService";
-import { fileExists } from "./mods/fileExists";
+import { fileExists } from "./utils/fileExists";
 import { modDiscoveryService } from "./mods/ModDiscoveryService";
 import { modGitService } from "./mods/ModGitService";
-import { getChannelModRepositoryPath, getChannelModsPath, getChannelModTempPath } from "./mods/modRepositoryPaths";
 import { modRegistryStore } from "./mods/ModRegistryStore";
-import { parseModSourceUrl } from "./mods/parseModSourceUrl";
-import { readValidatedModInfo } from "./mods/readValidatedModInfo";
+import { parseModSourceUrl } from "./mods/utils/parseModSourceUrl";
+import { readValidatedModInfo } from "./mods/utils/readValidatedModInfo";
 import { broadcastIPC } from "./utils/broadcastIPC";
+import { getChannelModTempPath } from "./mods/utils/getChannelModTempPath";
+import { getChannelModsPath } from "./mods/utils/getChannelModsPath";
+import { getChannelModRepositoryPath } from "./mods/utils/getChannelModRepositoryPath";
 
 type PendingInstall = {
     sourceType: "git" | "archive";
@@ -78,7 +80,7 @@ class ModRepositoryService {
             const mods = await modDiscoveryService.discover(tempPath);
             return await this.finalizeDiscovery({ sourceType: "git", sourceId, sourceUrl: parsedSource, tempPath, finalSourcePath: join("sources", sourceId), branch: clone.branch, commit: clone.commit, mods });
         } catch (error) {
-            if (tempPath !== undefined) await rm(tempPath, { recursive: true, force: true });
+            if (tempPath) await rm(tempPath, { recursive: true, force: true });
             return this.discoveryError(getErrorMessage(error));
         }
     }
@@ -99,7 +101,7 @@ class ModRepositoryService {
             const mods = await modDiscoveryService.discover(tempPath);
             return await this.finalizeDiscovery({ sourceType: "archive", sourceId, tempPath, finalSourcePath: join("sources", sourceId), mods });
         } catch (error) {
-            if (tempPath !== undefined) await rm(tempPath, { recursive: true, force: true });
+            if (tempPath) await rm(tempPath, { recursive: true, force: true });
             return this.discoveryError(getErrorMessage(error));
         }
     }

@@ -5,9 +5,10 @@ import { ModInfo } from "../../shared/mods/ModInfo";
 import { ModRegistry } from "../../shared/mods/ModRegistry";
 import { translate } from "../LocalizationService";
 import { isNodeError } from "../utils/isNodeError";
-import { getChannelModRepositoryPath } from "./modRepositoryPaths";
 
-export class ModRegistryStore {
+import { getChannelModRepositoryPath } from "./utils/getChannelModRepositoryPath";
+
+class ModRegistryStore {
     private readonly operations = new Map<string, Promise<void>>();
 
     constructor(private readonly translate: (key: string, variables?: Record<string, string | number>) => string) {}

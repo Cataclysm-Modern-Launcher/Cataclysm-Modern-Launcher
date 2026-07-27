@@ -4,7 +4,9 @@ import { dirname, join, relative, resolve } from "node:path";
 import { ModInfo } from "../../shared/mods/ModInfo";
 import { isNodeError } from "../utils/isNodeError";
 
-export class ModAttachmentService {
+const ModIdRegex = /[^a-zA-Z0-9._-]/g;
+
+class ModAttachmentService {
     async synchronize(userdataPaths: string[], mods: ModInfo[], getSourcePath: (mod: ModInfo) => string): Promise<void> {
         for (const userdataPath of userdataPaths) {
             for (const mod of mods) {
@@ -62,12 +64,8 @@ export class ModAttachmentService {
     }
 
     private getAttachmentPath(userdataPath: string, mod: ModInfo): string {
-        return join(userdataPath, "mods", getSafeModDirectoryName(mod.id));
+        return join(userdataPath, "mods", mod.id.replace(ModIdRegex, "_"));
     }
-}
-
-function getSafeModDirectoryName(modId: string): string {
-    return modId.replace(/[^a-zA-Z0-9._-]/g, "_");
 }
 
 export const modAttachmentService = new ModAttachmentService();

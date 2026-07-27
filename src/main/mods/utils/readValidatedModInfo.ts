@@ -3,7 +3,7 @@ import { join } from "node:path";
 
 import { isModInfoEntry } from "./isModInfoEntry";
 import { normalizeModDisplayName } from "./normalizeModDisplayName";
-import { ValidatedModInfo } from "./ValidatedModInfo";
+import { ValidatedModInfo } from "../types/ValidatedModInfo";
 
 export async function readValidatedModInfo(modPath: string, translate: (key: string, variables?: Record<string, string | number>) => string): Promise<ValidatedModInfo> {
     let parsed: unknown;
