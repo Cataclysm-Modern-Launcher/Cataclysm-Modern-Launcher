@@ -5,6 +5,7 @@ export type ModInfo = {
     id: string;
     displayName: string;
     description?: string;
+    dependencies?: string[];
     sourceType: ModSourceType;
     sourceId: string;
     sourceUrl?: string;

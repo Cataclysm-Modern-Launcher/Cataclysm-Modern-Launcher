@@ -15,17 +15,7 @@ export function BackupsDrawer(): React.JSX.Element {
     const backupSummary = useGameBackupStore((state) => state.summary);
 
     return (
-        <Drawer
-            opened={isOpened}
-            onClose={close}
-            position="right"
-            size={520}
-            title={
-                <Text fw={700} size="lg">
-                    {t("backups.title")}
-                </Text>
-            }
-        >
+        <Drawer opened={isOpened} onClose={close} position="right" size={520} title={<LocalizedText fw={700} size="lg" i18nKey="backups.title" />}>
             <Stack gap="md">
                 <LocalizedText size="sm" c="dimmed" i18nKey="backups.description" />
                 {backupSummary.backups.length === 0 ? (

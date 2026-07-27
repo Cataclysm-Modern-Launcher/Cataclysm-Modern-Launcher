@@ -77,7 +77,7 @@ class ModRepositoryService {
             const sourceId = randomUUID();
             tempPath = join(getChannelModTempPath(context.repositoryPath, context.channelId), sourceId);
             const clone = await modGitService.clone(parsedSource, tempPath);
-            const mods = await modDiscoveryService.discover(tempPath);
+            const mods = this.withDependencyCompatibility(await modDiscoveryService.discover(tempPath), context.coreModId);
             return await this.finalizeDiscovery({ sourceType: "git", sourceId, sourceUrl: parsedSource, tempPath, finalSourcePath: join("sources", sourceId), branch: clone.branch, commit: clone.commit, mods });
         } catch (error) {
             if (tempPath) await rm(tempPath, { recursive: true, force: true });
@@ -98,7 +98,7 @@ class ModRepositoryService {
             tempPath = join(getChannelModTempPath(context.repositoryPath, context.channelId), sourceId);
             await mkdir(tempPath, { recursive: true });
             await extract(selected.filePaths[0], { dir: tempPath });
-            const mods = await modDiscoveryService.discover(tempPath);
+            const mods = this.withDependencyCompatibility(await modDiscoveryService.discover(tempPath), context.coreModId);
             return await this.finalizeDiscovery({ sourceType: "archive", sourceId, tempPath, finalSourcePath: join("sources", sourceId), mods });
         } catch (error) {
             if (tempPath) await rm(tempPath, { recursive: true, force: true });
@@ -122,6 +122,7 @@ class ModRepositoryService {
                 id: info.id,
                 displayName: info.name,
                 description: info.description,
+                dependencies: info.dependencies,
                 sourceType: "folder",
                 sourceId: randomUUID(),
                 sourcePath: folderPath,
@@ -167,6 +168,7 @@ class ModRepositoryService {
                         id: found.id,
                         displayName: found.name,
                         description: found.description,
+                        dependencies: found.dependencies,
                         sourceType: "git",
                         sourceId: pending.sourceId,
                         sourceUrl: pending.sourceUrl,
@@ -196,6 +198,7 @@ class ModRepositoryService {
                         id: found.id,
                         displayName: found.name,
                         description: found.description,
+                        dependencies: found.dependencies,
                         sourceType: "archive",
                         sourceId,
                         sourcePath,
@@ -278,6 +281,7 @@ class ModRepositoryService {
                     ...item,
                     displayName: found.name,
                     description: found.description,
+                    dependencies: found.dependencies,
                     subdirectory: found.subdirectory,
                     installedCommit: clone.commit,
                     lastKnownRemoteCommit: clone.commit,
@@ -376,7 +380,7 @@ class ModRepositoryService {
     private async refreshMetadata(repositoryPath: string, channelId: string, mod: ModInfo): Promise<ModInfo> {
         try {
             const info = await readValidatedModInfo(modRegistryStore.getModPath(repositoryPath, channelId, mod), translate);
-            return info.id === mod.id ? { ...mod, displayName: info.name, description: info.description, checkedAt: new Date().toISOString() } : mod;
+            return info.id === mod.id ? { ...mod, displayName: info.name, description: info.description, dependencies: info.dependencies, checkedAt: new Date().toISOString() } : mod;
         } catch {
             return mod;
         }
@@ -396,7 +400,7 @@ class ModRepositoryService {
         try {
             await this.prepareDirectories(context.repositoryPath, context.channelId);
             const registry = await modRegistryStore.read(context.repositoryPath, context.channelId);
-            const mods = await Promise.all(Object.values(registry.mods).map((mod) => this.buildItem(context.repositoryPath, context.channelId, mod)));
+            const mods = await Promise.all(Object.values(registry.mods).map((mod) => this.buildItem(context.repositoryPath, context.channelId, context.coreModId, mod)));
             return {
                 status: "ready",
                 repositoryPath: context.repositoryPath,
@@ -410,19 +414,39 @@ class ModRepositoryService {
         }
     }
 
-    private async buildItem(repositoryPath: string, channelId: string, mod: ModInfo): Promise<ModInstanceInfo> {
+    private async buildItem(repositoryPath: string, channelId: string, coreModId: string | undefined, mod: ModInfo): Promise<ModInstanceInfo> {
         const absolutePath = modRegistryStore.getModPath(repositoryPath, channelId, mod);
-        const item = (status: ModInstanceInfo["status"], error?: string): ModInstanceInfo => ({ ...mod, status, absolutePath, error });
+        const item = (status: ModInstanceInfo["status"], dependencies = mod.dependencies, error?: string): ModInstanceInfo => ({
+            ...mod,
+            dependencies,
+            status,
+            absolutePath,
+            error,
+            dependencyCompatible: coreModId === undefined || dependencies === undefined ? undefined : dependencies.includes(coreModId),
+            expectedCoreModId: coreModId
+        });
         if (!(await fileExists(absolutePath))) return item("missing-local-copy");
+
+        let dependencies: string[];
         try {
             const info = await readValidatedModInfo(absolutePath, translate);
-            if (info.id !== mod.id) return item("invalid-local-copy");
+            if (info.id !== mod.id) return item("invalid-local-copy", info.dependencies);
+            dependencies = info.dependencies;
         } catch (error) {
-            return item("invalid-local-copy", getErrorMessage(error));
+            return item("invalid-local-copy", mod.dependencies, getErrorMessage(error));
         }
-        if (mod.hasLocalChanges || mod.hasUnpushedCommits) return item("blocked-by-local-changes");
-        if (mod.updateAvailable) return item("update-available");
-        return item("installed");
+
+        if (mod.hasLocalChanges || mod.hasUnpushedCommits) return item("blocked-by-local-changes", dependencies);
+        if (mod.updateAvailable) return item("update-available", dependencies);
+        return item("installed", dependencies);
+    }
+
+    private withDependencyCompatibility(mods: DiscoveredMod[], coreModId: string | undefined): DiscoveredMod[] {
+        return mods.map((mod) => ({
+            ...mod,
+            dependencyCompatible: coreModId === undefined ? undefined : mod.dependencies.includes(coreModId),
+            expectedCoreModId: coreModId
+        }));
     }
 
     private async synchronizeAttachments(repositoryPath: string, channelId: string, mods: ModInfo[]): Promise<void> {
@@ -444,11 +468,11 @@ class ModRepositoryService {
     private getReadyContext(): ReadyContext | UnavailableContext {
         const workspace = workspaceService.getWorkspaceStatus();
         if (workspace.status !== "ready") return { status: "unavailable", kind: workspace.status === "unconfigured" ? "unconfigured" : "error", message: getRepositoryUnavailableMessage(workspace) };
-        return { status: "ready", repositoryPath: workspace.path, channelId: workspace.selectedGameChannel.id };
+        return { status: "ready", repositoryPath: workspace.path, channelId: workspace.selectedGameChannel.id, coreModId: workspace.selectedGameChannel.coreModId };
     }
 }
 
-type ReadyContext = { status: "ready"; repositoryPath: string; channelId: string };
+type ReadyContext = { status: "ready"; repositoryPath: string; channelId: string; coreModId?: string };
 type UnavailableContext = { status: "unavailable"; kind: "unconfigured" | "error"; message: string };
 function getErrorMessage(error: unknown): string {
     return error instanceof Error ? error.message : String(error);

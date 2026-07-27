@@ -22,5 +22,8 @@ export async function readValidatedModInfo(modPath: string, translate: (key: str
 
     const name = normalizeModDisplayName(entry.name, id);
     const description = typeof entry.description === "string" && entry.description.trim().length > 0 ? entry.description.trim() : undefined;
-    return { id, name, description };
+    const dependencies = Array.isArray(entry.dependencies)
+        ? entry.dependencies.filter((dependency): dependency is string => typeof dependency === "string").map((dependency) => dependency.trim()).filter(Boolean)
+        : [];
+    return { id, name, description, dependencies };
 }

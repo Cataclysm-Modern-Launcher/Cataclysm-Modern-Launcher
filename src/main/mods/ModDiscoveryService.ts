@@ -21,6 +21,7 @@ class ModDiscoveryService {
                 id: info.id,
                 name: info.name,
                 description: info.description,
+                dependencies: info.dependencies,
                 subdirectory: relative(rootPath, candidatePath)
             });
         }

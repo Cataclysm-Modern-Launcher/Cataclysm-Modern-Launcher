@@ -1,6 +1,7 @@
 import { memo, useCallback, type JSX } from "react";
 import { Checkbox, Stack, Text } from "@mantine/core";
 import { DiscoveredMod } from "../../../../shared/mods/DiscoveredMod";
+import { useTranslate } from "@renderer/stores/useLocaleStore";
 
 type ModSelectionItemProps = {
     mod: DiscoveredMod;
@@ -10,6 +11,7 @@ type ModSelectionItemProps = {
 };
 
 export const ModSelectionItem = memo(function ModSelectionItem({ mod, selected, disabled, onToggle }: ModSelectionItemProps): JSX.Element {
+    const t = useTranslate();
     const toggle = useCallback(() => onToggle(mod.id), [mod.id, onToggle]);
 
     return (
@@ -24,6 +26,11 @@ export const ModSelectionItem = memo(function ModSelectionItem({ mod, selected, 
                         {mod.id}
                         {mod.subdirectory ? ` · ${mod.subdirectory}` : ""}
                     </Text>
+                    {mod.dependencyCompatible === false && mod.expectedCoreModId && (
+                        <Text size="xs" c="orange">
+                            {t("content.sheet.mods.compatibility.warning.description", { expected: mod.expectedCoreModId, actual: mod.dependencies.join(", ") || "—" })}
+                        </Text>
+                    )}
                     {mod.description && (
                         <Text size="xs" lineClamp={2}>
                             {mod.description}

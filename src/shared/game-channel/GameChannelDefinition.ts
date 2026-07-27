@@ -5,6 +5,7 @@ export type GameChannelDefinition = {
     gameName: string;
     shortName: string;
     channelName: string;
+    coreModId?: string;
     githubOwner: string;
     githubRepo: string;
     githubBranch: string;

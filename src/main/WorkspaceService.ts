@@ -292,6 +292,7 @@ function normalizeCustomChannel(channel: unknown): GameChannelDefinition | null 
         gameName: typeof candidate.gameName === "string" ? candidate.gameName : candidate.id,
         shortName: typeof candidate.shortName === "string" ? candidate.shortName : candidate.id,
         channelName: typeof candidate.channelName === "string" ? candidate.channelName : "Custom",
+        coreModId: typeof candidate.coreModId === "string" && candidate.coreModId.length > 0 ? candidate.coreModId : undefined,
         githubOwner: typeof candidate.githubOwner === "string" ? candidate.githubOwner : "",
         githubRepo: typeof candidate.githubRepo === "string" ? candidate.githubRepo : "",
         githubBranch: typeof candidate.githubBranch === "string" && candidate.githubBranch.length > 0 ? candidate.githubBranch : "master",

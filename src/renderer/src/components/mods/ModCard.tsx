@@ -13,6 +13,7 @@ export const ModCard = React.memo(function ModCard({ mod }: Props) {
         <Card withBorder radius="md" p="md">
             <Stack gap="xs">
                 <ModCardHeader mod={mod} />
+
                 {mod.error && (
                     <Text size="sm" c="red">
                         {mod.error}
