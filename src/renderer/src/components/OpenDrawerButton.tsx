@@ -1,5 +1,5 @@
 import { TDrawerKind, useOpenDrawerFn } from "@renderer/stores/useDrawerStore";
-import type { LocaleKeys } from "../../../shared/localization/types/LocaleFile";
+import type { LocaleKeys } from "@shared/localization/types/LocaleFile";
 import { Button, ButtonVariant, Tooltip } from "@mantine/core";
 import { ReactNode, useCallback } from "react";
 import { useTranslate } from "@renderer/stores/useLocaleStore";

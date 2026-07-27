@@ -1,4 +1,4 @@
-import { GameBundleInstallProgress } from "../../../shared/game-bundle/GameBundleInstallProgress";
+import { GameBundleInstallProgress } from "@shared/game-bundle/GameBundleInstallProgress";
 
 export function getIndeterminateProgressValue(progress: GameBundleInstallProgress): number {
     if (progress.status === "extracting") return 58;

@@ -1,7 +1,7 @@
-import { LocalizationApi } from "../../shared/bridge-api/LocalizationApi";
-import { LocalizationBundle } from "../../shared/localization/types/LocalizationBundle";
+import { LocalizationApi } from "@shared/bridge-api/LocalizationApi";
+import { LocalizationBundle } from "@shared/localization/types/LocalizationBundle";
 import { ipcRenderer, type IpcRendererEvent } from "electron";
-import { Bridge } from "../../shared/bridge-api/Bridge";
+import { Bridge } from "@shared/bridge-api/Bridge";
 
 export function registerPreloadLocalizationApi(): LocalizationApi {
     return {

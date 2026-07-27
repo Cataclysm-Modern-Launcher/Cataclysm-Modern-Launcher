@@ -1,9 +1,9 @@
 import { create } from "zustand";
-import { ModRepositoryState } from "../../../shared/mods/ModRepositoryState";
+import { ModRepositoryState } from "@shared/mods/ModRepositoryState";
 import { IMountableState } from "@renderer/types/IMountableState";
-import { ModInstanceInfo } from "../../../shared/mods/ModInstanceInfo";
+import { ModInstanceInfo } from "@shared/mods/ModInstanceInfo";
 import { translate } from "@renderer/stores/useLocaleStore";
-import { EModDiscoveryResult } from "../../../shared/mods/EModDiscoveryResult";
+import { EModDiscoveryResult } from "@shared/mods/EModDiscoveryResult";
 
 export type TModsBusyAction = null | "install" | "check-updates" | "update" | "remove";
 

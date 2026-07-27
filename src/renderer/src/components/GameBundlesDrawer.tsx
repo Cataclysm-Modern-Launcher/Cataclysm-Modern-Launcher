@@ -1,6 +1,6 @@
 import { ActionIcon, Divider, Drawer, Group, Loader, Stack, Text, Title, Tooltip } from "@mantine/core";
 import React, { useEffect, useMemo } from "react";
-import { GithubRelease } from "../../../shared/GithubRelease";
+import { GithubRelease } from "@shared/GithubRelease";
 import { localizeChannelName } from "@renderer/utils/localizeChannelName";
 import { GameBundleReleaseCard } from "@renderer/components/GameBundleReleaseCard";
 import { GameBundleCard } from "@renderer/components/GameBundleCard";

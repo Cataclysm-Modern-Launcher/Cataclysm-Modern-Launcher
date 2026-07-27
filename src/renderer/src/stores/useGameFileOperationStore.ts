@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { IMountableState } from "@renderer/types/IMountableState";
-import { GameFileOperationState } from "../../../shared/game-bundle/GameFileOperationState";
+import { GameFileOperationState } from "@shared/game-bundle/GameFileOperationState";
 
 interface GameFileOperationStoreState extends IMountableState {
     operation: GameFileOperationState;

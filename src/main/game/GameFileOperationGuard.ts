@@ -1,7 +1,7 @@
 import { translate } from "../LocalizationService";
-import { GameFileOperationKind, GameFileOperationState } from "../../shared/game-bundle/GameFileOperationState";
+import { GameFileOperationKind, GameFileOperationState } from "@shared/game-bundle/GameFileOperationState";
 import { ipcMain } from "electron";
-import { Bridge } from "../../shared/bridge-api/Bridge";
+import { Bridge } from "@shared/bridge-api/Bridge";
 import { broadcastIPC } from "../utils/broadcastIPC";
 
 class GameFileOperationGuard {

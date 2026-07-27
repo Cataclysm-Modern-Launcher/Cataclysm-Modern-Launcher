@@ -1,6 +1,6 @@
 import type React from "react";
 import { Alert, Button, Card, Group, Stack, Text, Title } from "@mantine/core";
-import { WORKSPACE_CONFIG_FILE_NAME } from "../../../../shared/Const";
+import { WORKSPACE_CONFIG_FILE_NAME } from "@shared/Const";
 import { useWorkspaceStore } from "@renderer/stores/useWorkspaceStore";
 import { useTranslate } from "@renderer/stores/useLocaleStore";
 import { LocalizedText } from "@renderer/components/LocalizedText";

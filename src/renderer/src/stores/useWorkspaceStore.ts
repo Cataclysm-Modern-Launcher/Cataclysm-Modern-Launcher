@@ -1,7 +1,7 @@
 import { create } from "zustand";
-import { WorkspaceStatus } from "../../../shared/workspace/WorkspaceStatus";
+import { WorkspaceStatus } from "@shared/workspace/WorkspaceStatus";
 import { IMountableState } from "@renderer/types/IMountableState";
-import { GameChannelDefinition } from "../../../shared/game-channel/GameChannelDefinition";
+import { GameChannelDefinition } from "@shared/game-channel/GameChannelDefinition";
 
 interface State extends IMountableState {
     workspaceStatus: WorkspaceStatus;

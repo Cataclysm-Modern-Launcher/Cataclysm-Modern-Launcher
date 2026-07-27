@@ -1,13 +1,7 @@
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
 
-const WINDOWS_EXECUTABLE_CANDIDATES = new Set([
-    "cataclysm-tiles.exe",
-    "cataclysm.exe",
-    "cataclysm-launcher.exe",
-    "cataclysm-bn-tiles.exe",
-    "cataclysm-bn.exe"
-]);
+const WINDOWS_EXECUTABLE_CANDIDATES = new Set(["cataclysm-tiles.exe", "cataclysm.exe", "cataclysm-launcher.exe", "cataclysm-bn-tiles.exe", "cataclysm-bn.exe"]);
 const POSIX_EXECUTABLE_CANDIDATES = new Set(["cataclysm-tiles", "cataclysm", "cataclysm-bn-tiles", "cataclysm-bn"]);
 
 export async function findExecutable(rootPath: string): Promise<string | null> {

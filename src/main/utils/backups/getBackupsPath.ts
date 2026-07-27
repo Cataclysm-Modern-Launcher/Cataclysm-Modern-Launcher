@@ -1,4 +1,4 @@
-import { GameBundle } from "../../../shared/game-bundle/GameBundle";
+import { GameBundle } from "@shared/game-bundle/GameBundle";
 import { join } from "node:path";
 
 export function getBackupsPath(gameBundle: GameBundle): string {

@@ -1,9 +1,9 @@
 import { ipcMain, nativeTheme } from "electron";
 
-import { AppearanceBundle } from "../../shared/bridge-api/AppearanceApi";
-import { TAppThemeSource } from "../../shared/appearance/TAppThemeSource";
-import { TAppTheme } from "../../shared/appearance/TAppTheme";
-import { Bridge } from "../../shared/bridge-api/Bridge";
+import { AppearanceBundle } from "@shared/bridge-api/AppearanceApi";
+import { TAppThemeSource } from "@shared/appearance/TAppThemeSource";
+import { TAppTheme } from "@shared/appearance/TAppTheme";
+import { Bridge } from "@shared/bridge-api/Bridge";
 import { appSettings } from "../settings/AppSettings";
 import { broadcastIPC } from "../utils/broadcastIPC";
 

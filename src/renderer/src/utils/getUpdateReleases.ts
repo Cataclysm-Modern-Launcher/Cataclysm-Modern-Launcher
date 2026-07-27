@@ -1,5 +1,5 @@
-import { GameBundle } from "../../../shared/game-bundle/GameBundle";
-import { GithubRelease } from "../../../shared/GithubRelease";
+import { GameBundle } from "@shared/game-bundle/GameBundle";
+import { GithubRelease } from "@shared/GithubRelease";
 
 export function getUpdateReleases(activeGameBundle: GameBundle, releases: GithubRelease[]): GithubRelease[] {
     if (releases.length === 0) return [];

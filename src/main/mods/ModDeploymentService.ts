@@ -1,4 +1,4 @@
-import { ModInfo } from "../../shared/mods/ModInfo";
+import { ModInfo } from "@shared/mods/ModInfo";
 import { modAttachmentService } from "./ModAttachmentService";
 import { modRegistryStore } from "./ModRegistryStore";
 

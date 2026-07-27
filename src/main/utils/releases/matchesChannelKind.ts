@@ -1,5 +1,5 @@
-import { GithubRelease } from "../../../shared/GithubRelease";
-import { GameChannelDefinition } from "../../../shared/game-channel/GameChannelDefinition";
+import { GithubRelease } from "@shared/GithubRelease";
+import { GameChannelDefinition } from "@shared/game-channel/GameChannelDefinition";
 
 export function matchesChannelKind(release: GithubRelease, channel: GameChannelDefinition): boolean {
     const value = `${release.id} ${release.name}`.toLowerCase();

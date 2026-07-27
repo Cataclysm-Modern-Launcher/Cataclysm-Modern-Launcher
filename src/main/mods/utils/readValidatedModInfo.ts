@@ -22,8 +22,17 @@ export async function readValidatedModInfo(modPath: string, translate: (key: str
 
     const name = normalizeModDisplayName(entry.name, id);
     const description = typeof entry.description === "string" && entry.description.trim().length > 0 ? entry.description.trim() : undefined;
-    const dependencies = Array.isArray(entry.dependencies)
-        ? entry.dependencies.filter((dependency): dependency is string => typeof dependency === "string").map((dependency) => dependency.trim()).filter(Boolean)
+    const authors = Array.isArray(entry.authors)
+        ? entry.authors
+              .filter((author): author is string => typeof author === "string")
+              .map((author) => author.trim())
+              .filter(Boolean)
         : [];
-    return { id, name, description, dependencies };
+    const dependencies = Array.isArray(entry.dependencies)
+        ? entry.dependencies
+              .filter((dependency): dependency is string => typeof dependency === "string")
+              .map((dependency) => dependency.trim())
+              .filter(Boolean)
+        : [];
+    return { id, name, description, authors, dependencies };
 }

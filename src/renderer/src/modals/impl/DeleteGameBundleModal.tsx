@@ -3,9 +3,9 @@ import { Alert, Button, Checkbox, Group, Stack } from "@mantine/core";
 import { getReleaseDisplayName } from "@renderer/utils/getReleaseDisplayName";
 import { useTranslate } from "@renderer/stores/useLocaleStore";
 import { useGameBundleInstallStore } from "@renderer/stores/useGameBundleInstallStore";
-import { getErrorMessage } from "../../../../shared/getErrorMessage";
+import { getErrorMessage } from "@shared/getErrorMessage";
 import { ContextModalProps, modals } from "@mantine/modals";
-import { GameBundle } from "../../../../shared/game-bundle/GameBundle";
+import { GameBundle } from "@shared/game-bundle/GameBundle";
 import { LocalizedText } from "@renderer/components/LocalizedText";
 
 export function DeleteGameBundleModal({ id, innerProps: { gameBundle } }: ContextModalProps<{ gameBundle: GameBundle }>): React.JSX.Element | null {

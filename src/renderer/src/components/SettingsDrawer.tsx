@@ -11,7 +11,7 @@ import { useCloseDrawer, useIsDrawerOpened } from "@renderer/stores/useDrawerSto
 import { useAppearanceStore } from "@renderer/stores/useAppearanceStore";
 import { getThemeOptions } from "@renderer/utils/getThemeOptions";
 import { ThemeIcon } from "@renderer/components/ThemeIcon";
-import { LocaleOption } from "../../../shared/localization/types/LocaleOption";
+import { LocaleOption } from "@shared/localization/types/LocaleOption";
 import { useWorkspaceStore } from "@renderer/stores/useWorkspaceStore";
 import { IconFolderSymlink } from "@tabler/icons-react";
 

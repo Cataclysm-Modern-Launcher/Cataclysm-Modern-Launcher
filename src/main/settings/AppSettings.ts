@@ -3,7 +3,7 @@ import { dirname, join } from "node:path";
 
 import { app } from "electron";
 
-import { TAppThemeSource } from "../../shared/appearance/TAppThemeSource";
+import { TAppThemeSource } from "@shared/appearance/TAppThemeSource";
 import { isNodeError } from "../utils/isNodeError";
 import { getDefaultWindowState, parseWindowState, WindowState } from "./WindowState";
 

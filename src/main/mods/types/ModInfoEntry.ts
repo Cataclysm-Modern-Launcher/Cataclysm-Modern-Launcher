@@ -4,5 +4,6 @@ export type ModInfoEntry = {
     ident?: string;
     name?: string;
     description?: string;
+    authors?: unknown;
     dependencies?: unknown;
 };

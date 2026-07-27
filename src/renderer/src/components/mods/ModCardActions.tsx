@@ -1,5 +1,5 @@
 import React, { ReactNode, useCallback } from "react";
-import { ModInstanceInfo } from "../../../../shared/mods/ModInstanceInfo";
+import { ModInstanceInfo } from "@shared/mods/ModInstanceInfo";
 import { ActionIcon, Menu, Tooltip } from "@mantine/core";
 import { IconDots, IconFolder, IconRefresh, IconRefreshAlert, IconX } from "@tabler/icons-react";
 import { useTranslate } from "@renderer/stores/useLocaleStore";

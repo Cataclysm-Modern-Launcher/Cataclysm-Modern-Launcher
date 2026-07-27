@@ -1,8 +1,8 @@
 import { GitHubAsset } from "./GitHubAsset";
-import { GameChannelDefinition } from "../../../shared/game-channel/GameChannelDefinition";
-import { TReleaseAssetVariant } from "../../../shared/release-asset/TReleaseAssetVariant";
+import { GameChannelDefinition } from "@shared/game-channel/GameChannelDefinition";
+import { TReleaseAssetVariant } from "@shared/release-asset/TReleaseAssetVariant";
 import { isCompatibleAsset } from "./isCompatibleAsset";
-import { getReleaseAssetVariantFallbackOrder } from "../../../shared/release-asset/getReleaseAssetVariantFallbackOrder";
+import { getReleaseAssetVariantFallbackOrder } from "@shared/release-asset/getReleaseAssetVariantFallbackOrder";
 import { getAssetVariant } from "./getAssetVariant";
 
 export function selectReleaseAsset(assets: GitHubAsset[] | undefined, channel: GameChannelDefinition, gameAssetVariant: TReleaseAssetVariant): GitHubAsset | null {

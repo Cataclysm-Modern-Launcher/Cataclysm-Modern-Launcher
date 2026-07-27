@@ -1,5 +1,5 @@
-import { BackupInstanceInfo } from "../../../shared/backups/types/BackupInstanceInfo";
-import { BackupInfo } from "../../../shared/backups/types/BackupInfo";
+import { BackupInstanceInfo } from "@shared/backups/types/BackupInstanceInfo";
+import { BackupInfo } from "@shared/backups/types/BackupInfo";
 
 export function toBackupInfo(backup: BackupInstanceInfo): BackupInfo {
     return {

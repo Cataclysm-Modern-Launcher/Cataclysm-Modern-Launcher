@@ -1,5 +1,5 @@
-import { GameBundle } from "../../../shared/game-bundle/GameBundle";
-import { GithubRelease } from "../../../shared/GithubRelease";
+import { GameBundle } from "@shared/game-bundle/GameBundle";
+import { GithubRelease } from "@shared/GithubRelease";
 import React, { useCallback } from "react";
 import { Badge, Button, Card, Group, Stack, Text } from "@mantine/core";
 import { getReleaseDisplayName } from "@renderer/utils/getReleaseDisplayName";

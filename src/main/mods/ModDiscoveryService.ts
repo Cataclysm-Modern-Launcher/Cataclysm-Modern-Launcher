@@ -1,7 +1,7 @@
 import { readdir } from "node:fs/promises";
 import { join, relative } from "node:path";
 
-import { DiscoveredMod } from "../../shared/mods/DiscoveredMod";
+import { DiscoveredMod } from "@shared/mods/DiscoveredMod";
 import { translate } from "../LocalizationService";
 import { fileExists } from "../utils/fileExists";
 import { readValidatedModInfo } from "./utils/readValidatedModInfo";
@@ -21,6 +21,7 @@ class ModDiscoveryService {
                 id: info.id,
                 name: info.name,
                 description: info.description,
+                authors: info.authors,
                 dependencies: info.dependencies,
                 subdirectory: relative(rootPath, candidatePath)
             });

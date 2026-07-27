@@ -6,7 +6,7 @@ import { ModCard } from "@renderer/components/mods/ModCard";
 import { useModsStore } from "@renderer/stores/useModsStore";
 import { useShallow } from "zustand/react/shallow";
 import { LocalizedText } from "@renderer/components/LocalizedText";
-import { ModRepositoryState } from "../../../../shared/mods/ModRepositoryState";
+import { ModRepositoryState } from "@shared/mods/ModRepositoryState";
 import { ModDrawerTitle } from "@renderer/components/mods/ModDrawerTitle";
 
 export function ModsDrawer(): ReactNode {

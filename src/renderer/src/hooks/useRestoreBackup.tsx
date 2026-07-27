@@ -1,10 +1,10 @@
-import { BackupInstanceInfo } from "../../../shared/backups/types/BackupInstanceInfo";
+import { BackupInstanceInfo } from "@shared/backups/types/BackupInstanceInfo";
 import { useGameBackupStore } from "@renderer/stores/useGameBackupStore";
 import { useCallback } from "react";
 import { modals } from "@mantine/modals";
 import { Stack } from "@mantine/core";
 import { useTranslate } from "@renderer/stores/useLocaleStore";
-import { coalesceText } from "../../../shared/coalesceText";
+import { coalesceText } from "@shared/coalesceText";
 import { LocalizedText } from "@renderer/components/LocalizedText";
 
 export function useRestoreBackup(): (backup: BackupInstanceInfo | null, skipConfirmation?: boolean) => void {

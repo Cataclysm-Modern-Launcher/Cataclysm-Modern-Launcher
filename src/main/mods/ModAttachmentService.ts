@@ -1,7 +1,7 @@
 import { lstat, mkdir, readlink, rm, symlink } from "node:fs/promises";
 import { dirname, join, relative, resolve } from "node:path";
 
-import { ModInfo } from "../../shared/mods/ModInfo";
+import { ModInfo } from "@shared/mods/ModInfo";
 import { isNodeError } from "../utils/isNodeError";
 
 const ModIdRegex = /[^a-zA-Z0-9._-]/g;

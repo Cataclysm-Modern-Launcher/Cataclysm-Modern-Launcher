@@ -1,11 +1,11 @@
-import { SettingsApi } from "../../shared/bridge-api/SettingsApi";
-import { SettingsIPC } from "../../shared/SettingsIPC";
+import { SettingsApi } from "@shared/bridge-api/SettingsApi";
+import { SettingsIPC } from "@shared/SettingsIPC";
 import { ipcRenderer, type IpcRendererEvent } from "electron";
-import { Bridge } from "../../shared/bridge-api/Bridge";
-import { TReleaseAssetVariant } from "../../shared/release-asset/TReleaseAssetVariant";
-import { TAutoBackupLimit } from "../../shared/backups/types/TAutoBackupLimit";
-import { TAutoBackupCooldown } from "../../shared/backups/types/TAutoBackupCooldown";
-import { TBackupRotationLimit } from "../../shared/backups/types/TBackupRotationLimit";
+import { Bridge } from "@shared/bridge-api/Bridge";
+import { TReleaseAssetVariant } from "@shared/release-asset/TReleaseAssetVariant";
+import { TAutoBackupLimit } from "@shared/backups/types/TAutoBackupLimit";
+import { TAutoBackupCooldown } from "@shared/backups/types/TAutoBackupCooldown";
+import { TBackupRotationLimit } from "@shared/backups/types/TBackupRotationLimit";
 
 export function registerPreloadSettingsApi(): SettingsApi {
     return {

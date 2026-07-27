@@ -1,4 +1,4 @@
-import { GameBundleInstallProgress } from "../../../shared/game-bundle/GameBundleInstallProgress";
+import { GameBundleInstallProgress } from "@shared/game-bundle/GameBundleInstallProgress";
 
 export function isGameBundleInstallRunning(isInstallingGameBundle: boolean, progress: GameBundleInstallProgress): boolean {
     if (isInstallingGameBundle) return true;

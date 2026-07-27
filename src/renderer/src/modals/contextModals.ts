@@ -1,13 +1,13 @@
-import { GameBundle } from "../../../shared/game-bundle/GameBundle";
+import { GameBundle } from "@shared/game-bundle/GameBundle";
 import { ContextModalProps, modals, type OpenContextModal } from "@mantine/modals";
 import React from "react";
 import { DeleteGameBundleModal } from "@renderer/modals/impl/DeleteGameBundleModal";
 import { ReleaseNotesTarget } from "@renderer/types/ReleaseNotesTarget";
 import { ReleaseNotesModal } from "@renderer/modals/impl/ReleaseNotesModal";
-import { BackupInstanceInfo } from "../../../shared/backups/types/BackupInstanceInfo";
+import { BackupInstanceInfo } from "@shared/backups/types/BackupInstanceInfo";
 import { RenameBackupModal } from "@renderer/modals/impl/RenameBackupModal";
 import { InstallReleaseModal } from "@renderer/modals/impl/InstallReleaseModal";
-import { GithubRelease } from "../../../shared/GithubRelease";
+import { GithubRelease } from "@shared/GithubRelease";
 import { AddGitModModal } from "@renderer/modals/impl/AddGitModModal";
 import { SelectModsModal, SelectModsModalPayload } from "@renderer/modals/impl/SelectModsModal";
 import { ModsHelpModal } from "@renderer/modals/impl/ModsHelpModal";

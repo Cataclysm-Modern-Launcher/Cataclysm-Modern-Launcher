@@ -1,11 +1,11 @@
 import { useCallback } from "react";
 import { create } from "zustand";
 import { IMountableState } from "@renderer/types/IMountableState";
-import { LocalizationBundle } from "../../../shared/localization/types/LocalizationBundle";
+import { LocalizationBundle } from "@shared/localization/types/LocalizationBundle";
 import { TMountFn } from "@renderer/types/TMountFn";
-import { FormatArgs } from "../../../shared/FormatArgs";
-import { formatHtmlMessage, formatMessage } from "../../../shared/formatMessage";
-import { LocaleKeys } from "../../../shared/localization/types/LocaleFile";
+import { FormatArgs } from "@shared/FormatArgs";
+import { formatHtmlMessage, formatMessage } from "@shared/formatMessage";
+import { LocaleKeys } from "@shared/localization/types/LocaleFile";
 import { sanitizeLocalizedHtml } from "@renderer/utils/sanitizeLocalizedHtml";
 
 export type TLocalizeFn = (key: LocaleKeys, variables?: FormatArgs) => string;

@@ -1,5 +1,5 @@
 import React from "react";
-import { BackupInstanceInfo } from "../../../../shared/backups/types/BackupInstanceInfo";
+import { BackupInstanceInfo } from "@shared/backups/types/BackupInstanceInfo";
 import { Group } from "@mantine/core";
 import { RenameBackupButton } from "@renderer/components/backups/RenameBackupButton";
 import { DeleteBackupButton } from "@renderer/components/backups/DeleteBackupButton";

@@ -2,9 +2,9 @@ import React, { ChangeEvent, useCallback, useEffect, useState } from "react";
 import { Alert, Button, Group, Stack, TextInput } from "@mantine/core";
 import { useTranslate } from "@renderer/stores/useLocaleStore";
 import { ContextModalProps, modals } from "@mantine/modals";
-import { BackupInstanceInfo } from "../../../../shared/backups/types/BackupInstanceInfo";
+import { BackupInstanceInfo } from "@shared/backups/types/BackupInstanceInfo";
 import { useGameBackupStore } from "@renderer/stores/useGameBackupStore";
-import { getErrorMessage } from "../../../../shared/getErrorMessage";
+import { getErrorMessage } from "@shared/getErrorMessage";
 import { LocalizedText } from "@renderer/components/LocalizedText";
 
 export function RenameBackupModal({ id, innerProps: { backup } }: ContextModalProps<{ backup: BackupInstanceInfo }>): React.JSX.Element {

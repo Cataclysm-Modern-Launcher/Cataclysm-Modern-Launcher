@@ -1,4 +1,4 @@
-import { ModInstanceInfo } from "../../../shared/mods/ModInstanceInfo";
+import { ModInstanceInfo } from "@shared/mods/ModInstanceInfo";
 
 export function compareMods(left: ModInstanceInfo, right: ModInstanceInfo): number {
     if (left.updateAvailable !== right.updateAvailable) return left.updateAvailable ? -1 : 1;

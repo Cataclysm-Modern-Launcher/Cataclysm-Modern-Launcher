@@ -7,7 +7,7 @@ import { useGameStateStore } from "@renderer/stores/useGameStateStore";
 import { useGameBackupStore } from "@renderer/stores/useGameBackupStore";
 import { LocalizedText } from "@renderer/components/LocalizedText";
 import { BackupControl } from "@renderer/components/backups/BackupControl";
-import { BackupInstanceInfo } from "../../../../shared/backups/types/BackupInstanceInfo";
+import { BackupInstanceInfo } from "@shared/backups/types/BackupInstanceInfo";
 
 export function WorkspaceBackupStrip(): React.JSX.Element | null {
     const t = useTranslate();

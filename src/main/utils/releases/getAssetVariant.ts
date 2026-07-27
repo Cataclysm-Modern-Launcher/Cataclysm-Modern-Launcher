@@ -1,5 +1,5 @@
 import { GitHubAsset } from "./GitHubAsset";
-import { TReleaseAssetVariant } from "../../../shared/release-asset/TReleaseAssetVariant";
+import { TReleaseAssetVariant } from "@shared/release-asset/TReleaseAssetVariant";
 
 export function getAssetVariant(asset: GitHubAsset): TReleaseAssetVariant {
     const assetName = asset.name?.toLowerCase() ?? "";

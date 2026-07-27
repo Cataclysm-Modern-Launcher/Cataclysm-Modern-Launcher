@@ -1,8 +1,8 @@
 import { create } from "zustand";
-import { DEFAULT_RELEASE_ASSET_VARIANT } from "../../../shared/release-asset/DEFAULT_RELEASE_ASSET_VARIANT";
-import { DEFAULT_BACKUP_SETTINGS } from "../../../shared/backups/DEFAULT_BACKUP_SETTINGS";
-import { getErrorMessage } from "../../../shared/getErrorMessage";
-import { SettingsIPC, SettingsIPCSetter } from "../../../shared/SettingsIPC";
+import { DEFAULT_RELEASE_ASSET_VARIANT } from "@shared/release-asset/DEFAULT_RELEASE_ASSET_VARIANT";
+import { DEFAULT_BACKUP_SETTINGS } from "@shared/backups/DEFAULT_BACKUP_SETTINGS";
+import { getErrorMessage } from "@shared/getErrorMessage";
+import { SettingsIPC, SettingsIPCSetter } from "@shared/SettingsIPC";
 import { IMountableState } from "@renderer/types/IMountableState";
 
 interface ConfigState extends SettingsIPC, SettingsIPCSetter, IMountableState {

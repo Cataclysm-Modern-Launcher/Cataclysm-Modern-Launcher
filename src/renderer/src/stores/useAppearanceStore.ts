@@ -1,7 +1,7 @@
 import { create } from "zustand";
-import { TAppThemeSource } from "../../../shared/appearance/TAppThemeSource";
-import { TAppTheme } from "../../../shared/appearance/TAppTheme";
-import { AppearanceBundle } from "../../../shared/bridge-api/AppearanceApi";
+import { TAppThemeSource } from "@shared/appearance/TAppThemeSource";
+import { TAppTheme } from "@shared/appearance/TAppTheme";
+import { AppearanceBundle } from "@shared/bridge-api/AppearanceApi";
 import { IMountableState } from "@renderer/types/IMountableState";
 
 interface State extends IMountableState {

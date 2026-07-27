@@ -1,4 +1,4 @@
-import { GameBundleManifest } from "../../shared/game-bundle/GameBundleManifest";
+import { GameBundleManifest } from "@shared/game-bundle/GameBundleManifest";
 
 export function isGameBundleManifest(value: unknown): value is GameBundleManifest {
     if (typeof value !== "object" || value === null) return false;

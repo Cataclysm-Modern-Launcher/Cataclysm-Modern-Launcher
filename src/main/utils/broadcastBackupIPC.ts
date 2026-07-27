@@ -1,6 +1,6 @@
-import { BackupProgress } from "../../shared/backups/types/BackupProgress";
+import { BackupProgress } from "@shared/backups/types/BackupProgress";
 import { broadcastIPC } from "./broadcastIPC";
-import { Bridge } from "../../shared/bridge-api/Bridge";
+import { Bridge } from "@shared/bridge-api/Bridge";
 
 let lastBackupProgressKey = "";
 let lastBackupProgressAt = 0;

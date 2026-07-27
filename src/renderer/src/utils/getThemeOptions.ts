@@ -1,4 +1,4 @@
-import { TAppThemeSource } from "../../../shared/appearance/TAppThemeSource";
+import { TAppThemeSource } from "@shared/appearance/TAppThemeSource";
 import { TLocalizeFn } from "@renderer/stores/useLocaleStore";
 
 type ThemeOption = {

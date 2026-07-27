@@ -1,8 +1,8 @@
-import { WorkspaceStatus } from "../../../../shared/workspace/WorkspaceStatus";
+import { WorkspaceStatus } from "@shared/workspace/WorkspaceStatus";
 import React, { useEffect } from "react";
 import { Alert, Badge, Button, Card, Group, Loader, Stack, Text, Title } from "@mantine/core";
 import { localizeChannelName } from "@renderer/utils/localizeChannelName";
-import { getGameChannelRepositoryUrl } from "../../../../shared/game-channel/getGameChannelRepositoryUrl";
+import { getGameChannelRepositoryUrl } from "@shared/game-channel/getGameChannelRepositoryUrl";
 import { SaveStatusLine } from "@renderer/components/SaveStatusLine";
 import { GameBundlePrompt } from "@renderer/components/GameBundlePrompt";
 import { WorkspaceInstalledVersionStrip } from "@renderer/components/WorkspaceInstalledVersionStrip";
@@ -69,13 +69,7 @@ export function WorkspaceReadyView({ workspace }: { workspace: Extract<Workspace
                     </Stack>
 
                     <Badge color={isInitialReleaseCheck ? "blue" : activeGameBundle === null ? "gray" : updateAvailable ? "blue" : "green"} variant="light" size="lg">
-                        {isInitialReleaseCheck
-                            ? t("home.status.checking")
-                            : activeGameBundle === null
-                              ? t("home.status.no.game.bundle")
-                              : updateAvailable
-                                ? t("home.status.update.available")
-                                : t("home.status.installed")}
+                        {isInitialReleaseCheck ? t("home.status.checking") : activeGameBundle === null ? t("home.status.no.game.bundle") : updateAvailable ? t("home.status.update.available") : t("home.status.installed")}
                     </Badge>
                 </Group>
 

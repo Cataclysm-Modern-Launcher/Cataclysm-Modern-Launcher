@@ -1,10 +1,10 @@
-import { ModsApi } from "../../shared/bridge-api/ModsApi";
+import { ModsApi } from "@shared/bridge-api/ModsApi";
 import { ipcRenderer, type IpcRendererEvent } from "electron";
-import { Bridge } from "../../shared/bridge-api/Bridge";
-import { UpdateModOptions } from "../../shared/mods/UpdateModOptions";
-import { ModRepositoryChangedEvent } from "../../shared/mods/ModRepositoryChangedEvent";
-import { ModRepositoryNoticeEvent } from "../../shared/mods/ModRepositoryNoticeEvent";
-import { ModInstallSelection } from "../../shared/mods/ModInstallSelection";
+import { Bridge } from "@shared/bridge-api/Bridge";
+import { UpdateModOptions } from "@shared/mods/UpdateModOptions";
+import { ModRepositoryChangedEvent } from "@shared/mods/ModRepositoryChangedEvent";
+import { ModRepositoryNoticeEvent } from "@shared/mods/ModRepositoryNoticeEvent";
+import { ModInstallSelection } from "@shared/mods/ModInstallSelection";
 
 export function registerPreloadModsApi(): ModsApi {
     return {

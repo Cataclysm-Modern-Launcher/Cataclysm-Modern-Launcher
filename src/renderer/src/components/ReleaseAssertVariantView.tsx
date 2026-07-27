@@ -2,7 +2,7 @@ import React, { useCallback, useMemo } from "react";
 import { Select } from "@mantine/core";
 import { useConfigStore } from "@renderer/stores/useConfigStore";
 import { useTranslate } from "@renderer/stores/useLocaleStore";
-import { TReleaseAssetVariant } from "../../../shared/release-asset/TReleaseAssetVariant";
+import { TReleaseAssetVariant } from "@shared/release-asset/TReleaseAssetVariant";
 
 export function ReleaseAssertVariantView(): React.JSX.Element {
     const t = useTranslate();

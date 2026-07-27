@@ -1,4 +1,4 @@
-import { BackupInstanceInfo } from "../../../shared/backups/types/BackupInstanceInfo";
+import { BackupInstanceInfo } from "@shared/backups/types/BackupInstanceInfo";
 import React, { ReactNode } from "react";
 import { Alert, Badge, Card, Drawer, Group, Stack, Text } from "@mantine/core";
 import { formatBackupTimestamp } from "@renderer/utils/formatBackupTimestamp";

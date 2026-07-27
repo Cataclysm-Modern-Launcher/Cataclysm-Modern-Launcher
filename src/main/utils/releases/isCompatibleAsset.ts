@@ -1,5 +1,5 @@
 import { GitHubAsset } from "./GitHubAsset";
-import { GameChannelDefinition } from "../../../shared/game-channel/GameChannelDefinition";
+import { GameChannelDefinition } from "@shared/game-channel/GameChannelDefinition";
 import { toAssetNameParts } from "./toAssetNameParts";
 
 export function isCompatibleAsset(asset: GitHubAsset, channel: GameChannelDefinition): boolean {

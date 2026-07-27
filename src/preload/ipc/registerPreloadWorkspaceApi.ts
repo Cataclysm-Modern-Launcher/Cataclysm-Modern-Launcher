@@ -1,8 +1,8 @@
-import { WorkspaceApi } from "../../shared/bridge-api/WorkspaceApi";
-import { WorkspaceStatus } from "../../shared/workspace/WorkspaceStatus";
 import { ipcRenderer } from "electron";
-import { Bridge } from "../../shared/bridge-api/Bridge";
-import { EWorkspaceSelectResult } from "../../shared/workspace/EWorkspaceSelectResult";
+import { WorkspaceApi } from "@shared/bridge-api/WorkspaceApi";
+import { WorkspaceStatus } from "@shared/workspace/WorkspaceStatus";
+import { Bridge } from "@shared/bridge-api/Bridge";
+import { EWorkspaceSelectResult } from "@shared/workspace/EWorkspaceSelectResult";
 
 export function registerPreloadWorkspaceApi(): WorkspaceApi {
     return {

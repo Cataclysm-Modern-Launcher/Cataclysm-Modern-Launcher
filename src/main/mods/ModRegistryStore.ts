@@ -1,8 +1,8 @@
 import { mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 
-import { ModInfo } from "../../shared/mods/ModInfo";
-import { ModRegistry } from "../../shared/mods/ModRegistry";
+import { ModInfo } from "@shared/mods/ModInfo";
+import { ModRegistry } from "@shared/mods/ModRegistry";
 import { translate } from "../LocalizationService";
 import { isNodeError } from "../utils/isNodeError";
 

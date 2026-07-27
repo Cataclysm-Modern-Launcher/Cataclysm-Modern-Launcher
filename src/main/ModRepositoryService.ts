@@ -5,20 +5,20 @@ import { randomUUID } from "node:crypto";
 import { dialog, ipcMain, shell } from "electron";
 import extract from "extract-zip";
 
-import { Bridge } from "../shared/bridge-api/Bridge";
-import { DiscoveredMod } from "../shared/mods/DiscoveredMod";
-import { EModDeleteResult } from "../shared/mods/EModDeleteResult";
-import { EModDiscoveryResult } from "../shared/mods/EModDiscoveryResult";
-import { EModInstallResult } from "../shared/mods/EModInstallResult";
-import { EModOpenFolderResult } from "../shared/mods/EModOpenFolderResult";
-import { EModsCheckResult } from "../shared/mods/EModsCheckResult";
-import { EModUpdateResult } from "../shared/mods/EModUpdateResult";
-import { ModInfo } from "../shared/mods/ModInfo";
-import { ModInstallSelection } from "../shared/mods/ModInstallSelection";
-import { ModInstanceInfo } from "../shared/mods/ModInstanceInfo";
-import { ModRepositoryState } from "../shared/mods/ModRepositoryState";
-import { UpdateModOptions } from "../shared/mods/UpdateModOptions";
-import { WorkspaceStatus } from "../shared/workspace/WorkspaceStatus";
+import { Bridge } from "@shared/bridge-api/Bridge";
+import { DiscoveredMod } from "@shared/mods/DiscoveredMod";
+import { EModDeleteResult } from "@shared/mods/EModDeleteResult";
+import { EModDiscoveryResult } from "@shared/mods/EModDiscoveryResult";
+import { EModInstallResult } from "@shared/mods/EModInstallResult";
+import { EModOpenFolderResult } from "@shared/mods/EModOpenFolderResult";
+import { EModsCheckResult } from "@shared/mods/EModsCheckResult";
+import { EModUpdateResult } from "@shared/mods/EModUpdateResult";
+import { ModInfo } from "@shared/mods/ModInfo";
+import { ModInstallSelection } from "@shared/mods/ModInstallSelection";
+import { ModInstanceInfo } from "@shared/mods/ModInstanceInfo";
+import { ModRepositoryState } from "@shared/mods/ModRepositoryState";
+import { UpdateModOptions } from "@shared/mods/UpdateModOptions";
+import { WorkspaceStatus } from "@shared/workspace/WorkspaceStatus";
 import { gameBundleService } from "./GameBundleService";
 import { translate } from "./LocalizationService";
 import { workspaceService } from "./WorkspaceService";
@@ -122,6 +122,7 @@ class ModRepositoryService {
                 id: info.id,
                 displayName: info.name,
                 description: info.description,
+                authors: info.authors,
                 dependencies: info.dependencies,
                 sourceType: "folder",
                 sourceId: randomUUID(),
@@ -168,6 +169,7 @@ class ModRepositoryService {
                         id: found.id,
                         displayName: found.name,
                         description: found.description,
+                        authors: found.authors,
                         dependencies: found.dependencies,
                         sourceType: "git",
                         sourceId: pending.sourceId,
@@ -198,6 +200,7 @@ class ModRepositoryService {
                         id: found.id,
                         displayName: found.name,
                         description: found.description,
+                        authors: found.authors,
                         dependencies: found.dependencies,
                         sourceType: "archive",
                         sourceId,
@@ -281,6 +284,7 @@ class ModRepositoryService {
                     ...item,
                     displayName: found.name,
                     description: found.description,
+                    authors: found.authors,
                     dependencies: found.dependencies,
                     subdirectory: found.subdirectory,
                     installedCommit: clone.commit,
@@ -380,7 +384,7 @@ class ModRepositoryService {
     private async refreshMetadata(repositoryPath: string, channelId: string, mod: ModInfo): Promise<ModInfo> {
         try {
             const info = await readValidatedModInfo(modRegistryStore.getModPath(repositoryPath, channelId, mod), translate);
-            return info.id === mod.id ? { ...mod, displayName: info.name, description: info.description, dependencies: info.dependencies, checkedAt: new Date().toISOString() } : mod;
+            return info.id === mod.id ? { ...mod, displayName: info.name, description: info.description, authors: info.authors, dependencies: info.dependencies, checkedAt: new Date().toISOString() } : mod;
         } catch {
             return mod;
         }
@@ -416,13 +420,13 @@ class ModRepositoryService {
 
     private async buildItem(repositoryPath: string, channelId: string, coreModId: string | undefined, mod: ModInfo): Promise<ModInstanceInfo> {
         const absolutePath = modRegistryStore.getModPath(repositoryPath, channelId, mod);
-        const item = (status: ModInstanceInfo["status"], dependencies = mod.dependencies, error?: string): ModInstanceInfo => ({
+        const item = (status: ModInstanceInfo["status"], metadata: Pick<ModInfo, "authors" | "dependencies"> = mod, error?: string): ModInstanceInfo => ({
             ...mod,
-            dependencies,
+            ...metadata,
             status,
             absolutePath,
             error,
-            dependencyCompatible: coreModId === undefined || dependencies === undefined ? undefined : dependencies.includes(coreModId),
+            dependencyCompatible: coreModId === undefined || metadata.dependencies === undefined ? undefined : metadata.dependencies.includes(coreModId),
             expectedCoreModId: coreModId
         });
         if (!(await fileExists(absolutePath))) return item("missing-local-copy");
@@ -430,15 +434,16 @@ class ModRepositoryService {
         let dependencies: string[];
         try {
             const info = await readValidatedModInfo(absolutePath, translate);
-            if (info.id !== mod.id) return item("invalid-local-copy", info.dependencies);
+            if (info.id !== mod.id) return item("invalid-local-copy", info);
             dependencies = info.dependencies;
+            mod = { ...mod, authors: info.authors };
         } catch (error) {
-            return item("invalid-local-copy", mod.dependencies, getErrorMessage(error));
+            return item("invalid-local-copy", mod, getErrorMessage(error));
         }
 
-        if (mod.hasLocalChanges || mod.hasUnpushedCommits) return item("blocked-by-local-changes", dependencies);
-        if (mod.updateAvailable) return item("update-available", dependencies);
-        return item("installed", dependencies);
+        if (mod.hasLocalChanges || mod.hasUnpushedCommits) return item("blocked-by-local-changes", { authors: mod.authors, dependencies });
+        if (mod.updateAvailable) return item("update-available", { authors: mod.authors, dependencies });
+        return item("installed", { authors: mod.authors, dependencies });
     }
 
     private withDependencyCompatibility(mods: DiscoveredMod[], coreModId: string | undefined): DiscoveredMod[] {

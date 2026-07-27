@@ -1,6 +1,6 @@
 import "./ModsDockButton.css";
 import React from "react";
-import { ModRepositoryState } from "../../../../shared/mods/ModRepositoryState";
+import { ModRepositoryState } from "@shared/mods/ModRepositoryState";
 import { useModsStore } from "@renderer/stores/useModsStore";
 import { OpenDrawerButton } from "@renderer/components/OpenDrawerButton";
 

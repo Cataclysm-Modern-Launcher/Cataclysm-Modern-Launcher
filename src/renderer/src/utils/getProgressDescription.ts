@@ -1,4 +1,4 @@
-import { GameBundleInstallProgress } from "../../../shared/game-bundle/GameBundleInstallProgress";
+import { GameBundleInstallProgress } from "@shared/game-bundle/GameBundleInstallProgress";
 import { formatBytes } from "@renderer/utils/formatBytes";
 import { TLocalizeFn } from "@renderer/stores/useLocaleStore";
 

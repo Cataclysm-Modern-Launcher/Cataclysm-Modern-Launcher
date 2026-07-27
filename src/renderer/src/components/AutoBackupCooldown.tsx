@@ -2,7 +2,7 @@ import React, { useCallback, useMemo } from "react";
 import { ComboboxItem, ComboboxLikeRenderOptionInput, Select, Text } from "@mantine/core";
 import { useConfigStore } from "@renderer/stores/useConfigStore";
 import { useTranslate } from "@renderer/stores/useLocaleStore";
-import { TAutoBackupCooldown } from "../../../shared/backups/types/TAutoBackupCooldown";
+import { TAutoBackupCooldown } from "@shared/backups/types/TAutoBackupCooldown";
 
 export function AutoBackupCooldown(): React.JSX.Element {
     const t = useTranslate();

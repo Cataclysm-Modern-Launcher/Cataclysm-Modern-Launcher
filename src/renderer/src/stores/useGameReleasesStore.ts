@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { GithubRelease } from "../../../shared/GithubRelease";
+import { GithubRelease } from "@shared/GithubRelease";
 
 interface GameReleasesStoreState {
     releases: GithubRelease[];

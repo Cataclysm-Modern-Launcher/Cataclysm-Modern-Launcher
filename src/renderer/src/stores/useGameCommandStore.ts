@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { GameLaunchOptions } from "../../../shared/launch/GameLaunchOptions";
+import { GameLaunchOptions } from "@shared/launch/GameLaunchOptions";
 
 interface GameCommandStoreState {
     launchActive: (options?: GameLaunchOptions) => Promise<boolean>;

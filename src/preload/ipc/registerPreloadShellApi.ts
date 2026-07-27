@@ -1,6 +1,6 @@
-import { ShellApi } from "../../shared/bridge-api/ShellApi";
 import { ipcRenderer } from "electron";
-import { Bridge } from "../../shared/bridge-api/Bridge";
+import { ShellApi } from "@shared/bridge-api/ShellApi";
+import { Bridge } from "@shared/bridge-api/Bridge";
 
 export function registerPreloadShellApi(): ShellApi {
     return {

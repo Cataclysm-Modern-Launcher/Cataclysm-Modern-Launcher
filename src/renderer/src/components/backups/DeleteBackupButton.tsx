@@ -1,4 +1,4 @@
-import { BackupInstanceInfo } from "../../../../shared/backups/types/BackupInstanceInfo";
+import { BackupInstanceInfo } from "@shared/backups/types/BackupInstanceInfo";
 import React, { useCallback } from "react";
 import { useTranslate } from "@renderer/stores/useLocaleStore";
 import { useDeleteBackup } from "@renderer/hooks/useDeleteBackup";

@@ -1,4 +1,4 @@
-import { BackupInstanceInfo } from "../../../shared/backups/types/BackupInstanceInfo";
+import { BackupInstanceInfo } from "@shared/backups/types/BackupInstanceInfo";
 import { useGameBackupStore } from "@renderer/stores/useGameBackupStore";
 import { useCallback } from "react";
 import { modals } from "@mantine/modals";

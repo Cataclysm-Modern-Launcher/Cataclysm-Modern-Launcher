@@ -1,8 +1,8 @@
-import { GameSaveSummary } from "../../../shared/GameSaveSummary";
+import { GameSaveSummary } from "@shared/GameSaveSummary";
 import { join } from "node:path";
 import { readdir, stat } from "node:fs/promises";
 import { isNodeError } from "../isNodeError";
-import { GameWorldInfo } from "../../../shared/GameWorldInfo";
+import { GameWorldInfo } from "@shared/GameWorldInfo";
 import { readFirstCharacter } from "./readFirstCharacter";
 import { decodeWorldFolderName } from "./decodeWorldFolderName";
 

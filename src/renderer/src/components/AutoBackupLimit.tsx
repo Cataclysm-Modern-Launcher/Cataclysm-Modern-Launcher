@@ -2,7 +2,7 @@ import React, { useCallback, useMemo } from "react";
 import { ComboboxItem, ComboboxLikeRenderOptionInput, Select, Text, Tooltip } from "@mantine/core";
 import { useConfigStore } from "@renderer/stores/useConfigStore";
 import { useTranslate } from "@renderer/stores/useLocaleStore";
-import { TAutoBackupLimit } from "../../../shared/backups/types/TAutoBackupLimit";
+import { TAutoBackupLimit } from "@shared/backups/types/TAutoBackupLimit";
 
 export function AutoBackupLimit(): React.JSX.Element {
     const t = useTranslate();

@@ -1,6 +1,6 @@
-import { memo, useCallback, type JSX } from "react";
+import { type JSX, memo, useCallback } from "react";
 import { Checkbox, Stack, Text } from "@mantine/core";
-import { DiscoveredMod } from "../../../../shared/mods/DiscoveredMod";
+import { DiscoveredMod } from "@shared/mods/DiscoveredMod";
 import { useTranslate } from "@renderer/stores/useLocaleStore";
 
 type ModSelectionItemProps = {

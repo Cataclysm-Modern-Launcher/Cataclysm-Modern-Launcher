@@ -1,4 +1,4 @@
-import { ModInstanceInfo } from "../../../../shared/mods/ModInstanceInfo";
+import { ModInstanceInfo } from "@shared/mods/ModInstanceInfo";
 import React from "react";
 import { Card, Stack, Text } from "@mantine/core";
 import { LocalizedText } from "@renderer/components/LocalizedText";

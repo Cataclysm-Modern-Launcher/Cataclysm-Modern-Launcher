@@ -1,9 +1,9 @@
 import { ipcMain } from "electron";
 
-import { Bridge } from "../../shared/bridge-api/Bridge";
-import { GameStateRequest } from "../../shared/bridge-api/types/GameStateRequest";
-import { GithubRelease } from "../../shared/GithubRelease";
-import { GameBundleState } from "../../shared/game-bundle/GameBundleState";
+import { Bridge } from "@shared/bridge-api/Bridge";
+import { GameStateRequest } from "@shared/bridge-api/types/GameStateRequest";
+import { GithubRelease } from "@shared/GithubRelease";
+import { GameBundleState } from "@shared/game-bundle/GameBundleState";
 import { translate } from "../LocalizationService";
 import { gameBackupService } from "../GameBackupService";
 import { gameBundleService } from "../GameBundleService";

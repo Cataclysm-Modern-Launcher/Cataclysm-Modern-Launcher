@@ -1,4 +1,4 @@
-import { GithubRelease } from "../../../shared/GithubRelease";
+import { GithubRelease } from "@shared/GithubRelease";
 import { getReleaseNameDisplay } from "@renderer/utils/getReleaseNameDisplay";
 import { formatDate } from "@renderer/utils/formatDate";
 

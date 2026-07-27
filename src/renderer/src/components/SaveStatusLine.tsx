@@ -1,4 +1,4 @@
-import { GameWorldInfo } from "../../../shared/GameWorldInfo";
+import { GameWorldInfo } from "@shared/GameWorldInfo";
 import type React from "react";
 import { Text } from "@mantine/core";
 import { TLocalizeFn, useTranslate } from "@renderer/stores/useLocaleStore";

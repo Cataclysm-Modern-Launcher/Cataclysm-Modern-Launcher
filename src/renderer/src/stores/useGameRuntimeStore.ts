@@ -1,6 +1,6 @@
 import { IMountableState } from "@renderer/types/IMountableState";
 import { create } from "zustand";
-import { GameRuntimeState } from "../../../shared/GameRuntimeState";
+import { GameRuntimeState } from "@shared/GameRuntimeState";
 import { useEffect } from "react";
 import { subscribeWithSelector } from "zustand/middleware";
 

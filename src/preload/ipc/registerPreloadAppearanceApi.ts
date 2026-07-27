@@ -1,8 +1,8 @@
-import { AppearanceApi, AppearanceBundle } from "../../shared/bridge-api/AppearanceApi";
+import { AppearanceApi, AppearanceBundle } from "@shared/bridge-api/AppearanceApi";
 import { ipcRenderer, type IpcRendererEvent } from "electron";
-import { TAppThemeSource } from "../../shared/appearance/TAppThemeSource";
-import { TAppTheme } from "../../shared/appearance/TAppTheme";
-import { Bridge } from "../../shared/bridge-api/Bridge";
+import { TAppThemeSource } from "@shared/appearance/TAppThemeSource";
+import { TAppTheme } from "@shared/appearance/TAppTheme";
+import { Bridge } from "@shared/bridge-api/Bridge";
 
 export function registerPreloadAppearanceApi(): AppearanceApi {
     return {

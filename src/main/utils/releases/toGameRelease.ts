@@ -1,6 +1,6 @@
-import { GameChannelDefinition } from "../../../shared/game-channel/GameChannelDefinition";
-import { TReleaseAssetVariant } from "../../../shared/release-asset/TReleaseAssetVariant";
-import { GithubRelease } from "../../../shared/GithubRelease";
+import { GameChannelDefinition } from "@shared/game-channel/GameChannelDefinition";
+import { TReleaseAssetVariant } from "@shared/release-asset/TReleaseAssetVariant";
+import { GithubRelease } from "@shared/GithubRelease";
 import { GitHubRelease } from "./GitHubRelease";
 import { selectReleaseAsset } from "./selectReleaseAsset";
 

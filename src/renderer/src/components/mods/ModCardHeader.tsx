@@ -14,8 +14,6 @@ interface Props {
 export const ModCardHeader = React.memo(function ModCardHeader({ mod }: Props): ReactNode {
     const t = useTranslate();
 
-    const modAuthorsExample = ["Author1", "Author2", "A2"];
-
     return (
         <Group wrap="nowrap" justify="space-between" align="flex-start">
             <Stack gap={4} style={{ minWidth: 0 }}>
@@ -24,9 +22,9 @@ export const ModCardHeader = React.memo(function ModCardHeader({ mod }: Props): 
                         <Title mod={mod} />
                     </Tooltip>
 
-                    {!!modAuthorsExample.length && (
+                    {!!mod.authors?.length && (
                         <Group gap="2">
-                            {modAuthorsExample.map((a) => (
+                            {mod.authors.map((a) => (
                                 <ModAuthorBadge name={a} key={a} />
                             ))}
                         </Group>

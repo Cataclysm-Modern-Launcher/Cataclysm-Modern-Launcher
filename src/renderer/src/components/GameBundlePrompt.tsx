@@ -4,7 +4,7 @@ import { useTranslate } from "@renderer/stores/useLocaleStore";
 import { useGameStateStore } from "@renderer/stores/useGameStateStore";
 import { selectIsGameBundleInstallRunning, useGameBundleInstallStore } from "@renderer/stores/useGameBundleInstallStore";
 import { useGameFileOperationStore } from "@renderer/stores/useGameFileOperationStore";
-import { GithubRelease } from "../../../shared/GithubRelease";
+import { GithubRelease } from "@shared/GithubRelease";
 import { useOpenDrawer } from "@renderer/stores/useDrawerStore";
 import { openModal } from "@renderer/modals/contextModals";
 

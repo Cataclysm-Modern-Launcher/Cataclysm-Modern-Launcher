@@ -1,5 +1,5 @@
 import { ipcMain, shell } from "electron";
-import { Bridge } from "../../shared/bridge-api/Bridge";
+import { Bridge } from "@shared/bridge-api/Bridge";
 
 export function setupShellIpc(): void {
     ipcMain.handle(Bridge.Shell.openExternal, async (_event, url: string) => {

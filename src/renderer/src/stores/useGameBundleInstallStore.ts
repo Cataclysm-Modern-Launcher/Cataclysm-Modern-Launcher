@@ -1,8 +1,8 @@
 import { create } from "zustand";
 import { IMountableState } from "@renderer/types/IMountableState";
-import { GameBundleDeleteOptions } from "../../../shared/game-bundle/GameBundleDeleteOptions";
-import { GameBundleInstallOptions } from "../../../shared/game-bundle/GameBundleInstallOptions";
-import { GameBundleInstallProgress } from "../../../shared/game-bundle/GameBundleInstallProgress";
+import { GameBundleDeleteOptions } from "@shared/game-bundle/GameBundleDeleteOptions";
+import { GameBundleInstallOptions } from "@shared/game-bundle/GameBundleInstallOptions";
+import { GameBundleInstallProgress } from "@shared/game-bundle/GameBundleInstallProgress";
 import { isGameBundleInstallRunning } from "@renderer/utils/isGameBundleInstallRunning";
 
 interface GameBundleInstallStoreState extends IMountableState {

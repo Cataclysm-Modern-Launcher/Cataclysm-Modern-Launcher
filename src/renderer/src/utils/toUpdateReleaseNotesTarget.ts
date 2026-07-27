@@ -1,5 +1,5 @@
-import { GameBundle } from "../../../shared/game-bundle/GameBundle";
-import { GithubRelease } from "../../../shared/GithubRelease";
+import { GameBundle } from "@shared/game-bundle/GameBundle";
+import { GithubRelease } from "@shared/GithubRelease";
 import { getReleaseDisplayName } from "@renderer/utils/getReleaseDisplayName";
 import { getReleaseNameDisplay } from "@renderer/utils/getReleaseNameDisplay";
 import { formatUpdateReleaseNotes } from "@renderer/utils/formatUpdateReleaseNotes";

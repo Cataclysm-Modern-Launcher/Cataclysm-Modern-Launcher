@@ -5,7 +5,7 @@ import { ContextModalProps, modals } from "@mantine/modals";
 import { IconSearch } from "@tabler/icons-react";
 import { useModsStore } from "@renderer/stores/useModsStore";
 import { useTranslate } from "@renderer/stores/useLocaleStore";
-import { DiscoveredMod } from "../../../../shared/mods/DiscoveredMod";
+import { DiscoveredMod } from "@shared/mods/DiscoveredMod";
 import { ModSelectionItem } from "./ModSelectionItem";
 
 export type SelectModsModalPayload = { sessionId: string; mods: DiscoveredMod[] };

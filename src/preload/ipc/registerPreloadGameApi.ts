@@ -1,22 +1,22 @@
-import { GameApi } from "../../shared/bridge-api/GameApi";
+import { GameApi } from "@shared/bridge-api/GameApi";
 import { ipcRenderer, type IpcRendererEvent } from "electron";
-import { Bridge } from "../../shared/bridge-api/Bridge";
-import { GameBundleInstallOptions } from "../../shared/game-bundle/GameBundleInstallOptions";
-import { GameBundleDeleteOptions } from "../../shared/game-bundle/GameBundleDeleteOptions";
-import { GameLaunchOptions } from "../../shared/launch/GameLaunchOptions";
-import { CreateManualBackupOptions } from "../../shared/backups/types/CreateManualBackupOptions";
-import { EBackupCreateResult } from "../../shared/backups/types/EBackupCreateResult";
-import { EBackupRestoreResult } from "../../shared/backups/types/EBackupRestoreResult";
-import { EBackupDeleteResult } from "../../shared/backups/types/EBackupDeleteResult";
-import { EBackupRenameResult } from "../../shared/backups/types/EBackupRenameResult";
-import { GameBundleInstallProgress } from "../../shared/game-bundle/GameBundleInstallProgress";
-import { GameRuntimeState } from "../../shared/GameRuntimeState";
-import { GameSaveSummaryUpdate } from "../../shared/GameSaveSummaryUpdate";
-import { GameSaveActivityUpdate } from "../../shared/GameSaveActivityUpdate";
-import { BackupProgress } from "../../shared/backups/types/BackupProgress";
-import { BackupSummaryUpdate } from "../../shared/backups/types/BackupSummaryUpdate";
-import { GameFileOperationState } from "../../shared/game-bundle/GameFileOperationState";
-import { GameBundleState } from "../../shared/game-bundle/GameBundleState";
+import { Bridge } from "@shared/bridge-api/Bridge";
+import { GameBundleInstallOptions } from "@shared/game-bundle/GameBundleInstallOptions";
+import { GameBundleDeleteOptions } from "@shared/game-bundle/GameBundleDeleteOptions";
+import { GameLaunchOptions } from "@shared/launch/GameLaunchOptions";
+import { CreateManualBackupOptions } from "@shared/backups/types/CreateManualBackupOptions";
+import { EBackupCreateResult } from "@shared/backups/types/EBackupCreateResult";
+import { EBackupRestoreResult } from "@shared/backups/types/EBackupRestoreResult";
+import { EBackupDeleteResult } from "@shared/backups/types/EBackupDeleteResult";
+import { EBackupRenameResult } from "@shared/backups/types/EBackupRenameResult";
+import { GameBundleInstallProgress } from "@shared/game-bundle/GameBundleInstallProgress";
+import { GameRuntimeState } from "@shared/GameRuntimeState";
+import { GameSaveSummaryUpdate } from "@shared/GameSaveSummaryUpdate";
+import { GameSaveActivityUpdate } from "@shared/GameSaveActivityUpdate";
+import { BackupProgress } from "@shared/backups/types/BackupProgress";
+import { BackupSummaryUpdate } from "@shared/backups/types/BackupSummaryUpdate";
+import { GameFileOperationState } from "@shared/game-bundle/GameFileOperationState";
+import { GameBundleState } from "@shared/game-bundle/GameBundleState";
 
 export function registerPreloadGameApi(): GameApi {
     return {

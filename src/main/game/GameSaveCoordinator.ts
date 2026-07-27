@@ -1,6 +1,6 @@
-import { GameSaveSummaryUpdate } from "../../shared/GameSaveSummaryUpdate";
-import { GameBundle } from "../../shared/game-bundle/GameBundle";
-import { toAutoBackupCooldownMs } from "../../shared/backups/toAutoBackupCooldownMs";
+import { GameSaveSummaryUpdate } from "@shared/GameSaveSummaryUpdate";
+import { GameBundle } from "@shared/game-bundle/GameBundle";
+import { toAutoBackupCooldownMs } from "@shared/backups/toAutoBackupCooldownMs";
 import { GameSaveMonitor, GameSaveSettledActivity } from "../GameSaveMonitor";
 import { getAutoBackupTimerKey } from "../utils/saves/getAutoBackupTimerKey";
 import { getChangedWorldFolderNames } from "../utils/saves/getChangedWorldFolderNames";
@@ -12,8 +12,8 @@ import { GameBackupContext } from "../GameBackupContext";
 import { gameBackupService } from "../GameBackupService";
 import { gameBundleService } from "../GameBundleService";
 import { broadcastIPC } from "../utils/broadcastIPC";
-import { Bridge } from "../../shared/bridge-api/Bridge";
-import { GameSaveActivityUpdate } from "../../shared/GameSaveActivityUpdate";
+import { Bridge } from "@shared/bridge-api/Bridge";
+import { GameSaveActivityUpdate } from "@shared/GameSaveActivityUpdate";
 
 export class GameSaveCoordinator {
     private activeSaveMonitor: GameSaveMonitor | null = null;

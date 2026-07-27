@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { UpdateState } from "../../../shared/bridge-api/types/UpdateState";
+import { UpdateState } from "@shared/bridge-api/types/UpdateState";
 import { useTranslate } from "@renderer/stores/useLocaleStore";
 import { NotificationData, notifications } from "@mantine/notifications";
-import { getErrorMessage } from "../../../shared/getErrorMessage";
+import { getErrorMessage } from "@shared/getErrorMessage";
 import { Button, Group, Progress, Stack, Text } from "@mantine/core";
 import { formatBytes } from "@renderer/utils/formatBytes";
 

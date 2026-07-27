@@ -1,6 +1,6 @@
-import { GameBundleInstallProgress } from "../../shared/game-bundle/GameBundleInstallProgress";
+import { GameBundleInstallProgress } from "@shared/game-bundle/GameBundleInstallProgress";
 import { broadcastIPC } from "./broadcastIPC";
-import { Bridge } from "../../shared/bridge-api/Bridge";
+import { Bridge } from "@shared/bridge-api/Bridge";
 
 let lastInstallProgressKey = "";
 let lastInstallProgressAt = 0;

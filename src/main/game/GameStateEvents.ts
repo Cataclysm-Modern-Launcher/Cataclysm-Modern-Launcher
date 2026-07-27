@@ -1,4 +1,4 @@
-import { GithubRelease } from "../../shared/GithubRelease";
+import { GithubRelease } from "@shared/GithubRelease";
 
 type GameStatePublisher = (latestRelease?: GithubRelease | null) => void | Promise<void>;
 type ActiveBundleSynchronizer = () => void | Promise<void>;

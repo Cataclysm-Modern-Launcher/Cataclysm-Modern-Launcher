@@ -1,8 +1,8 @@
 import type React from "react";
 import type { TextProps } from "@mantine/core";
 import { Text } from "@mantine/core";
-import type { FormatArgs } from "../../../shared/FormatArgs";
-import type { LocaleKeys } from "../../../shared/localization/types/LocaleFile";
+import type { FormatArgs } from "@shared/FormatArgs";
+import type { LocaleKeys } from "@shared/localization/types/LocaleFile";
 import { useTranslateHtml } from "@renderer/stores/useLocaleStore";
 
 type Props = TextProps & {

@@ -1,11 +1,11 @@
-import { GameBundle } from "../../../shared/game-bundle/GameBundle";
-import { BackupSummary } from "../../../shared/backups/types/BackupSummary";
+import { GameBundle } from "@shared/game-bundle/GameBundle";
+import { BackupSummary } from "@shared/backups/types/BackupSummary";
 import { access, readdir, readFile, stat } from "node:fs/promises";
 import { isNodeError } from "../isNodeError";
-import { BackupInstanceInfo } from "../../../shared/backups/types/BackupInstanceInfo";
+import { BackupInstanceInfo } from "@shared/backups/types/BackupInstanceInfo";
 import { join } from "node:path";
-import { BACKUP_ARCHIVE_FILE_NAME, BACKUP_INFO_FILE_NAME } from "../../../shared/Const";
-import { BackupInfo } from "../../../shared/backups/types/BackupInfo";
+import { BACKUP_ARCHIVE_FILE_NAME, BACKUP_INFO_FILE_NAME } from "@shared/Const";
+import { BackupInfo } from "@shared/backups/types/BackupInfo";
 
 import { getBackupsPath } from "./getBackupsPath";
 

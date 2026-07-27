@@ -1,8 +1,8 @@
 import { create } from "zustand";
 import { IMountableState } from "@renderer/types/IMountableState";
-import { BackupProgress } from "../../../shared/backups/types/BackupProgress";
-import { BackupSummary } from "../../../shared/backups/types/BackupSummary";
-import { CreateManualBackupOptions } from "../../../shared/backups/types/CreateManualBackupOptions";
+import { BackupProgress } from "@shared/backups/types/BackupProgress";
+import { BackupSummary } from "@shared/backups/types/BackupSummary";
+import { CreateManualBackupOptions } from "@shared/backups/types/CreateManualBackupOptions";
 import { useGameStateStore } from "./useGameStateStore";
 
 interface GameBackupStoreState extends IMountableState {

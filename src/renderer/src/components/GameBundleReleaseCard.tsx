@@ -1,4 +1,4 @@
-import { GithubRelease } from "../../../shared/GithubRelease";
+import { GithubRelease } from "@shared/GithubRelease";
 import React, { useCallback } from "react";
 import { Badge, Button, Card, Group, Stack, Text } from "@mantine/core";
 import { getReleaseNameDisplay } from "@renderer/utils/getReleaseNameDisplay";

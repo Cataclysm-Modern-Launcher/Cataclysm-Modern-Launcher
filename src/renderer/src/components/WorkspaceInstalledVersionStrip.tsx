@@ -9,7 +9,7 @@ import { selectIsGameBundleInstallRunning, useGameBundleInstallStore } from "@re
 import { getUpdateReleases } from "@renderer/utils/getUpdateReleases";
 import { useGameReleasesStore } from "@renderer/stores/useGameReleasesStore";
 import { useGameFileOperationStore } from "@renderer/stores/useGameFileOperationStore";
-import { GithubRelease } from "../../../shared/GithubRelease";
+import { GithubRelease } from "@shared/GithubRelease";
 import { toUpdateReleaseNotesTarget } from "@renderer/utils/toUpdateReleaseNotesTarget";
 import { openModal } from "@renderer/modals/contextModals";
 import { LocalizedText } from "@renderer/components/LocalizedText";

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { IMountableState } from "@renderer/types/IMountableState";
-import { GameBundleState } from "../../../shared/game-bundle/GameBundleState";
+import { GameBundleState } from "@shared/game-bundle/GameBundleState";
 import { withSaveActivity } from "@renderer/utils/withSaveActivity";
 import { withSaveSummary } from "@renderer/utils/withSaveSummary";
 import { withBackupSummary } from "@renderer/utils/withBackupSummary";

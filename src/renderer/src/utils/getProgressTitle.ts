@@ -1,4 +1,4 @@
-import { GameBundleInstallProgress } from "../../../shared/game-bundle/GameBundleInstallProgress";
+import { GameBundleInstallProgress } from "@shared/game-bundle/GameBundleInstallProgress";
 import { getReleaseNameDisplay } from "@renderer/utils/getReleaseNameDisplay";
 import { TLocalizeFn } from "@renderer/stores/useLocaleStore";
 

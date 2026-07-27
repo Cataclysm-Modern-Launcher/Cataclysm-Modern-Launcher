@@ -3,9 +3,9 @@ import { Button, Menu, Text } from "@mantine/core";
 import { localizeChannelName } from "@renderer/utils/localizeChannelName";
 import { useGameChannels, useSelectedGameChannel, useWorkspaceStore } from "@renderer/stores/useWorkspaceStore";
 import { useTranslate } from "@renderer/stores/useLocaleStore";
-import { GameBundleInstallProgress } from "../../../shared/game-bundle/GameBundleInstallProgress";
+import { GameBundleInstallProgress } from "@shared/game-bundle/GameBundleInstallProgress";
 import { useGameBundleInstallStore } from "@renderer/stores/useGameBundleInstallStore";
-import { GameChannelDefinition } from "../../../shared/game-channel/GameChannelDefinition";
+import { GameChannelDefinition } from "@shared/game-channel/GameChannelDefinition";
 
 export function SelectGameVariant(): React.JSX.Element {
     const t = useTranslate();
