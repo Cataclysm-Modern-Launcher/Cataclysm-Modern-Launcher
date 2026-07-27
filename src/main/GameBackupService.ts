@@ -57,7 +57,7 @@ class GameBackupService {
             const result = await gameFileOperationGuard.run("restoring-backup", async () => {
                 const context = await gameSaveCoordinator.getBackupContext();
                 if (context === null) return { status: "unavailable", message: translate("game.error.no.game.bundle") } as EBackupRestoreResult;
-                const restoreResult = await this.restoreBackup(context, backupId);
+                const restoreResult = await gameSaveCoordinator.withSaveMonitoringPaused(context.gameBundle.id, () => this.restoreBackup(context, backupId));
                 if (restoreResult.status === "restored") await gameSaveCoordinator.refreshActiveSaveSummary();
                 return restoreResult;
             });

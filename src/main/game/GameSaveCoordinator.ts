@@ -62,6 +62,19 @@ export class GameSaveCoordinator {
         broadcastIPC(Bridge.Game.saveSummaryChanged, { gameBundleId: gameBundle.id, saves });
     }
 
+    async withSaveMonitoringPaused<T>(gameBundleId: string, operation: () => Promise<T>): Promise<T> {
+        const shouldRestartMonitor = this.activeSaveMonitorGameBundleId === gameBundleId;
+        if (shouldRestartMonitor) this.stopActiveSaveMonitor();
+        try {
+            return await operation();
+        } finally {
+            if (shouldRestartMonitor) {
+                const activeGameBundle = await gameBundleService.getActiveGameBundle();
+                await this.updateActiveGameBundle(activeGameBundle?.id === gameBundleId ? activeGameBundle : null);
+            }
+        }
+    }
+
     touchAutoBackupCooldown(gameBundleId: string, worldFolderName: string): void {
         this.latestBackupAtByWorld.set(getAutoBackupTimerKey(gameBundleId, worldFolderName), Date.now());
     }
