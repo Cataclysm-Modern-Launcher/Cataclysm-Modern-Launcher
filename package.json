@@ -22,6 +22,7 @@
         "publish": "npm version patch -m \"Released v%s\" && git push --follow-tags",
         "publish:minor": "npm version minor -m \"Released v%s\" && git push --follow-tags",
         "zip:source": "tsx scripts/zip-source.ts",
+        "release-info": "tsx scripts/release-info.ts",
         "dev:debug-main": "electron-vite dev --inspect-brk=9229"
     },
     "dependencies": {
