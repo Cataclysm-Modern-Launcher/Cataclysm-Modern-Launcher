@@ -64,6 +64,13 @@ export const Bridge = {
         gameBackupProgress: "game:backup-progress",
         backupSummaryChanged: "game:backup-summary-changed"
     },
+    Knowledge: {
+        open: "knowledge:open",
+        getStatus: "knowledge:get-status",
+        searchItems: "knowledge:search-items",
+        getItem: "knowledge:get-item",
+        statusChanged: "knowledge:status-changed"
+    },
     Mods: {
         getState: "mods:get-state",
         discoverFromGit: "mods:discover-from-git",

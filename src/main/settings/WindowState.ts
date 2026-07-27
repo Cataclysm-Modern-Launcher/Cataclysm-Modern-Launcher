@@ -38,12 +38,12 @@ export function parseWindowState(value: unknown): WindowState | null {
     };
 }
 
-export function resolveWindowBounds(savedBounds: Rectangle | undefined): Rectangle {
+export function resolveWindowBounds(savedBounds: Rectangle | undefined, defaultSize: Pick<Rectangle, "width" | "height"> = DEFAULT_BOUNDS): Rectangle {
     const primaryWorkArea = screen.getPrimaryDisplay().workArea;
     const source = savedBounds ?? {
-        ...DEFAULT_BOUNDS,
-        x: primaryWorkArea.x + Math.round((primaryWorkArea.width - DEFAULT_BOUNDS.width) / 2),
-        y: primaryWorkArea.y + Math.round((primaryWorkArea.height - DEFAULT_BOUNDS.height) / 2)
+        ...defaultSize,
+        x: primaryWorkArea.x + Math.round((primaryWorkArea.width - defaultSize.width) / 2),
+        y: primaryWorkArea.y + Math.round((primaryWorkArea.height - defaultSize.height) / 2)
     };
 
     const targetWorkArea = findBestWorkArea(source) ?? primaryWorkArea;

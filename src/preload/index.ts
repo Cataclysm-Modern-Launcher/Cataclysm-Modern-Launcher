@@ -1,7 +1,7 @@
 import { electronAPI } from "@electron-toolkit/preload";
 import { contextBridge } from "electron";
 
-import { AppApi } from "../shared/bridge-api/AppApi";
+import { AppApi } from "@shared/bridge-api/AppApi";
 import { registerPreloadAppearanceApi } from "./ipc/registerPreloadAppearanceApi";
 import { registerPreloadWorkspaceApi } from "./ipc/registerPreloadWorkspaceApi";
 import { registerPreloadSettingsApi } from "./ipc/registerPreloadSettingsApi";
@@ -10,6 +10,7 @@ import { registerPreloadLocalizationApi } from "./ipc/registerPreloadLocalizatio
 import { registerPreloadShellApi } from "./ipc/registerPreloadShellApi";
 import { registerPreloadGameApi } from "./ipc/registerPreloadGameApi";
 import { registerPreloadModsApi } from "./ipc/registerPreloadModsApi";
+import { registerPreloadKnowledgeApi } from "./ipc/registerPreloadKnowledgeApi";
 
 const api: AppApi = {
     updater: registerPreloadUpdaterApi(),
@@ -19,7 +20,8 @@ const api: AppApi = {
     shell: registerPreloadShellApi(),
     settings: registerPreloadSettingsApi(),
     game: registerPreloadGameApi(),
-    mods: registerPreloadModsApi()
+    mods: registerPreloadModsApi(),
+    knowledge: registerPreloadKnowledgeApi()
 };
 
 // Use `contextBridge` APIs to expose Electron APIs to renderer only if context isolation is enabled, otherwise just add to the DOM global.

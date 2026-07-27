@@ -16,13 +16,15 @@ interface Settings {
     locale?: string;
     theme?: TAppThemeSource;
     windowState?: WindowState;
+    knowledgeWindowState?: WindowState;
 }
 
 const DEFAULT_SETTINGS: Settings = {
     workspacePath: "",
     locale: "",
     theme: "system",
-    windowState: getDefaultWindowState()
+    windowState: getDefaultWindowState(),
+    knowledgeWindowState: getDefaultWindowState()
 };
 
 class AppSettings {
@@ -67,7 +69,8 @@ class AppSettings {
             workspacePath: typeof parsed.workspacePath === "string" && parsed.workspacePath.trim().length > 0 ? parsed.workspacePath : "",
             locale: typeof parsed.locale === "string" && parsed.locale.trim().length > 0 ? parsed.locale : "",
             theme: this.isThemeSource(parsed.theme) ? parsed.theme : "system",
-            windowState: parseWindowState(parsed.windowState) ?? getDefaultWindowState()
+            windowState: parseWindowState(parsed.windowState) ?? getDefaultWindowState(),
+            knowledgeWindowState: parseWindowState(parsed.knowledgeWindowState) ?? getDefaultWindowState()
         };
 
         this.settings = finalSettings;

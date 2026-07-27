@@ -10,8 +10,13 @@ import { useGameStateStore } from "@renderer/stores/useGameStateStore";
 import { useGameFileOperationStore } from "@renderer/stores/useGameFileOperationStore";
 import { useGameBundleInstallStore } from "@renderer/stores/useGameBundleInstallStore";
 import { useGameBackupStore } from "@renderer/stores/useGameBackupStore";
+import { KnowledgeRoot } from "@renderer/knowledge/KnowledgeRoot";
 
 export function Root(): React.JSX.Element {
+    return new URLSearchParams(window.location.search).get("view") === "knowledge" ? <KnowledgeRoot /> : <LauncherRoot />;
+}
+
+function LauncherRoot(): React.JSX.Element {
     // Appearance settings bridge
     const mountAppearance = useAppearanceStore((state) => state.mount);
     useEffect(() => mountAppearance(), [mountAppearance]);

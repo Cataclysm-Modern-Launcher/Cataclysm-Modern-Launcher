@@ -7,6 +7,7 @@ import { useWorkspaceStore } from "@renderer/stores/useWorkspaceStore";
 import { IconSettings } from "@tabler/icons-react";
 import { defaultIconProps } from "@renderer/utils/defaultIconProps";
 import { OpenDrawerButton } from "@renderer/components/OpenDrawerButton";
+import { KnowledgeDockButton } from "@renderer/components/KnowledgeDockButton";
 
 export function AppBottomDock(): ReactNode {
     const backupsEnabled = useConfigStore((state) => state.backupsEnabled);
@@ -20,6 +21,7 @@ export function AppBottomDock(): ReactNode {
                 <Group gap="xs" wrap="nowrap" className="launcher-dock__section">
                     <SelectGameVariant />
                     <OpenDrawerButton drawer="game-bundles" i18nKey="versions.title" />
+                    <KnowledgeDockButton />
                 </Group>
 
                 <Group gap="xs" wrap="nowrap" className="launcher-dock__section launcher-dock__section--right">

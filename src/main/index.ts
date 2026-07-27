@@ -16,6 +16,7 @@ import { gameFileOperationGuard } from "./game/GameFileOperationGuard";
 import { gameBackupService } from "./GameBackupService";
 import { gameStateService } from "./game/GameStateService";
 import { attachRendererLogging, initializeConsoleLogging } from "./logger";
+import { knowledgeService } from "./knowledge/KnowledgeService";
 
 function createWindow(): void {
     const isDark = nativeTheme.shouldUseDarkColors;
@@ -87,6 +88,7 @@ app.whenReady()
         await gameStateService.initialize();
         await modRepositoryService.initialize();
         await updaterService.initialize();
+        knowledgeService.initialize();
 
         setupAppearanceIpc();
         setupShellIpc();

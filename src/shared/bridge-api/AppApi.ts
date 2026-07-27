@@ -6,6 +6,7 @@ import { WorkspaceApi } from "./WorkspaceApi";
 import { SettingsApi } from "./SettingsApi";
 import { ShellApi } from "./ShellApi";
 import { UpdaterApi } from "./UpdaterApi";
+import { KnowledgeApi } from "./KnowledgeApi";
 
 export type AppApi = {
     updater: UpdaterApi;
@@ -16,4 +17,5 @@ export type AppApi = {
     settings: SettingsApi;
     game: GameApi;
     mods: ModsApi;
+    knowledge: KnowledgeApi;
 };
