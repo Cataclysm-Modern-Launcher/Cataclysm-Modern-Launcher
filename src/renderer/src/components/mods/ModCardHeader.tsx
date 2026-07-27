@@ -18,9 +18,7 @@ export const ModCardHeader = React.memo(function ModCardHeader({ mod }: Props): 
         <Group wrap="nowrap" justify="space-between" align="flex-start">
             <Stack gap={4} style={{ minWidth: 0 }}>
                 <Group gap="xs" wrap="wrap">
-                    <Tooltip label={<TitleTooltip mod={mod} />}>
-                        <Title mod={mod} />
-                    </Tooltip>
+                    <Title mod={mod} />
 
                     {!!mod.authors?.length && (
                         <Group gap="2">
@@ -53,21 +51,12 @@ export const ModCardHeader = React.memo(function ModCardHeader({ mod }: Props): 
 });
 
 function Title({ mod }: { mod: ModInstanceInfo }): ReactNode {
-    const handleOpenUrl = useCallback(() => openUrl(mod.sourceUrl!), [mod]);
-
-    if (mod.sourceType === "git" && mod.sourceUrl) {
-        return (
-            <Anchor fw={700} onClick={handleOpenUrl}>
-                {mod.displayName}
-            </Anchor>
-        );
-    }
-    return <Text fw={700}>{mod.displayName}</Text>;
-}
-
-function TitleTooltip({ mod }: { mod: ModInstanceInfo }): ReactNode {
     const id = mod.subdirectory ? `${mod.id} (<code>${mod.subdirectory}</code>)` : mod.id;
-    return <LocalizedText size="xs" i18nKey="content.sheet.mods.title.tooltip" variables={{ id }} />;
+    return (
+        <Tooltip label={<LocalizedText size="xs" i18nKey="content.sheet.mods.title.tooltip" variables={{ id }} />}>
+            <Text fw={700}>{mod.displayName}</Text>
+        </Tooltip>
+    );
 }
 
 function ModAuthorBadge({ name }: { name: string }): ReactNode {
@@ -79,13 +68,15 @@ function ModAuthorBadge({ name }: { name: string }): ReactNode {
 }
 
 function ModSourceBadge({ mod }: { mod: ModInstanceInfo }): ReactNode {
-    const t = useTranslate();
+    const handleOpenUrl = useCallback(() => openUrl(mod.sourceUrl!), [mod]);
 
     if (mod.sourceType === "git" && mod.sourceUrl) {
         return (
             <Tooltip label={<LocalizedText i18nKey="content.sheet.mods.source.git.tooltip" variables={{ url: mod.sourceUrl }} size="xs" />}>
                 <Badge size="xs" variant="outline">
-                    {t(`content.sheet.mods.source.${mod.sourceType}`)}
+                    <Anchor onClick={handleOpenUrl}>
+                        <LocalizedText size="xs" i18nKey={`content.sheet.mods.source.${mod.sourceType}`} />
+                    </Anchor>
                 </Badge>
             </Tooltip>
         );
@@ -93,7 +84,7 @@ function ModSourceBadge({ mod }: { mod: ModInstanceInfo }): ReactNode {
 
     return (
         <Badge size="xs" variant="outline">
-            {t(`content.sheet.mods.source.${mod.sourceType}`)}
+            <LocalizedText i18nKey={`content.sheet.mods.source.${mod.sourceType}`} />
         </Badge>
     );
 }
