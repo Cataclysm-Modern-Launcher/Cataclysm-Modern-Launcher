@@ -59,7 +59,6 @@ export const EN_LOCALE = {
         "content.sheet.mods.add.from.git": "From Git repository",
         "content.sheet.mods.add.menu.title": "Add mod",
         "content.sheet.mods.add.tooltip": "Add mod",
-        "content.sheet.mods.channel.hint": "This mod library applies only to the <strong>{channel}</strong>.",
         "content.sheet.mods.check.button": "Check updates",
         "content.sheet.mods.empty": "No mods have been added yet.",
         "content.sheet.mods.git.modal.title": "Add mod from Git",

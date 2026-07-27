@@ -2,21 +2,16 @@ import "./ModsDockButton.css";
 import React from "react";
 import { ModRepositoryState } from "../../../../shared/mods/ModRepositoryState";
 import { useModsStore } from "@renderer/stores/useModsStore";
-import { useOpenDrawer } from "@renderer/stores/useDrawerStore";
-import { useTranslate } from "@renderer/stores/useLocaleStore";
-import { Button } from "@mantine/core";
+import { OpenDrawerButton } from "@renderer/components/OpenDrawerButton";
 
 export function ModsDockButton(): React.JSX.Element | null {
-    const t = useTranslate();
     const modRepositoryState = useModsStore((state) => state.state);
     const modIndicatorState = getModIndicatorState(modRepositoryState);
-    const openModsDrawer = useOpenDrawer("mods");
 
     return (
-        <Button variant="light" size="xs" radius="md" onClick={openModsDrawer} className="launcher-dock__button launcher-dock__mods-button">
-            {t("dock.mods")}
+        <OpenDrawerButton drawer="mods" i18nKey="dock.mods" className="launcher-dock__mods-button">
             {modIndicatorState !== "idle" && <span className={`launcher-dock__mods-indicator launcher-dock__mods-indicator--${modIndicatorState}`} aria-hidden="true" />}
-        </Button>
+        </OpenDrawerButton>
     );
 }
 

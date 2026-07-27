@@ -58,7 +58,6 @@ export const RU_LOCALE = {
         "content.sheet.mods.add.from.git": "Из репозитория Git",
         "content.sheet.mods.add.menu.title": "Добавить мод",
         "content.sheet.mods.add.tooltip": "Добавить мод",
-        "content.sheet.mods.channel.hint": "Эта библиотека модов относится только к <strong>{channel}</strong>.",
         "content.sheet.mods.check.button": "Проверить обновления",
         "content.sheet.mods.empty": "Моды пока не добавлены.",
         "content.sheet.mods.git.modal.title": "Добавить мод из Git",

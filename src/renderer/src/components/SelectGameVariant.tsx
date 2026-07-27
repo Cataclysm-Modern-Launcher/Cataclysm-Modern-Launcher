@@ -19,7 +19,7 @@ export function SelectGameVariant(): React.JSX.Element {
     return (
         <Menu shadow="md" width={310} position="top-start" disabled={!isReady || isGameBundleInstallInProgress}>
             <Menu.Target>
-                <Button variant="gradient" size="xs" radius="md" disabled={!isReady || isGameBundleInstallInProgress} className="launcher-dock__button launcher-dock__game-button">
+                <Button variant="gradient" size="xs" radius="md" disabled={!isReady || isGameBundleInstallInProgress} className="launcher-dock__game-button">
                     {selectedChannel === null ? t("dock.game.unavailable") : `${selectedChannel.shortName} · ${localizeChannelName(selectedChannel.channelName, t)}`}
                 </Button>
             </Menu.Target>

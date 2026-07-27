@@ -1,9 +1,6 @@
 import { ReactNode, useMemo } from "react";
-import { useTranslate } from "@renderer/stores/useLocaleStore";
 import { useCloseDrawer, useIsDrawerOpened } from "@renderer/stores/useDrawerStore";
 import { Drawer, Stack, Text } from "@mantine/core";
-import { useSelectedGameChannel } from "@renderer/stores/useWorkspaceStore";
-import { localizeChannelName } from "@renderer/utils/localizeChannelName";
 import { compareMods } from "@renderer/utils/compareMods";
 import { ModCard } from "@renderer/components/mods/ModCard";
 import { useModsStore } from "@renderer/stores/useModsStore";
@@ -13,13 +10,8 @@ import { ModRepositoryState } from "../../../../shared/mods/ModRepositoryState";
 import { ModDrawerTitle } from "@renderer/components/mods/ModDrawerTitle";
 
 export function ModsDrawer(): ReactNode {
-    const t = useTranslate();
-
     const close = useCloseDrawer();
     const isOpened = useIsDrawerOpened("mods");
-
-    const selectedGameChannel = useSelectedGameChannel();
-    const selectedGameChannelName = selectedGameChannel === null ? null : `${selectedGameChannel.gameName} · ${localizeChannelName(selectedGameChannel.channelName, t)}`;
 
     const { modRepoState, error } = useModsStore(
         useShallow((state) => ({
@@ -34,8 +26,6 @@ export function ModsDrawer(): ReactNode {
     return (
         <Drawer opened={isOpened} onClose={close} position="right" size={420} styles={{ title: { flex: 1 } }} title={<ModDrawerTitle />}>
             <Stack gap="md">
-                {!!selectedGameChannelName && <LocalizedText size="xs" c="dimmed" i18nKey="content.sheet.mods.channel.hint" variables={{ channel: selectedGameChannelName }} />}
-
                 <Stack gap="sm" className="content-sheet__intro">
                     <StateMessage isRepositoryReady={isRepositoryReady} state={modRepoState} />
 
