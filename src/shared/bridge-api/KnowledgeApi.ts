@@ -1,4 +1,6 @@
-import { KnowledgeIndexStatus, KnowledgeItemDetails, KnowledgeItemSummary } from "../knowledge/KnowledgeTypes";
+import { KnowledgeIndexStatus } from "@shared/knowledge/KnowledgeIndexStatus";
+import { KnowledgeItemSummary } from "@shared/knowledge/KnowledgeItemSummary";
+import { KnowledgeItemDetails } from "@shared/knowledge/KnowledgeItemDetails";
 
 export type KnowledgeApi = {
     open: (worldFolderName: string) => Promise<void>;

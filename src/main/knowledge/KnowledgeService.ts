@@ -4,11 +4,16 @@ import { dirname, join, resolve } from "node:path";
 import { readdir, readFile } from "node:fs/promises";
 import { parse } from "jsonc-parser";
 import { Bridge } from "@shared/bridge-api/Bridge";
-import { KnowledgeIndexStatus, KnowledgeItemDetails, KnowledgeItemSummary, KnowledgeRecipe, KnowledgeRequirementGroup, KnowledgeResolvedRequirement } from "@shared/knowledge/KnowledgeTypes";
 import { gameBundleService } from "../GameBundleService";
 import { attachRendererLogging } from "../logger";
 import { appSettings } from "../settings/AppSettings";
 import { attachWindowStatePersistence, resolveWindowBounds } from "../settings/WindowState";
+import { KnowledgeIndexStatus } from "@shared/knowledge/KnowledgeIndexStatus";
+import { KnowledgeItemSummary } from "@shared/knowledge/KnowledgeItemSummary";
+import { KnowledgeRecipe } from "@shared/knowledge/KnowledgeRecipe";
+import { KnowledgeItemDetails } from "@shared/knowledge/KnowledgeItemDetails";
+import { KnowledgeResolvedRequirement } from "@shared/knowledge/KnowledgeResolvedRequirement";
+import { KnowledgeRequirementGroup } from "@shared/knowledge/KnowledgeRequirementGroup";
 
 const ITEM_TYPES = new Set(["ITEM", "AMMO", "ARMOR", "BATTERY", "BIONIC_ITEM", "BOOK", "COMESTIBLE", "ENGINE", "GENERIC", "GUN", "GUNMOD", "MAGAZINE", "PET_ARMOR", "TOOL", "TOOLMOD", "WHEEL"]);
 

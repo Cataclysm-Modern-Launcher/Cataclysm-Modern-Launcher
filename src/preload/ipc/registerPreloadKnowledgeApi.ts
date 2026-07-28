@@ -1,7 +1,8 @@
 import { ipcRenderer, type IpcRendererEvent } from "electron";
 import { Bridge } from "@shared/bridge-api/Bridge";
 import { KnowledgeApi } from "@shared/bridge-api/KnowledgeApi";
-import { KnowledgeIndexStatus } from "@shared/knowledge/KnowledgeTypes";
+
+import { KnowledgeIndexStatus } from "@shared/knowledge/KnowledgeIndexStatus";
 
 export function registerPreloadKnowledgeApi(): KnowledgeApi {
     return {

@@ -1,4 +1,3 @@
-import App from "@renderer/App";
 import React, { useEffect } from "react";
 import { useConfigStore } from "@renderer/stores/useConfigStore";
 import { useAppearanceStore } from "@renderer/stores/useAppearanceStore";
@@ -10,7 +9,17 @@ import { useGameStateStore } from "@renderer/stores/useGameStateStore";
 import { useGameFileOperationStore } from "@renderer/stores/useGameFileOperationStore";
 import { useGameBundleInstallStore } from "@renderer/stores/useGameBundleInstallStore";
 import { useGameBackupStore } from "@renderer/stores/useGameBackupStore";
-import { KnowledgeRoot } from "@renderer/knowledge/KnowledgeRoot";
+import { KnowledgeContent } from "@renderer/knowledge/KnowledgeContent";
+import { useKnownProficiency } from "@renderer/knowledge/stores/useKnownProficiency";
+import { MantineProvider } from "@mantine/core";
+import { ModalsProvider } from "@mantine/modals";
+import { defaultModalProps } from "@renderer/utils/DefaultModalProps";
+import { contextModals } from "@renderer/modals/contextModals";
+import { Notifications } from "@mantine/notifications";
+import { SelfUpdaterStatus } from "@renderer/components/SelfUpdaterStatus";
+import { WorkspaceView } from "@renderer/components/workspace/WorkspaceView";
+import { AppBottomDock } from "@renderer/components/AppBottomDock";
+import { DrawerOwner } from "@renderer/components/DrawerOwner";
 
 export function Root(): React.JSX.Element {
     return new URLSearchParams(window.location.search).get("view") === "knowledge" ? <KnowledgeRoot /> : <LauncherRoot />;
@@ -48,5 +57,42 @@ function LauncherRoot(): React.JSX.Element {
 
     useGameRuntimeStatusMount();
 
-    return <App />;
+    const colorTheme = useAppearanceStore((state) => state.theme);
+
+    return (
+        <MantineProvider forceColorScheme={colorTheme}>
+            <ModalsProvider modalProps={defaultModalProps} modals={contextModals}>
+                <Notifications position="top-right" />
+
+                <SelfUpdaterStatus />
+
+                <main className="app-shell">
+                    <WorkspaceView />
+                </main>
+
+                <AppBottomDock />
+
+                <DrawerOwner />
+            </ModalsProvider>
+        </MantineProvider>
+    );
+}
+
+function KnowledgeRoot(): React.JSX.Element {
+    const mountAppearance = useAppearanceStore((state) => state.mount);
+    useEffect(() => mountAppearance(), [mountAppearance]);
+
+    const mountLocale = useLocaleStoreMount();
+    useEffect(() => mountLocale(), [mountLocale]);
+
+    const mountKnownProficiency = useKnownProficiency((state) => state.mount);
+    useEffect(() => mountKnownProficiency(), [mountKnownProficiency]);
+
+    const theme = useAppearanceStore((state) => state.theme);
+
+    return (
+        <MantineProvider forceColorScheme={theme}>
+            <KnowledgeContent />
+        </MantineProvider>
+    );
 }
