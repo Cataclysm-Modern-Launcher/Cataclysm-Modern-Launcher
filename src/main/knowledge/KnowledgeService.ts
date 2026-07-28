@@ -18,6 +18,9 @@ class KnowledgeService {
     private context: TKnowledgeIndexContext | null = null;
     private index: TKnowledgeIndex | null = null;
     private status: KnowledgeIndexStatus = { status: "idle" };
+    private lastProgressPublishAt = 0;
+    private progressPublishCount = 0;
+    private progressPublishDurationMs = 0;
 
     initialize(): void {
         ipcMain.handle(Bridge.Knowledge.open, (_, worldFolderName: string) => this.open(worldFolderName));
@@ -41,7 +44,9 @@ class KnowledgeService {
         const cached = await knowledgeIndexStore.load(this.context);
         if (cached !== null) {
             this.index = cached;
-            console.info(`[knowledge:index] loaded persistent index entities=${cached.entities.length}`);
+            console.info(
+                `[knowledge:index] loaded persistent index entities=${cached.entities.length} graphNodes=${cached.graph.nodes.length} graphEdges=${cached.graph.edges.length} unresolved=${cached.graph.unresolved.length}`
+            );
             this.publish(this.createReadyStatus(cached, true));
             return;
         }
@@ -52,18 +57,35 @@ class KnowledgeService {
     private async rebuild(): Promise<void> {
         if (this.context === null) throw new Error("Knowledge context is not available.");
 
+        const rebuildStarted = performance.now();
+        this.index = null;
+        this.publish({ status: "building", processedFiles: 0, totalFiles: 0 });
+
+        const dropStarted = performance.now();
         await knowledgeIndexStore.drop(this.context);
-        await this.build();
+        console.info(`[knowledge:index] rebuild drop durationMs=${Math.round(performance.now() - dropStarted)}`);
+
+        await this.build(false);
+        console.info(`[knowledge:index] rebuild total durationMs=${Math.round(performance.now() - rebuildStarted)}`);
     }
 
-    private async build(): Promise<void> {
+    private async build(publishInitialStatus = true): Promise<void> {
         if (this.context === null) throw new Error("Knowledge context is not available.");
 
         this.index = null;
-        this.publish({ status: "building", processedFiles: 0, totalFiles: 0 });
+        this.lastProgressPublishAt = 0;
+        this.progressPublishCount = 0;
+        this.progressPublishDurationMs = 0;
+        if (publishInitialStatus) this.publish({ status: "building", processedFiles: 0, totalFiles: 0 });
         try {
-            const index = await buildKnowledgeIndex(this.context, (progress) => this.publish({ status: "building", ...progress }));
+            const buildStarted = performance.now();
+            const index = await buildKnowledgeIndex(this.context, (progress) => this.publishBuildProgress(progress));
+            console.info(
+                `[knowledge:index] build pipeline durationMs=${Math.round(performance.now() - buildStarted)} progressPublishes=${this.progressPublishCount} progressPublishDurationMs=${Math.round(this.progressPublishDurationMs)}`
+            );
+            const persistenceStarted = performance.now();
             await knowledgeIndexStore.save(this.context, index);
+            console.info(`[knowledge:graph] persistence durationMs=${Math.round(performance.now() - persistenceStarted)}`);
             this.index = index;
             this.publish(this.createReadyStatus(index, false));
         } catch (error) {
@@ -72,6 +94,18 @@ class KnowledgeService {
             this.publish({ status: "error", message });
             throw error;
         }
+    }
+
+    private publishBuildProgress(progress: { processedFiles: number; totalFiles: number }): void {
+        const now = performance.now();
+        const isBoundary = progress.processedFiles === 0 || progress.processedFiles === progress.totalFiles;
+        if (!isBoundary && now - this.lastProgressPublishAt < 200) return;
+
+        this.lastProgressPublishAt = now;
+        const publishStarted = performance.now();
+        this.publish({ status: "building", ...progress });
+        this.progressPublishCount += 1;
+        this.progressPublishDurationMs += performance.now() - publishStarted;
     }
 
     private search(query: string, category: string | null, limit: number): KnowledgeEntitySummary[] {

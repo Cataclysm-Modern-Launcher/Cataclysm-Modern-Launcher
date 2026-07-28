@@ -47,6 +47,8 @@ export function KnowledgeContent(): React.JSX.Element {
     const openEntity = async (key: string): Promise<void> => setSelected(await window.api.knowledge.getEntity(key));
     const rebuild = async (): Promise<void> => {
         setSelected(null);
+        setEntities([]);
+        setStatus({ status: "building", processedFiles: 0, totalFiles: 0 });
         await window.api.knowledge.rebuild();
     };
     return (

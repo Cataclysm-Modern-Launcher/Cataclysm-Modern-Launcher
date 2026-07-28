@@ -6,7 +6,8 @@ import { TKnowledgeIndexContext } from "./types/TKnowledgeIndexContext";
 import { IKnowledgeIndexPersistence } from "./types/IKnowledgeIndexPersistence";
 import { createHash } from "node:crypto";
 
-const KNOWLEDGE_INDEX_SCHEMA_VERSION = 9;
+const KNOWLEDGE_INDEX_SCHEMA_VERSION = 10;
+const KNOWLEDGE_GRAPH_SCHEMA_VERSION = 2;
 
 class KnowledgeIndexStore implements IKnowledgeIndexPersistence {
     async load(context: TKnowledgeIndexContext): Promise<TKnowledgeIndex | null> {
@@ -39,7 +40,13 @@ class KnowledgeIndexStore implements IKnowledgeIndexPersistence {
     }
 
     private createKnowledgeIndexKey(context: TKnowledgeIndexContext): string {
-        const value = JSON.stringify({ schemaVersion: KNOWLEDGE_INDEX_SCHEMA_VERSION, bundleId: context.bundleId, worldFolderName: context.worldFolderName, modIds: context.modIds });
+        const value = JSON.stringify({
+            schemaVersion: KNOWLEDGE_INDEX_SCHEMA_VERSION,
+            graphSchemaVersion: KNOWLEDGE_GRAPH_SCHEMA_VERSION,
+            bundleId: context.bundleId,
+            worldFolderName: context.worldFolderName,
+            modIds: context.modIds
+        });
         return createHash("sha256").update(value).digest("hex").slice(0, 24);
     }
 }

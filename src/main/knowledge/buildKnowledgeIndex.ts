@@ -12,18 +12,49 @@ import { parse } from "jsonc-parser";
 import { TKnowledgeScanResult } from "./types/TKnowledgeScanResult";
 import { TScannedKnowledgeDefinition } from "./types/TScannedKnowledgeDefinition";
 import { isRecord } from "../utils/isRecord";
+import { buildKnowledgeGraph } from "./graph/buildKnowledgeGraph";
 
 export async function buildKnowledgeIndex(context: TKnowledgeIndexContext, onProgress: (progress: ScanProgress) => void): Promise<TKnowledgeIndex> {
+    const totalStarted = performance.now();
     const diagnostics = new KnowledgeDiagnostics();
+
+    const sourcesStarted = performance.now();
     const sources = await resolveKnowledgeSources(context);
+    const sourcesMs = performance.now() - sourcesStarted;
+
+    const scanStarted = performance.now();
     const scan = await scanKnowledgeJsonDefinitions(sources, diagnostics, onProgress);
+    const scanMs = performance.now() - scanStarted;
+
+    const identifyStarted = performance.now();
     const identified = identifyDefinitions(scan.definitions, diagnostics);
+    const identifyMs = performance.now() - identifyStarted;
+
+    const resolveStarted = performance.now();
     const resolved = resolveKnowledgeDefinitions(identified, diagnostics);
+    const resolveMs = performance.now() - resolveStarted;
+
+    const entitiesStarted = performance.now();
     const entities = resolved.map(buildKnowledgeEntity);
+    const entitiesMs = performance.now() - entitiesStarted;
+
+    const graphStarted = performance.now();
+    const graph = buildKnowledgeGraph(resolved);
+    const graphMs = performance.now() - graphStarted;
+
+    console.info("[knowledge:index] phase timings", {
+        sourcesMs: Math.round(sourcesMs),
+        scanMs: Math.round(scanMs),
+        identifyMs: Math.round(identifyMs),
+        resolveMs: Math.round(resolveMs),
+        entitiesMs: Math.round(entitiesMs),
+        graphMs: Math.round(graphMs),
+        totalMs: Math.round(performance.now() - totalStarted)
+    });
 
     diagnostics.flush(scan.summary, entities.length);
     console.info(`[knowledge:index] built entities=${entities.length} rawDefinitions=${scan.definitions.length} sources=${sources.length}`);
-    return { entities, modIds: context.modIds, sourceCount: sources.length, rawDefinitionCount: scan.definitions.length };
+    return { entities, graph, modIds: context.modIds, sourceCount: sources.length, rawDefinitionCount: scan.definitions.length };
 }
 
 type ScanProgress = { processedFiles: number; totalFiles: number };
