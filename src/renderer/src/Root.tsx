@@ -10,7 +10,6 @@ import { useGameFileOperationStore } from "@renderer/stores/useGameFileOperation
 import { useGameBundleInstallStore } from "@renderer/stores/useGameBundleInstallStore";
 import { useGameBackupStore } from "@renderer/stores/useGameBackupStore";
 import { KnowledgeContent } from "@renderer/knowledge/KnowledgeContent";
-import { useKnownProficiency } from "@renderer/knowledge/stores/useKnownProficiency";
 import { MantineProvider } from "@mantine/core";
 import { ModalsProvider } from "@mantine/modals";
 import { defaultModalProps } from "@renderer/utils/DefaultModalProps";
@@ -84,9 +83,6 @@ function KnowledgeRoot(): React.JSX.Element {
 
     const mountLocale = useLocaleStoreMount();
     useEffect(() => mountLocale(), [mountLocale]);
-
-    const mountKnownProficiency = useKnownProficiency((state) => state.mount);
-    useEffect(() => mountKnownProficiency(), [mountKnownProficiency]);
 
     const theme = useAppearanceStore((state) => state.theme);
 

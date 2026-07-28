@@ -5,7 +5,7 @@ export function formatRecipeTime(value: KnowledgeRecipe["time"], multiplier: num
     let seconds: number | null = null;
     if (typeof value === "number") seconds = value / 100;
     else {
-        const match = value.trim().match(/^([\d.]+)\s*(s|m|h|d)$/i);
+        const match = value.trim().match(/^([\d.]+)\s*([smhd])$/i);
         if (match !== null) {
             const amount = Number(match[1]);
             const unit = match[2].toLowerCase();

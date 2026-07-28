@@ -6,6 +6,7 @@ import { app } from "electron";
 import { TAppThemeSource } from "@shared/appearance/TAppThemeSource";
 import { isNodeError } from "../utils/isNodeError";
 import { getDefaultWindowState, parseWindowState, WindowState } from "./WindowState";
+import { isRecord } from "../utils/isRecord";
 
 const WRITE_DEBOUNCE_MS = 250;
 
@@ -59,7 +60,7 @@ class AppSettings {
             return;
         }
 
-        if (!this.isRecord(parsed)) {
+        if (!isRecord(parsed)) {
             console.warn("[settings] invalid settings file, resetting");
             this.update(DEFAULT_SETTINGS);
             return;
@@ -122,10 +123,6 @@ class AppSettings {
     private async write(settings: Settings): Promise<void> {
         await mkdir(dirname(this.filePath), { recursive: true });
         await writeFile(this.filePath, `${JSON.stringify(settings, null, 4)}\n`, "utf8");
-    }
-
-    private isRecord(value: unknown): value is Record<string, unknown> {
-        return typeof value === "object" && value !== null && !Array.isArray(value);
     }
 
     private isThemeSource(value: unknown): value is TAppThemeSource {

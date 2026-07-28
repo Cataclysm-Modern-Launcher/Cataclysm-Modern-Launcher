@@ -1,19 +1,18 @@
-import { Alert, AppShell, Badge, Box, Center, Group, Loader, Paper, ScrollArea, Stack, Text, TextInput, Title } from "@mantine/core";
-import { IconSearch } from "@tabler/icons-react";
+import { Alert, Center, Loader, Stack, Text, Title } from "@mantine/core";
 import React, { useEffect, useState } from "react";
-import { useTranslate } from "@renderer/stores/useLocaleStore";
+import { KnowledgeEntityDetails } from "@shared/knowledge/KnowledgeEntityDetails";
+import { KnowledgeEntitySummary } from "@shared/knowledge/KnowledgeEntitySummary";
 import { KnowledgeIndexStatus } from "@shared/knowledge/KnowledgeIndexStatus";
-import { KnowledgeItemSummary } from "@shared/knowledge/KnowledgeItemSummary";
-import { KnowledgeItemDetails } from "@shared/knowledge/KnowledgeItemDetails";
-import { KnowledgeItemDetailsView } from "@renderer/knowledge/KnowledgeItemDetailsView";
+import { useTranslate } from "@renderer/stores/useLocaleStore";
+import { KnowledgeReadyView } from "./KnowledgeReadyView";
 
 export function KnowledgeContent(): React.JSX.Element {
     const t = useTranslate();
     const [status, setStatus] = useState<KnowledgeIndexStatus>({ status: "idle" });
     const [query, setQuery] = useState("");
-    const [items, setItems] = useState<KnowledgeItemSummary[]>([]);
-    const [selected, setSelected] = useState<KnowledgeItemDetails | null>(null);
-    const [history, setHistory] = useState<string[]>([]);
+    const [category, setCategory] = useState<string | null>(null);
+    const [entities, setEntities] = useState<KnowledgeEntitySummary[]>([]);
+    const [selected, setSelected] = useState<KnowledgeEntityDetails | null>(null);
 
     useEffect(() => {
         void window.api.knowledge.getStatus().then(setStatus);
@@ -22,28 +21,9 @@ export function KnowledgeContent(): React.JSX.Element {
 
     useEffect(() => {
         if (status.status !== "ready") return;
-        const timeout = window.setTimeout(async () => {
-            const items = await window.api.knowledge.searchItems(query, 200);
-            setItems(items);
-        }, 120);
-        return function cleanup() {
-            window.clearTimeout(timeout);
-        };
-    }, [query, status]);
-
-    const openItem = async (itemId: string, rememberCurrent = true): Promise<void> => {
-        const next = await window.api.knowledge.getItem(itemId);
-        if (next === null) return;
-        if (rememberCurrent && selected !== null && selected.id !== next.id) setHistory((current) => [...current, selected.id]);
-        setSelected(next);
-    };
-
-    const goBack = async (): Promise<void> => {
-        const previousId = history.at(-1);
-        if (previousId === undefined) return;
-        setHistory((current) => current.slice(0, -1));
-        await openItem(previousId, false);
-    };
+        const timeout = window.setTimeout(() => void window.api.knowledge.searchEntities(query, category, 300).then(setEntities), 100);
+        return () => window.clearTimeout(timeout);
+    }, [query, category, status]);
 
     if (status.status === "idle" || status.status === "building")
         return (
@@ -55,7 +35,6 @@ export function KnowledgeContent(): React.JSX.Element {
                 </Stack>
             </Center>
         );
-
     if (status.status === "error")
         return (
             <Center h="100vh">
@@ -65,48 +44,22 @@ export function KnowledgeContent(): React.JSX.Element {
             </Center>
         );
 
+    const openEntity = async (key: string): Promise<void> => setSelected(await window.api.knowledge.getEntity(key));
+    const rebuild = async (): Promise<void> => {
+        setSelected(null);
+        await window.api.knowledge.rebuild();
+    };
     return (
-        <AppShell navbar={{ width: 360, breakpoint: "sm" }} padding={0} h="100vh" styles={{ main: { height: "100vh", overflow: "hidden" } }}>
-            <AppShell.Navbar p="md">
-                <Stack h="100%" gap="sm">
-                    <Group justify="space-between">
-                        <Title order={2}>{t("knowledge.title")}</Title>
-                        <Badge variant="light">{t("knowledge.items.count", { count: status.itemCount })}</Badge>
-                    </Group>
-                    <TextInput value={query} onChange={(event) => setQuery(event.currentTarget.value)} leftSection={<IconSearch size={16} />} placeholder={t("knowledge.search.placeholder")} />
-                    <ScrollArea flex={1} offsetScrollbars>
-                        <Stack gap={4} pr="xs">
-                            {items.map((item) => (
-                                <Paper key={item.id} withBorder p="sm" onClick={() => void openItem(item.id)} style={{ cursor: "pointer" }}>
-                                    <Text fw={600}>{item.name}</Text>
-                                    <Group gap="xs">
-                                        <Text size="xs" c="dimmed">
-                                            {item.id}
-                                        </Text>
-                                        <Badge size="xs" variant="outline">
-                                            {item.sourceModId}
-                                        </Badge>
-                                    </Group>
-                                </Paper>
-                            ))}
-                        </Stack>
-                    </ScrollArea>
-                </Stack>
-            </AppShell.Navbar>
-
-            <AppShell.Main>
-                {selected === null ? (
-                    <Center h="100%">
-                        <Text c="dimmed">{t("knowledge.item.select")}</Text>
-                    </Center>
-                ) : (
-                    <ScrollArea h="100%" offsetScrollbars>
-                        <Box p="md">
-                            <KnowledgeItemDetailsView item={selected} onNavigate={(id) => void openItem(id)} canGoBack={history.length > 0} onBack={() => void goBack()} />
-                        </Box>
-                    </ScrollArea>
-                )}
-            </AppShell.Main>
-        </AppShell>
+        <KnowledgeReadyView
+            status={status}
+            query={query}
+            category={category}
+            entities={entities}
+            selected={selected}
+            onQueryChange={setQuery}
+            onCategoryChange={setCategory}
+            onOpen={(key) => void openEntity(key)}
+            onRebuild={() => void rebuild()}
+        />
     );
 }

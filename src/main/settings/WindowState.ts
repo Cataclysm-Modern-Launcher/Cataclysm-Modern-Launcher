@@ -1,4 +1,7 @@
 import { Rectangle, screen } from "electron";
+import { isRecord } from "../utils/isRecord";
+import { isFiniteNumber } from "../utils/isFiniteNumber";
+import { clamp } from "../utils/clamp";
 
 export interface WindowState {
     bounds?: Rectangle;
@@ -77,18 +80,6 @@ function getIntersectionArea(a: Rectangle, b: Rectangle): number {
     const width = Math.max(0, Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x));
     const height = Math.max(0, Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y));
     return width * height;
-}
-
-function clamp(value: number, min: number, max: number): number {
-    return Math.min(Math.max(value, min), max);
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-    return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-function isFiniteNumber(value: unknown): value is number {
-    return typeof value === "number" && Number.isFinite(value);
 }
 
 export function attachWindowStatePersistence(window: import("electron").BrowserWindow, initialState: WindowState, save: (state: WindowState) => void): void {
