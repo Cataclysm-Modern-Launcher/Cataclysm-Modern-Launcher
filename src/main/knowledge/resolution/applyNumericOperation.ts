@@ -1,5 +1,5 @@
-import { ScalarOperationRegistry } from "./scalars/ScalarOperationRegistry";
-import { StructuralOperationRegistry } from "./structures/StructuralOperationRegistry";
+import { applyScalarOperation } from "./scalars/applyScalarOperation";
+import { applyStructuralOperation } from "./structures/applyStructuralOperation";
 import { getDefinitionDefault } from "./defaults/getDefinitionDefault";
 import { TJsonRecord } from "../types/TJsonRecord";
 import { isRecord } from "../../utils/isRecord";
@@ -19,9 +19,6 @@ export type NumericOperationResult = {
     value: TJsonRecord;
     unsupportedPaths: UnsupportedNumericPath[];
 };
-
-const scalarRegistry = new ScalarOperationRegistry();
-const structuralRegistry = new StructuralOperationRegistry();
 
 export function applyNumericOperation(target: TJsonRecord, operation: unknown, kind: NumericOperation, canonicalType: string): NumericOperationResult {
     if (!isRecord(operation)) {
@@ -53,12 +50,12 @@ function applyObject(target: TJsonRecord, operation: TJsonRecord, kind: NumericO
 function applyValue(current: unknown, operand: unknown, kind: NumericOperation, path: string, unsupported: UnsupportedNumericPath[], canonicalType: string): { applied: boolean; value: unknown } {
     if ((typeof current === "string" || typeof current === "boolean") && current === operand) return { applied: true, value: current };
 
-    const scalar = scalarRegistry.apply(current, operand, kind);
+    const scalar = applyScalarOperation(current, operand, kind);
     if (scalar.applied) return scalar;
 
-    const structural = structuralRegistry.apply(current, operand, kind, path);
+    const structural = applyStructuralOperation(current, operand, kind, path);
     if (structural.applied) return structural;
-    if (structural.reason !== undefined) {
+    if ("reason" in structural && structural.reason !== undefined) {
         unsupported.push(createUnsupported(path, structural.reason, current, operand));
         return { applied: false, value: current };
     }

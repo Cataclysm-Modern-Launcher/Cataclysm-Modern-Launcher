@@ -1,5 +1,4 @@
 import { NumericOperation } from "../applyNumericOperation";
-import { IStructuralOperationAdapter } from "./IStructuralOperationAdapter";
 import { TJsonRecord } from "../../types/TJsonRecord";
 import { cloneRecord } from "../../../utils/cloneRecord";
 import { isRecord } from "../../../utils/isRecord";
@@ -8,25 +7,23 @@ import { TStructuralOperationResult } from "./TStructuralOperationResult";
 
 const DAMAGE_FIELDS = ["amount", "damage_multiplier", "armor_penetration", "armor_multiplier", "constant_armor_multiplier", "constant_damage_multiplier"] as const;
 
-export class DamageInstanceOperationAdapter implements IStructuralOperationAdapter {
-    apply(current: unknown, operand: unknown, operation: NumericOperation, path: string): TStructuralOperationResult {
-        if (!isDamagePath(path)) return { applied: false };
-        const currentUnits = readDamageUnits(current);
-        const operandUnits = readDamageUnits(operand);
-        if (currentUnits === null || operandUnits === null) return { applied: false };
+export function applyDamageInstanceOperation(current: unknown, operand: unknown, operation: NumericOperation, path: string): TStructuralOperationResult {
+    if (!isDamagePath(path)) return { applied: false };
+    const currentUnits = readDamageUnits(current);
+    const operandUnits = readDamageUnits(operand);
+    if (currentUnits === null || operandUnits === null) return { applied: false };
 
-        const result = currentUnits.units.map((unit) => cloneRecord(unit));
-        for (const operationUnit of operandUnits.units) {
-            const damageType = isString(operationUnit.damage_type);
-            if (damageType === null) return { applied: false, reason: "type-mismatch" };
-            const index = result.findIndex((unit) => unit.damage_type === damageType);
-            if (index < 0) return { applied: false, reason: "missing-target" };
-            const applied = operation === "proportional" ? applyProportional(result[index], operationUnit) : applyRelative(result[index], operationUnit);
-            if (!applied) return { applied: false, reason: "type-mismatch" };
-        }
-
-        return { applied: true, value: currentUnits.wasArray ? result : result[0] };
+    const result = currentUnits.units.map((unit) => cloneRecord(unit));
+    for (const operationUnit of operandUnits.units) {
+        const damageType = isString(operationUnit.damage_type);
+        if (damageType === null) return { applied: false, reason: "type-mismatch" };
+        const index = result.findIndex((unit) => unit.damage_type === damageType);
+        if (index < 0) return { applied: false, reason: "missing-target" };
+        const applied = operation === "proportional" ? applyProportional(result[index], operationUnit) : applyRelative(result[index], operationUnit);
+        if (!applied) return { applied: false, reason: "type-mismatch" };
     }
+
+    return { applied: true, value: currentUnits.wasArray ? result : result[0] };
 }
 
 function applyProportional(target: TJsonRecord, operation: TJsonRecord): boolean {

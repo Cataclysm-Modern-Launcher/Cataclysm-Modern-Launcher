@@ -1,4 +1,4 @@
-import { IScalarOperationAdapter } from "./IScalarOperationAdapter";
+import { NumericOperation } from "../applyNumericOperation";
 import { TScalarOperationResult } from "./TScalarOperationResult";
 
 const MONEY_UNITS: Record<string, number> = {
@@ -12,26 +12,24 @@ const MONEY_UNITS: Record<string, number> = {
 
 const MONEY_PART_PATTERN = /([+-]?(?:\d+(?:\.\d+)?|\.\d+))\s*(cents|cent|dollars|dollar|USD|kUSD)(?=\s|$)/g;
 
-export class MoneyStringScalarAdapter implements IScalarOperationAdapter {
-    apply(current: unknown, operand: unknown, operation: "relative" | "proportional"): TScalarOperationResult {
-        if (typeof current !== "string") return { applied: false } as const;
-        const currentCents = parseMoney(current);
-        if (currentCents === null) return { applied: false } as const;
+export function applyMoneyStringScalarOperation(current: unknown, operand: unknown, operation: NumericOperation): TScalarOperationResult {
+    if (typeof current !== "string") return { applied: false } as const;
+    const currentCents = parseMoney(current);
+    if (currentCents === null) return { applied: false } as const;
 
-        if (operation === "proportional" && typeof operand === "number") {
-            // units::money stores integer cents. Assigning the multiplied quantity
-            // back to quantity<int> truncates toward zero, matching the game.
-            return { applied: true, value: formatMoney(Math.trunc(currentCents * operand)) } as const;
-        }
-
-        if (operation === "relative" && typeof operand === "string") {
-            const operandCents = parseMoney(operand);
-            if (operandCents === null) return { applied: false } as const;
-            return { applied: true, value: formatMoney(currentCents + operandCents) } as const;
-        }
-
-        return { applied: false } as const;
+    if (operation === "proportional" && typeof operand === "number") {
+        // units::money stores integer cents. Assigning the multiplied quantity
+        // back to quantity<int> truncates toward zero, matching the game.
+        return { applied: true, value: formatMoney(Math.trunc(currentCents * operand)) } as const;
     }
+
+    if (operation === "relative" && typeof operand === "string") {
+        const operandCents = parseMoney(operand);
+        if (operandCents === null) return { applied: false } as const;
+        return { applied: true, value: formatMoney(currentCents + operandCents) } as const;
+    }
+
+    return { applied: false } as const;
 }
 
 function parseMoney(value: string): number | null {
