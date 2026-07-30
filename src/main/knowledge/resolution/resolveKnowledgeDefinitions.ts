@@ -63,14 +63,14 @@ function findParent(definition: TIdentifiedKnowledgeDefinition): TIdentifiedKnow
     return candidates.find((candidate) => candidate.sequence !== definition.sequence);
 }
 
-function resolve(definition: TIdentifiedKnowledgeDefinition, diagnostics: KnowledgeDiagnostics): TResolvedKnowledgeDefinition {
+function resolve(definition: TIdentifiedKnowledgeDefinition, diagnostics: KnowledgeDiagnostics, implicitParent?: TResolvedKnowledgeDefinition): TResolvedKnowledgeDefinition {
     const cached = resolved.get(definition.sequence);
     if (cached !== undefined) return cached;
     if (resolving.has(definition.sequence)) return resolveWithoutParent(definition, "inheritance-cycle", diagnostics);
 
     resolving.add(definition.sequence);
     const parentDefinition = findParent(definition);
-    const parent = parentDefinition === undefined ? undefined : resolve(parentDefinition, diagnostics);
+    const parent = parentDefinition === undefined ? implicitParent : resolve(parentDefinition, diagnostics);
     const merged = mergeJsonDefinitions(parent?.raw, definition.raw);
     const inheritance = applyInheritanceOperations({ ...merged, ...pickOperationFields(definition.raw) }, definition.canonicalType);
     const descriptor = getKnowledgeTypeDescriptor(definition);
@@ -105,11 +105,17 @@ export function resolveKnowledgeDefinitions(definitions: TIdentifiedKnowledgeDef
     multipleDefinitions.length = 0;
 
     for (const definition of definitions) {
-        const resolved = resolve(definition, diagnostics);
+        const previousByAlias = definition.identityAliases.map((alias) => getCurrentDefinition(definition.canonicalType, alias)).find((value) => value !== undefined);
+        const implicitParent = definition.parentId === null && hasInheritanceOperations(definition.raw) ? previousByAlias : undefined;
+        const resolved = resolve(definition, diagnostics, implicitParent);
         const previous = getCurrentDefinition(resolved.canonicalType, resolved.effectiveId);
         diagnostics.observeReplacement(resolved, previous);
         registerDefinition(resolved);
     }
 
     return [...singleDefinitions.values(), ...multipleDefinitions];
+}
+
+function hasInheritanceOperations(value: Record<string, unknown>): boolean {
+    return Object.hasOwn(value, "extend") || Object.hasOwn(value, "delete") || Object.hasOwn(value, "relative") || Object.hasOwn(value, "proportional");
 }

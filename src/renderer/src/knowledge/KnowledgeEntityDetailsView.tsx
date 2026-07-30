@@ -11,6 +11,7 @@ import { KnowledgeRecipeCard } from "./KnowledgeRecipeCard";
 export type KnowledgeEntityDetailsViewProps = {
     entity: KnowledgeEntityDetails;
     relations: KnowledgeEntityRelations;
+    relatedEntities: Record<string, KnowledgeEntityDetails>;
     relatedRelations: Record<string, KnowledgeEntityRelations>;
     canGoBack: boolean;
     canGoForward: boolean;
@@ -110,19 +111,19 @@ export function KnowledgeEntityDetailsView(props: KnowledgeEntityDetailsViewProp
 
                 {isItem && recipes.length > 0 && (
                     <Tabs.Panel value="recipes" pt="md">
-                        <RecipeList recipes={recipes} relatedRelations={props.relatedRelations} onOpen={props.onOpen} />
+                        <RecipeList recipes={recipes} relatedEntities={props.relatedEntities} relatedRelations={props.relatedRelations} onOpen={props.onOpen} />
                     </Tabs.Panel>
                 )}
 
                 {isItem && disassembly.length > 0 && (
                     <Tabs.Panel value="disassembly" pt="md">
-                        <RecipeList recipes={disassembly} relatedRelations={props.relatedRelations} onOpen={props.onOpen} />
+                        <RecipeList recipes={disassembly} relatedEntities={props.relatedEntities} relatedRelations={props.relatedRelations} onOpen={props.onOpen} />
                     </Tabs.Panel>
                 )}
 
                 {isItem && usedIn.length > 0 && (
                     <Tabs.Panel value="usedIn" pt="md">
-                        <RecipeList recipes={usedIn} relatedRelations={props.relatedRelations} onOpen={props.onOpen} />
+                        <RecipeList recipes={usedIn} relatedEntities={props.relatedEntities} relatedRelations={props.relatedRelations} onOpen={props.onOpen} />
                     </Tabs.Panel>
                 )}
             </Tabs>
@@ -131,14 +132,49 @@ export function KnowledgeEntityDetailsView(props: KnowledgeEntityDetailsViewProp
     );
 }
 
-function RecipeList({ recipes, relatedRelations, onOpen }: { recipes: KnowledgeEntityRelation[]; relatedRelations: Record<string, KnowledgeEntityRelations>; onOpen: (key: string) => void }): React.JSX.Element {
+function RecipeList({
+    recipes,
+    relatedEntities,
+    relatedRelations,
+    onOpen
+}: {
+    recipes: KnowledgeEntityRelation[];
+    relatedEntities: Record<string, KnowledgeEntityDetails>;
+    relatedRelations: Record<string, KnowledgeEntityRelations>;
+    onOpen: (key: string) => void;
+}): React.JSX.Element {
+    const t = useTranslate();
+    const cards = recipes.map((recipe, index) => ({
+        key: `${recipe.entity.key}:${index}`,
+        label: getRecipeTabLabel(recipe, relatedEntities[recipe.entity.key], index, t),
+        content: <KnowledgeRecipeCard recipe={recipe} entity={relatedEntities[recipe.entity.key]} relations={relatedRelations[recipe.entity.key]} relatedRelations={relatedRelations} onOpen={onOpen} />
+    }));
+
+    if (cards.length === 1) return cards[0].content;
+
     return (
-        <Stack gap="sm">
-            {recipes.map((recipe, index) => (
-                <KnowledgeRecipeCard key={`${recipe.entity.key}:${index}`} recipe={recipe} relations={relatedRelations[recipe.entity.key]} onOpen={onOpen} />
+        <Tabs defaultValue={cards[0].key} variant="outline" keepMounted={false}>
+            <Tabs.List>
+                {cards.map((card) => (
+                    <Tabs.Tab key={card.key} value={card.key}>
+                        {card.label}
+                    </Tabs.Tab>
+                ))}
+            </Tabs.List>
+            {cards.map((card) => (
+                <Tabs.Panel key={card.key} value={card.key} pt="md">
+                    {card.content}
+                </Tabs.Panel>
             ))}
-        </Stack>
+        </Tabs>
     );
+}
+
+function getRecipeTabLabel(recipe: KnowledgeEntityRelation, entity: KnowledgeEntityDetails | undefined, index: number, t: ReturnType<typeof useTranslate>): string {
+    const raw = entity?.raw;
+    const suffix = typeof raw?.id_suffix === "string" && raw.id_suffix.length > 0 ? raw.id_suffix.replaceAll("_", " ") : null;
+    if (suffix !== null) return suffix;
+    return t("knowledge.recipe.variant", { number: index + 1 });
 }
 
 function filterRelations(relations: KnowledgeEntityRelation[], kind: KnowledgeEntityRelation["kind"]): KnowledgeEntityRelation[] {

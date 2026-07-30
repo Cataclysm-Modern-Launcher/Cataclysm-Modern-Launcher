@@ -12,7 +12,7 @@ export function applyInheritanceOperations(value: TJsonRecord, canonicalType: st
     const unsupportedOperations: TInheritanceResolutionResult["unsupportedOperations"] = [];
 
     if (Object.hasOwn(value, "extend")) {
-        result = applyExtendOperation(result, value.extend);
+        result = applyExtendOperation(result, value.extend, canonicalType);
         appliedOperations.push("extend");
     }
     if (Object.hasOwn(value, "delete")) {

@@ -2,7 +2,7 @@ import { NumericOperation } from "../applyNumericOperation";
 import { TJsonRecord } from "../../types/TJsonRecord";
 import { cloneRecord } from "../../../utils/cloneRecord";
 import { isRecord } from "@shared/utils/isRecord";
-import { isString } from "@shared/utils/isString";
+import { readString } from "@shared/utils/readString";
 import { TStructuralOperationResult } from "./TStructuralOperationResult";
 
 const DAMAGE_FIELDS = ["amount", "damage_multiplier", "armor_penetration", "armor_multiplier", "constant_armor_multiplier", "constant_damage_multiplier"] as const;
@@ -15,7 +15,7 @@ export function applyDamageInstanceOperation(current: unknown, operand: unknown,
 
     const result = currentUnits.units.map((unit) => cloneRecord(unit));
     for (const operationUnit of operandUnits.units) {
-        const damageType = isString(operationUnit.damage_type);
+        const damageType = readString(operationUnit.damage_type);
         if (damageType === null) return { applied: false, reason: "type-mismatch" };
         const index = result.findIndex((unit) => unit.damage_type === damageType);
         if (index < 0) return { applied: false, reason: "missing-target" };

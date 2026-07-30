@@ -1,6 +1,8 @@
 import { Alert, Center, Loader, Stack, Text, Title } from "@mantine/core";
 import React, { useEffect, useRef, useState } from "react";
+import { KnowledgeEntityDetails } from "@shared/knowledge/KnowledgeEntityDetails";
 import { KnowledgeEntitySummary } from "@shared/knowledge/KnowledgeEntitySummary";
+import { KnowledgeEntityRelations } from "@shared/knowledge/KnowledgeEntityRelations";
 import { KnowledgeIndexStatus } from "@shared/knowledge/KnowledgeIndexStatus";
 import { useTranslate } from "@renderer/stores/useLocaleStore";
 import { KnowledgePage } from "./KnowledgePage";
@@ -58,9 +60,18 @@ export function KnowledgeContent(): React.JSX.Element {
     const loadPage = async (key: string, useGameLanguage: boolean): Promise<KnowledgePage | null> => {
         const [entity, relations] = await Promise.all([window.api.knowledge.getEntity(key, useGameLanguage), window.api.knowledge.getEntityRelations(key, useGameLanguage)]);
         if (entity === null) return null;
-        const relatedKeys = relations.incoming.filter((relation) => relation.entity.jsonType === "recipe" || relation.entity.jsonType === "uncraft").map((relation) => relation.entity.key);
-        const relatedRelations = await window.api.knowledge.getEntityRelationsBatch(relatedKeys, useGameLanguage);
-        return { entity, relations, relatedRelations };
+        const relatedKeys = [...new Set(relations.incoming.filter((relation) => relation.entity.jsonType === "recipe" || relation.entity.jsonType === "uncraft").map((relation) => relation.entity.key))];
+        const recipeRelations = await window.api.knowledge.getEntityRelationsBatch(relatedKeys, useGameLanguage);
+        const relatedRelations: Record<string, KnowledgeEntityRelations> = { ...recipeRelations };
+        let requirementKeys = findUnloadedRequirementKeys(Object.values(recipeRelations), relatedRelations);
+        while (requirementKeys.length > 0) {
+            const requirementRelations = await window.api.knowledge.getEntityRelationsBatch(requirementKeys, useGameLanguage);
+            Object.assign(relatedRelations, requirementRelations);
+            requirementKeys = findUnloadedRequirementKeys(Object.values(requirementRelations), relatedRelations);
+        }
+        const relatedEntityValues = await Promise.all(relatedKeys.map((relatedKey) => window.api.knowledge.getEntity(relatedKey, useGameLanguage)));
+        const relatedEntities = Object.fromEntries(relatedEntityValues.filter((value): value is KnowledgeEntityDetails => value !== null).map((value) => [value.key, value]));
+        return { entity, relations, relatedEntities, relatedRelations };
     };
     const openEntity = async (key: string): Promise<void> => {
         if (selected?.entity.key === key) return;
@@ -105,4 +116,15 @@ export function KnowledgeContent(): React.JSX.Element {
             onLocalizedChange={(value) => void changeLanguage(value)}
         />
     );
+}
+
+function findUnloadedRequirementKeys(relations: KnowledgeEntityRelations[], loaded: Record<string, KnowledgeEntityRelations>): string[] {
+    return [
+        ...new Set(
+            relations
+                .flatMap((value) => value.outgoing)
+                .filter((relation) => relation.kind === "uses-requirement" && loaded[relation.entity.key] === undefined)
+                .map((relation) => relation.entity.key)
+        )
+    ];
 }

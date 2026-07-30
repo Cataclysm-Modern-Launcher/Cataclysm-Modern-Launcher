@@ -1,6 +1,7 @@
 import { TResolvedKnowledgeDefinition } from "../../types/TResolvedKnowledgeDefinition";
 import { TKnowledgeRelationCandidate } from "../types/TKnowledgeRelationCandidate";
 import { extractRequirementRelations } from "./extractRequirementRelations";
+import { isRecord } from "@shared/utils/isRecord";
 
 export function extractRecipeRelations(definition: TResolvedKnowledgeDefinition, sourceKey: string): TKnowledgeRelationCandidate[] {
     const result = extractRequirementRelations(definition, sourceKey);
@@ -59,10 +60,28 @@ export function extractRecipeRelations(definition: TResolvedKnowledgeDefinition,
             }
         });
     }
+    if (Array.isArray(raw.proficiencies)) {
+        raw.proficiencies.forEach((entry, index) => {
+            if (!isRecord(entry) || typeof entry.proficiency !== "string") return;
+            result.push(
+                make(definition, sourceKey, "requires-proficiency", entry.proficiency, "proficiency", `proficiencies[${index}]`, {
+                    required: entry.required !== false,
+                    timeMultiplier: typeof entry.time_multiplier === "number" ? entry.time_multiplier : undefined,
+                    skillPenalty: typeof entry.skill_penalty === "number" ? entry.skill_penalty : undefined
+                })
+            );
+        });
+    }
+    if (Array.isArray(raw.book_learn)) {
+        raw.book_learn.forEach((entry, index) => {
+            if (!Array.isArray(entry) || typeof entry[0] !== "string") return;
+            result.push(make(definition, sourceKey, "learned-from", entry[0], "ITEM", `book_learn[${index}]`, { level: typeof entry[1] === "number" ? entry[1] : 0 }));
+        });
+    }
     if (Array.isArray(raw.using)) {
         raw.using.forEach((entry, index) => {
             if (Array.isArray(entry) && typeof entry[0] === "string") {
-                result.push(make(definition, sourceKey, "uses-requirement", entry[0], "requirement", `using[${index}]`, { multiplier: typeof entry[1] === "number" ? entry[1] : 1 }));
+                result.push(make(definition, sourceKey, "uses-requirement", entry[0], "requirement", `using[${index}]`, { multiplier: typeof entry[1] === "number" ? entry[1] : 1, groupKey: `using:${index}` }));
             }
         });
     }

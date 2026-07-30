@@ -17,7 +17,8 @@ export function extractRequirementRelations(definition: TResolvedKnowledgeDefini
                         level: typeof value.level === "number" ? value.level : 1,
                         count: typeof value.amount === "number" ? value.amount : 1,
                         groupIndex,
-                        alternativeIndex
+                        alternativeIndex,
+                        groupKey: `qualities:${groupIndex}`
                     })
                 );
             });
@@ -39,6 +40,7 @@ function extractTupleGroups(definition: TResolvedKnowledgeDefinition, sourceKey:
                 candidate(definition, sourceKey, requirementReference ? "uses-requirement" : kind, entry[0], [requirementReference ? "requirement" : "ITEM"], `${field}[${groupIndex}][${alternativeIndex}]`, {
                     groupIndex,
                     alternativeIndex,
+                    groupKey: `${field}:${groupIndex}`,
                     count: Math.abs(count),
                     consumed: field === "components" || count > 0,
                     countMode: field === "tools" && count > 0 ? "charges" : "items"

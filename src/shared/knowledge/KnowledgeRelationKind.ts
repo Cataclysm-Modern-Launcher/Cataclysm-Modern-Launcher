@@ -4,6 +4,8 @@ export type KnowledgeRelationKind =
     | "uses-tool"
     | "requires-quality"
     | "requires-skill"
+    | "requires-proficiency"
+    | "learned-from"
     | "uses-requirement"
     | "provides-quality"
     | "uncrafts-item"

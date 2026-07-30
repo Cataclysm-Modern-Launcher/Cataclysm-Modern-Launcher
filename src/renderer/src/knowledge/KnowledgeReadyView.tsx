@@ -48,8 +48,8 @@ export function KnowledgeReadyView(props: KnowledgeReadyViewProps): React.JSX.El
                                         size="md"
                                         checked={props.localized}
                                         onChange={(event) => props.onLocalizedChange(event.currentTarget.checked)}
-                                        onLabel="EN"
-                                        offLabel={props.status.language.gameLanguage.toUpperCase()}
+                                        offLabel="EN"
+                                        onLabel={props.status.language.gameLanguage.toUpperCase()}
                                     />
                                 </Tooltip>
                             )}
@@ -93,6 +93,7 @@ export function KnowledgeReadyView(props: KnowledgeReadyViewProps): React.JSX.El
                                 key={props.selected.entity.key}
                                 entity={props.selected.entity}
                                 relations={props.selected.relations}
+                                relatedEntities={props.selected.relatedEntities}
                                 relatedRelations={props.selected.relatedRelations}
                                 canGoBack={props.canGoBack}
                                 canGoForward={props.canGoForward}

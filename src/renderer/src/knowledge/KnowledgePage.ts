@@ -4,5 +4,6 @@ import { KnowledgeEntityRelations } from "@shared/knowledge/KnowledgeEntityRelat
 export type KnowledgePage = {
     entity: KnowledgeEntityDetails;
     relations: KnowledgeEntityRelations;
+    relatedEntities: Record<string, KnowledgeEntityDetails>;
     relatedRelations: Record<string, KnowledgeEntityRelations>;
 };
