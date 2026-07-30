@@ -11,7 +11,7 @@ import { useGameFileOperationStore } from "@renderer/stores/useGameFileOperation
 import { useGameBundleInstallStore } from "@renderer/stores/useGameBundleInstallStore";
 import { useGameBackupStore } from "@renderer/stores/useGameBackupStore";
 import { KnowledgeContent } from "@renderer/knowledge/KnowledgeContent";
-import { createTheme, MantineProvider, Switch } from "@mantine/core";
+import { createTheme, MantineProvider, Switch, Tooltip } from "@mantine/core";
 import { ModalsProvider } from "@mantine/modals";
 import { defaultModalProps } from "@renderer/utils/DefaultModalProps";
 import { contextModals } from "@renderer/modals/contextModals";
@@ -31,6 +31,11 @@ const theme = createTheme({
             classNames: {
                 root: classes.switchRoot,
                 track: classes.switchTrack
+            }
+        }),
+        Tooltip: Tooltip.extend({
+            defaultProps: {
+                openDelay: 300
             }
         })
     }

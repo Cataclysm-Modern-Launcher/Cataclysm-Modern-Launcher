@@ -13,6 +13,7 @@ export function buildKnowledgeGraph(definitions: TResolvedKnowledgeDefinition[])
         sourceModId: definition.sourceModId,
         sourceFile: definition.sourceFile
     }));
+    const definitionsByKey = new Map(definitions.map((definition) => [key(definition.canonicalType, definition.effectiveId), definition]));
     const aliases = new Map<string, string>();
     definitions.forEach((definition) => [definition.effectiveId, ...definition.effectiveAliases].forEach((id) => aliases.set(key(definition.canonicalType, id), key(definition.canonicalType, definition.effectiveId))));
     const itemMigrations = buildItemMigrationMap(definitions);
@@ -59,6 +60,7 @@ export function buildKnowledgeGraph(definitions: TResolvedKnowledgeDefinition[])
         if (targetKey === undefined) unresolved.push(candidate);
         else {
             const kind = resolvedTargetType === undefined ? candidate.kind : (candidate.resolvedKindsByTargetType?.[resolvedTargetType] ?? candidate.kind);
+            metadata = resolveMetadata(kind, metadata, definitionsByKey.get(targetKey));
             edges.push({ sourceKey: candidate.sourceKey, targetKey, kind, metadata });
         }
     }
@@ -70,4 +72,22 @@ export function buildKnowledgeGraph(definitions: TResolvedKnowledgeDefinition[])
 
 function key(type: string, id: string): string {
     return `${type}:${id}`;
+}
+
+function resolveMetadata(kind: TKnowledgeGraph["edges"][number]["kind"], metadata: Record<string, unknown>, target: TResolvedKnowledgeDefinition | undefined): Record<string, unknown> {
+    if (kind !== "requires-proficiency" || metadata.required === true) return metadata;
+
+    const raw = target?.raw;
+    const recipeTimeMultiplier = typeof metadata.timeMultiplier === "number" ? metadata.timeMultiplier : 0;
+    const recipeSkillPenalty = typeof metadata.skillPenalty === "number" ? metadata.skillPenalty : undefined;
+
+    return {
+        ...metadata,
+        timeMultiplier: recipeTimeMultiplier === 0 ? readNumber(raw?.default_time_multiplier, 2) : recipeTimeMultiplier,
+        skillPenalty: recipeSkillPenalty ?? readNumber(raw?.default_skill_penalty, 1)
+    };
+}
+
+function readNumber(value: unknown, fallback: number): number {
+    return typeof value === "number" ? value : fallback;
 }

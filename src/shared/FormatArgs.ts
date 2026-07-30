@@ -1,1 +1,1 @@
-export type FormatArgs = Record<string, string | number>;
+export type FormatArgs = Record<string, string | number | null>;

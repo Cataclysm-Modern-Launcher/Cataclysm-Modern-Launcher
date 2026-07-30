@@ -21,6 +21,9 @@ import { TKnowledgeGraphNode } from "./graph/types/TKnowledgeGraphNode";
 import { isKnowledgeEntitySearchable } from "./isKnowledgeEntitySearchable";
 import { KnowledgeTranslationService } from "./KnowledgeTranslationService";
 import { KnowledgeLanguageInfo } from "@shared/knowledge/KnowledgeLanguageInfo";
+import { KnowledgeRecipeRequirements } from "@shared/knowledge/KnowledgeRecipeRequirements";
+import { KnowledgeRecipeRequirementGroup } from "@shared/knowledge/KnowledgeRecipeRequirementGroup";
+import { KnowledgeRecipeRequirementAlternative } from "@shared/knowledge/KnowledgeRecipeRequirementAlternative";
 
 class KnowledgeService {
     private context: TKnowledgeIndexContext | null = null;
@@ -215,8 +218,74 @@ class KnowledgeService {
     }
 
     private localizeEntity(entity: KnowledgeEntityDetails, localized: boolean): KnowledgeEntityDetails {
-        if (!localized) return entity;
-        return { ...this.localizeSummary(entity, true), sourceFile: entity.sourceFile, raw: this.translations.translateValue(entity.raw) as Record<string, unknown> };
+        const localizedEntity = localized
+            ? { ...this.localizeSummary(entity, true), sourceFile: entity.sourceFile, raw: this.translations.translateValue(entity.raw) as Record<string, unknown> }
+            : entity;
+        if (entity.jsonType !== "recipe" && entity.jsonType !== "uncraft") return localizedEntity;
+        return { ...localizedEntity, recipeRequirements: this.buildRecipeRequirements(entity.key, localized) };
+    }
+
+    private buildRecipeRequirements(recipeKey: string, localized: boolean): KnowledgeRecipeRequirements {
+        const toolsAndQualities = new Map<string, KnowledgeRecipeRequirementAlternative[]>();
+        const components = new Map<string, KnowledgeRecipeRequirementAlternative[]>();
+        const recoveredComponents = new Map<string, KnowledgeRecipeRequirementAlternative[]>();
+
+        const appendEdge = (edge: TKnowledgeGraphEdge, groupKey: string, multiplier: number): void => {
+            const target =
+                edge.kind === "uses-tool" || edge.kind === "requires-quality"
+                    ? toolsAndQualities
+                    : edge.kind === "uses-component"
+                      ? components
+                      : edge.kind === "recovers-component"
+                        ? recoveredComponents
+                        : null;
+            if (target === null) return;
+            const count = readFiniteNumber(edge.metadata.count);
+            const metadata = {
+                ...edge.metadata,
+                groupKey,
+                count: count === null || edge.kind === "requires-quality" ? edge.metadata.count : count * multiplier
+            };
+            const alternative: KnowledgeRecipeRequirementAlternative = {
+                kind: edge.kind,
+                entity: this.getEntityReference(edge.targetKey, localized),
+                metadata
+            };
+            const values = target.get(groupKey) ?? [];
+            values.push(alternative);
+            target.set(groupKey, values);
+        };
+
+        const visitRequirement = (requirementKey: string, multiplier: number, path: string, visited: Set<string>): void => {
+            if (visited.has(requirementKey)) return;
+            const nextVisited = new Set(visited).add(requirementKey);
+            for (const [index, edge] of (this.outgoingEdgesByKey.get(requirementKey) ?? []).entries()) {
+                const localGroup = readMetadataString(edge.metadata.groupKey) ?? `${edge.kind}:${index}`;
+                const nestedPath = `${path}/${localGroup}`;
+                if (edge.kind === "uses-requirement") {
+                    visitRequirement(edge.targetKey, multiplier * (readFiniteNumber(edge.metadata.multiplier) ?? readFiniteNumber(edge.metadata.count) ?? 1), nestedPath, nextVisited);
+                } else {
+                    appendEdge(edge, nestedPath, multiplier);
+                }
+            }
+        };
+
+        for (const [index, edge] of (this.outgoingEdgesByKey.get(recipeKey) ?? []).entries()) {
+            const localGroup = readMetadataString(edge.metadata.groupKey) ?? `${edge.kind}:${index}`;
+            if (edge.kind === "uses-requirement") {
+                const alternativeIndex = readFiniteNumber(edge.metadata.alternativeIndex);
+                const path = `${localGroup}:${edge.targetKey}${alternativeIndex === null ? "" : `:${alternativeIndex}`}`;
+                visitRequirement(edge.targetKey, readFiniteNumber(edge.metadata.multiplier) ?? readFiniteNumber(edge.metadata.count) ?? 1, path, new Set());
+            } else {
+                appendEdge(edge, localGroup, 1);
+            }
+        }
+
+        return {
+            toolsAndQualities: toRequirementGroups(toolsAndQualities),
+            components: toRequirementGroups(components),
+            recoveredComponents: toRequirementGroups(recoveredComponents)
+        };
     }
 
     private setIndex(index: TKnowledgeIndex): void {
@@ -258,6 +327,22 @@ class KnowledgeService {
         };
     }
 }
+
+function toRequirementGroups(groups: Map<string, KnowledgeRecipeRequirementAlternative[]>): KnowledgeRecipeRequirementGroup[] {
+    return [...groups.entries()].map(([key, alternatives]) => ({
+        key,
+        alternatives: alternatives.sort((left, right) => (readFiniteNumber(left.metadata.alternativeIndex) ?? 0) - (readFiniteNumber(right.metadata.alternativeIndex) ?? 0))
+    }));
+}
+
+function readFiniteNumber(value: unknown): number | null {
+    return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function readMetadataString(value: unknown): string | null {
+    return typeof value === "string" && value.length > 0 ? value : null;
+}
+
 
 function append<TKey, TValue>(map: Map<TKey, TValue[]>, key: TKey, value: TValue): void {
     const values = map.get(key);

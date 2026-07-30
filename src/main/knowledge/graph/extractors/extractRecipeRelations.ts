@@ -65,9 +65,14 @@ export function extractRecipeRelations(definition: TResolvedKnowledgeDefinition,
             if (!isRecord(entry) || typeof entry.proficiency !== "string") return;
             result.push(
                 make(definition, sourceKey, "requires-proficiency", entry.proficiency, "proficiency", `proficiencies[${index}]`, {
-                    required: entry.required !== false,
+                    required: entry.required === true,
                     timeMultiplier: typeof entry.time_multiplier === "number" ? entry.time_multiplier : undefined,
-                    skillPenalty: typeof entry.skill_penalty === "number" ? entry.skill_penalty : undefined
+                    skillPenalty:
+                        typeof entry.skill_penalty === "number"
+                            ? entry.skill_penalty
+                            : typeof entry.fail_multiplier === "number"
+                              ? entry.fail_multiplier - 1
+                              : undefined
                 })
             );
         });
