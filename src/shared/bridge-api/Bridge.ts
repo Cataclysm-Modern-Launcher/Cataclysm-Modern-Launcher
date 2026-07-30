@@ -69,6 +69,8 @@ export const Bridge = {
         getStatus: "knowledge:get-status",
         searchEntities: "knowledge:search-entities",
         getEntity: "knowledge:get-entity",
+        getEntityRelations: "knowledge:get-entity-relations",
+        getEntityRelationsBatch: "knowledge:get-entity-relations-batch",
         rebuild: "knowledge:rebuild",
         statusChanged: "knowledge:status-changed"
     },

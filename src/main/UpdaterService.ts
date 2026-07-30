@@ -2,9 +2,9 @@ import { is } from "@electron-toolkit/utils";
 import { app, ipcMain } from "electron";
 import { autoUpdater, ProgressInfo, UpdateInfo } from "electron-updater";
 
-import { Bridge } from "../shared/bridge-api/Bridge";
-import { UpdateState } from "../shared/bridge-api/types/UpdateState";
-import { LocaleKeys } from "../shared/localization/types/LocaleFile";
+import { Bridge } from "@shared/bridge-api/Bridge";
+import { UpdateState } from "@shared/bridge-api/types/UpdateState";
+import { LocaleKeys } from "@shared/localization/types/LocaleFile";
 import { translate } from "./LocalizationService";
 import { broadcastIPC } from "./utils/broadcastIPC";
 

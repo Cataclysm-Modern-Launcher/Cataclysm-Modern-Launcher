@@ -1,23 +1,27 @@
 import React from "react";
 import { ActionIcon, AppShell, Badge, Box, Center, Group, ScrollArea, Stack, Text, TextInput, Title, Tooltip } from "@mantine/core";
 import { IconRefresh, IconSearch } from "@tabler/icons-react";
-import { KnowledgeEntityDetails } from "@shared/knowledge/KnowledgeEntityDetails";
 import { KnowledgeEntitySummary } from "@shared/knowledge/KnowledgeEntitySummary";
 import { KnowledgeIndexStatus } from "@shared/knowledge/KnowledgeIndexStatus";
 import { useTranslate } from "@renderer/stores/useLocaleStore";
 import { KnowledgeCategorySelect } from "./KnowledgeCategorySelect";
 import { KnowledgeEntityCard } from "./KnowledgeEntityCard";
 import { KnowledgeEntityDetailsView } from "./KnowledgeEntityDetailsView";
+import { KnowledgePage } from "./KnowledgePage";
 
 export type KnowledgeReadyViewProps = {
     status: Extract<KnowledgeIndexStatus, { status: "ready" }>;
     query: string;
     category: string | null;
     entities: KnowledgeEntitySummary[];
-    selected: KnowledgeEntityDetails | null;
+    selected: KnowledgePage | null;
+    canGoBack: boolean;
+    canGoForward: boolean;
     onQueryChange: (value: string) => void;
     onCategoryChange: (value: string | null) => void;
     onOpen: (key: string) => void;
+    onBack: () => void;
+    onForward: () => void;
     onRebuild: () => void;
 };
 
@@ -61,7 +65,17 @@ export function KnowledgeReadyView(props: KnowledgeReadyViewProps): React.JSX.El
                 ) : (
                     <ScrollArea h="100%" offsetScrollbars>
                         <Box p="md">
-                            <KnowledgeEntityDetailsView entity={props.selected} />
+                            <KnowledgeEntityDetailsView
+                                key={props.selected.entity.key}
+                                entity={props.selected.entity}
+                                relations={props.selected.relations}
+                                relatedRelations={props.selected.relatedRelations}
+                                canGoBack={props.canGoBack}
+                                canGoForward={props.canGoForward}
+                                onOpen={props.onOpen}
+                                onBack={props.onBack}
+                                onForward={props.onForward}
+                            />
                         </Box>
                     </ScrollArea>
                 )}

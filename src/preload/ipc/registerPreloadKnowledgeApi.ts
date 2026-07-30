@@ -10,6 +10,8 @@ export function registerPreloadKnowledgeApi(): KnowledgeApi {
         getStatus: () => ipcRenderer.invoke(Bridge.Knowledge.getStatus),
         searchEntities: (query, category, limit) => ipcRenderer.invoke(Bridge.Knowledge.searchEntities, query, category, limit),
         getEntity: (key) => ipcRenderer.invoke(Bridge.Knowledge.getEntity, key),
+        getEntityRelations: (key) => ipcRenderer.invoke(Bridge.Knowledge.getEntityRelations, key),
+        getEntityRelationsBatch: (keys) => ipcRenderer.invoke(Bridge.Knowledge.getEntityRelationsBatch, keys),
         onStatusChanged: (callback) => {
             const listener = (_event: IpcRendererEvent, status: KnowledgeIndexStatus): void => callback(status);
             ipcRenderer.on(Bridge.Knowledge.statusChanged, listener);

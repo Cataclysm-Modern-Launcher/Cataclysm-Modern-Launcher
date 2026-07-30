@@ -1,16 +1,16 @@
 import { app, ipcMain } from "electron";
 
 import { appSettings } from "./settings/AppSettings";
-import { LocaleOption } from "../shared/localization/types/LocaleOption";
-import { LocalizationBundle } from "../shared/localization/types/LocalizationBundle";
-import { FormatArgs } from "../shared/FormatArgs";
-import { mergeMessages } from "../shared/localization/mergeMessages";
-import { formatMessage } from "../shared/formatMessage";
-import { Bridge } from "../shared/bridge-api/Bridge";
-import { EN_LOCALE } from "../shared/localization/locales/en";
-import { RU_LOCALE } from "../shared/localization/locales/ru";
-import { LocaleFile } from "../shared/localization/types/LocaleFile";
-import { LocaleMessages } from "../shared/localization/types/LocaleMessages";
+import { LocaleOption } from "@shared/localization/types/LocaleOption";
+import { LocalizationBundle } from "@shared/localization/types/LocalizationBundle";
+import { FormatArgs } from "@shared/FormatArgs";
+import { mergeMessages } from "@shared/localization/mergeMessages";
+import { formatMessage } from "@shared/formatMessage";
+import { Bridge } from "@shared/bridge-api/Bridge";
+import { EN_LOCALE } from "@shared/localization/locales/en";
+import { RU_LOCALE } from "@shared/localization/locales/ru";
+import { LocaleFile } from "@shared/localization/types/LocaleFile";
+import { LocaleMessages } from "@shared/localization/types/LocaleMessages";
 import { broadcastIPC } from "./utils/broadcastIPC";
 
 const FALLBACK_LOCALE = EN_LOCALE.locale;

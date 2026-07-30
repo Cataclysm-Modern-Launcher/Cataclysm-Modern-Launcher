@@ -1,10 +1,17 @@
 import { Alert, Center, Loader, Stack, Text, Title } from "@mantine/core";
 import React, { useEffect, useState } from "react";
-import { KnowledgeEntityDetails } from "@shared/knowledge/KnowledgeEntityDetails";
 import { KnowledgeEntitySummary } from "@shared/knowledge/KnowledgeEntitySummary";
 import { KnowledgeIndexStatus } from "@shared/knowledge/KnowledgeIndexStatus";
 import { useTranslate } from "@renderer/stores/useLocaleStore";
+import { KnowledgePage } from "./KnowledgePage";
 import { KnowledgeReadyView } from "./KnowledgeReadyView";
+
+type NavigationState = {
+    entries: KnowledgePage[];
+    index: number;
+};
+
+const emptyNavigation: NavigationState = { entries: [], index: -1 };
 
 export function KnowledgeContent(): React.JSX.Element {
     const t = useTranslate();
@@ -12,7 +19,7 @@ export function KnowledgeContent(): React.JSX.Element {
     const [query, setQuery] = useState("");
     const [category, setCategory] = useState<string | null>(null);
     const [entities, setEntities] = useState<KnowledgeEntitySummary[]>([]);
-    const [selected, setSelected] = useState<KnowledgeEntityDetails | null>(null);
+    const [navigation, setNavigation] = useState<NavigationState>(emptyNavigation);
 
     useEffect(() => {
         void window.api.knowledge.getStatus().then(setStatus);
@@ -44,13 +51,24 @@ export function KnowledgeContent(): React.JSX.Element {
             </Center>
         );
 
-    const openEntity = async (key: string): Promise<void> => setSelected(await window.api.knowledge.getEntity(key));
+    const selected = navigation.index >= 0 ? navigation.entries[navigation.index] : null;
+    const openEntity = async (key: string): Promise<void> => {
+        if (selected?.entity.key === key) return;
+        const [entity, relations] = await Promise.all([window.api.knowledge.getEntity(key), window.api.knowledge.getEntityRelations(key)]);
+        if (entity === null) return;
+        const relatedKeys = relations.incoming
+            .filter((relation) => relation.entity.jsonType === "recipe" || relation.entity.jsonType === "uncraft")
+            .map((relation) => relation.entity.key);
+        const relatedRelations = await window.api.knowledge.getEntityRelationsBatch(relatedKeys);
+        setNavigation((current) => ({ entries: [...current.entries.slice(0, current.index + 1), { entity, relations, relatedRelations }], index: current.index + 1 }));
+    };
     const rebuild = async (): Promise<void> => {
-        setSelected(null);
+        setNavigation(emptyNavigation);
         setEntities([]);
         setStatus({ status: "building", processedFiles: 0, totalFiles: 0 });
         await window.api.knowledge.rebuild();
     };
+
     return (
         <KnowledgeReadyView
             status={status}
@@ -58,9 +76,13 @@ export function KnowledgeContent(): React.JSX.Element {
             category={category}
             entities={entities}
             selected={selected}
+            canGoBack={navigation.index > 0}
+            canGoForward={navigation.index >= 0 && navigation.index < navigation.entries.length - 1}
             onQueryChange={setQuery}
             onCategoryChange={setCategory}
             onOpen={(key) => void openEntity(key)}
+            onBack={() => setNavigation((current) => ({ ...current, index: Math.max(0, current.index - 1) }))}
+            onForward={() => setNavigation((current) => ({ ...current, index: Math.min(current.entries.length - 1, current.index + 1) }))}
             onRebuild={() => void rebuild()}
         />
     );

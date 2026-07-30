@@ -1,5 +1,5 @@
-import { GameBundle } from "../shared/game-bundle/GameBundle";
-import { GameSaveSummary } from "../shared/GameSaveSummary";
+import { GameBundle } from "@shared/game-bundle/GameBundle";
+import { GameSaveSummary } from "@shared/GameSaveSummary";
 
 export type GameBackupContext = {
     gameBundle: GameBundle;
