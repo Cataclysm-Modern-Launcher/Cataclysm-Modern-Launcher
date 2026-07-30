@@ -1,4 +1,4 @@
-import { TJsonRecord } from "../types/TJsonRecord";
+import { TJsonRecord } from "@shared/TJsonRecord";
 
 export function readStringField(value: TJsonRecord, field: string): string | null {
     const candidate = value[field];

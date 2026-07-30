@@ -1,4 +1,4 @@
-import { TJsonRecord } from "../types/TJsonRecord";
+import { TJsonRecord } from "@shared/TJsonRecord";
 
 const OPERATION_FIELDS = new Set(["extend", "delete", "relative", "proportional"]);
 

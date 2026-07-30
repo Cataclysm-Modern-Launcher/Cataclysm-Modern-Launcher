@@ -6,9 +6,11 @@ import { KnowledgeEntityRelations } from "@shared/knowledge/KnowledgeEntityRelat
 import { readNumber } from "@shared/utils/readNumber";
 import { Anchor, Badge, Button, Group, Loader, Modal, Stack, Text } from "@mantine/core";
 import { IconTool } from "@tabler/icons-react";
+import { useKnowledgeNavigate } from "@renderer/stores/useKnowledgeNavigationStore";
 
-export function KnowledgeQualityRequirementBadge({ alternative, onOpen }: { alternative: KnowledgeRecipeRequirementAlternative; onOpen: (key: string) => void }): React.JSX.Element {
+export function KnowledgeQualityRequirementBadge({ alternative }: { alternative: KnowledgeRecipeRequirementAlternative }): React.JSX.Element {
     const t = useTranslate();
+    const openEntity = useKnowledgeNavigate();
     const [opened, { open, close }] = useDisclosure(false);
     const [relations, setRelations] = useState<KnowledgeEntityRelations | null>(null);
     const level = readNumber(alternative.metadata.level) ?? 1;
@@ -16,7 +18,8 @@ export function KnowledgeQualityRequirementBadge({ alternative, onOpen }: { alte
 
     useEffect(() => {
         if (!opened || relations !== null) return;
-        void window.api.knowledge.getEntityRelations(alternative.entity.key, true).then(setRelations);
+        const localized = localStorage.getItem("knowledge.use-game-language") !== "false";
+        void window.api.knowledge.getEntityRelations(alternative.entity.key, localized).then(setRelations);
     }, [alternative.entity.key, opened, relations]);
 
     const providers = (relations?.incoming ?? [])
@@ -24,7 +27,7 @@ export function KnowledgeQualityRequirementBadge({ alternative, onOpen }: { alte
         .sort((left, right) => left.entity.name.localeCompare(right.entity.name));
     const navigate = (key: string): void => {
         close();
-        onOpen(key);
+        openEntity(key);
     };
 
     return (
@@ -38,6 +41,7 @@ export function KnowledgeQualityRequirementBadge({ alternative, onOpen }: { alte
                     </Text>
                 </Group>
             </Badge>
+
             <Modal opened={opened} onClose={close} title={t("knowledge.recipe.quality.providers.title", { quality: alternative.entity.name, level })} size="lg">
                 <Stack gap="md">
                     <Anchor component="button" type="button" w="fit-content" onClick={() => navigate(alternative.entity.key)}>

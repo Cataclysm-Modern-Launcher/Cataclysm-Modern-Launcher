@@ -1,7 +1,7 @@
 import { TKnowledgeDefinitionIdentity } from "./types/TKnowledgeDefinitionIdentity";
 import { TInheritanceResolutionResult } from "./resolution/TInheritanceResolutionResult";
 import { TKnowledgeScanSummary } from "./types/TKnowledgeScanSummary";
-import { TJsonRecord } from "./types/TJsonRecord";
+import { TJsonRecord } from "@shared/TJsonRecord";
 import { TScannedKnowledgeDefinition } from "./types/TScannedKnowledgeDefinition";
 import { TIdentifiedKnowledgeDefinition } from "./types/TIdentifiedKnowledgeDefinition";
 import { TResolvedKnowledgeDefinition } from "./types/TResolvedKnowledgeDefinition";

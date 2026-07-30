@@ -8,12 +8,12 @@ export class KnowledgeTranslationService {
     private language = "en";
     private readonly translations = new Map<string, string>();
 
-    getLanguage(): string {
-        return this.language;
-    }
-
     get hasTranslation(): boolean {
         return this.language !== "en" && this.translations.size > 0;
+    }
+
+    getLanguage(): string {
+        return this.language;
     }
 
     async load(bundlePath: string, userdataPath: string): Promise<void> {

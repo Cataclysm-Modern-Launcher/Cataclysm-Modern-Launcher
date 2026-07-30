@@ -1,7 +1,7 @@
 import { TKnowledgeDefinitionIdentity } from "./TKnowledgeDefinitionIdentity";
 import { TResolvedKnowledgeIdentity } from "./TResolvedKnowledgeIdentity";
 import { TKnowledgeDefinitionCardinality } from "./TKnowledgeDefinitionCardinality";
-import { TJsonRecord } from "./TJsonRecord";
+import { TJsonRecord } from "@shared/TJsonRecord";
 import { TScannedKnowledgeDefinition } from "./TScannedKnowledgeDefinition";
 import { TResolvedKnowledgeDefinition } from "./TResolvedKnowledgeDefinition";
 

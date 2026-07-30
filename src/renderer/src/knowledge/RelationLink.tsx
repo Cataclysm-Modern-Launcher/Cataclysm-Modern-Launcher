@@ -3,12 +3,13 @@ import { readNumber } from "@shared/utils/readNumber";
 import { readString } from "@shared/utils/readString";
 import React, { ReactNode } from "react";
 import { Anchor, AnchorProps, Badge, Group, Text, Tooltip } from "@mantine/core";
-import { IconBook2, IconBrain, IconClock, IconProps, IconRecycle, IconRosette, IconTool } from "@tabler/icons-react";
+import { IconBook2, IconBrain, IconClock, IconProps, IconRecycle, IconRosette } from "@tabler/icons-react";
 import { useTranslate } from "@renderer/stores/useLocaleStore";
+import { useKnowledgeNavigate } from "@renderer/stores/useKnowledgeNavigationStore";
+import { KnowledgeQualityRequirementBadge } from "./KnowledgeQualityRequirementBadge";
 
 interface Props extends AnchorProps {
     relation: KnowledgeEntityRelation;
-    onOpen: (key: string) => void;
     iconClass?: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<SVGSVGElement>>;
 }
 
@@ -70,20 +71,7 @@ export function RelationLink(props: Props): React.JSX.Element {
     }
 
     if (relation.kind === "requires-quality") {
-        const level = readNumber(relation.metadata.level) ?? 1;
-        // haha yes, this is a thing. recipe can require multiple of the same quality.
-        const amount = readNumber(relation.metadata.count) ?? 1;
-        return (
-            <Wrap {...props}>
-                <Group gap={2} wrap="nowrap">
-                    {(!!iconClass && React.createElement(iconClass, iconProps)) || <IconTool {...iconProps} />}
-                    {amount > 1 ? <Text>{amount}× </Text> : null}
-                    <Text size="xs">
-                        {relation.entity.name} {level}
-                    </Text>
-                </Group>
-            </Wrap>
-        );
+        return <KnowledgeQualityRequirementBadge alternative={{ kind: relation.kind, entity: relation.entity, metadata: relation.metadata }} />;
     }
 
     if (relation.kind === "learned-from") {
@@ -169,14 +157,15 @@ export function RelationLink(props: Props): React.JSX.Element {
     );
 }
 
-function Wrap({ relation, onOpen, iconClass, children, tooltip, ...props }: Props & { children: ReactNode; tooltip?: string }): React.JSX.Element {
+function Wrap({ relation, iconClass, children, tooltip, ...props }: Props & { children: ReactNode; tooltip?: string }): React.JSX.Element {
     void iconClass;
+    const navigate = useKnowledgeNavigate();
     const content = relation.entity.virtual ? (
         <Text size="sm" {...props}>
             {children}
         </Text>
     ) : (
-        <Anchor component="button" type="button" size="sm" onClick={() => onOpen(relation.entity.key)} {...props}>
+        <Anchor component="button" type="button" size="sm" onClick={() => navigate(relation.entity.key)} {...props}>
             {children}
         </Anchor>
     );

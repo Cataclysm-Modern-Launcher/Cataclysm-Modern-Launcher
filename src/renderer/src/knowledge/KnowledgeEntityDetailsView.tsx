@@ -7,23 +7,24 @@ import { KnowledgeEntityRelations } from "@shared/knowledge/KnowledgeEntityRelat
 import React, { useState } from "react";
 import { KnowledgeJsonModal } from "./KnowledgeJsonModal";
 import { KnowledgeRecipeCard } from "./KnowledgeRecipeCard";
+import { KnowledgeItemDestructionView } from "./KnowledgeItemDestructionView";
+import { useKnowledgeNavigationStore } from "@renderer/stores/useKnowledgeNavigationStore";
+import { KnowledgeQualityRequirementBadge } from "./KnowledgeQualityRequirementBadge";
 
 export type KnowledgeEntityDetailsViewProps = {
     entity: KnowledgeEntityDetails;
     relations: KnowledgeEntityRelations;
     relatedEntities: Record<string, KnowledgeEntityDetails>;
     relatedRelations: Record<string, KnowledgeEntityRelations>;
-    canGoBack: boolean;
-    canGoForward: boolean;
-    onOpen: (key: string) => void;
-    onBack: () => void;
-    onForward: () => void;
 };
 
 export function KnowledgeEntityDetailsView(props: KnowledgeEntityDetailsViewProps): React.JSX.Element {
     const t = useTranslate();
+    const navigation = useKnowledgeNavigationStore();
+    const current = navigation.entries[navigation.index];
     const recipes = filterRelations(props.relations.incoming, "produces");
-    const disassembly = filterRelations(props.relations.incoming, "uncrafts-item");
+    const destruction = props.entity.itemDestruction?.actions ?? [];
+    const obtainedFrom = props.entity.itemDestruction?.obtainedFrom ?? [];
     const usedIn = props.relations.incoming.filter((relation) => relation.kind === "uses-component" || relation.kind === "uses-tool");
     const qualities = filterRelations(props.relations.outgoing, "provides-quality");
     const isItem = props.entity.jsonType === "ITEM";
@@ -33,10 +34,10 @@ export function KnowledgeEntityDetailsView(props: KnowledgeEntityDetailsViewProp
         <Stack gap="md" pb="xl">
             <Group align="flex-start" wrap="nowrap">
                 <Group gap={4} mt={4} wrap="nowrap">
-                    <ActionIcon variant="subtle" disabled={!props.canGoBack} onClick={props.onBack}>
+                    <ActionIcon variant="subtle" disabled={navigation.index <= 0} onClick={navigation.back}>
                         <IconArrowLeft size={18} />
                     </ActionIcon>
-                    <ActionIcon variant="subtle" disabled={!props.canGoForward} onClick={props.onForward}>
+                    <ActionIcon variant="subtle" disabled={navigation.index < 0 || navigation.index >= navigation.entries.length - 1} onClick={navigation.forward}>
                         <IconArrowRight size={18} />
                     </ActionIcon>
                 </Group>
@@ -78,11 +79,12 @@ export function KnowledgeEntityDetailsView(props: KnowledgeEntityDetailsViewProp
                 </Stack>
             </Group>
 
-            <Tabs defaultValue="info" keepMounted={false}>
+            <Tabs value={current?.tab ?? "info"} onChange={(value) => navigation.setTab(value ?? "info")} keepMounted={false}>
                 <Tabs.List>
                     <Tabs.Tab value="info">{t("knowledge.tabs.info")}</Tabs.Tab>
                     {isItem && recipes.length > 0 && <Tabs.Tab value="recipes">{t("knowledge.tabs.recipes", { count: recipes.length })}</Tabs.Tab>}
-                    {isItem && disassembly.length > 0 && <Tabs.Tab value="disassembly">{t("knowledge.tabs.disassembly", { count: disassembly.length })}</Tabs.Tab>}
+                    {isItem && destruction.length > 0 && <Tabs.Tab value="destruction">{t("knowledge.tabs.destruction", { count: destruction.length })}</Tabs.Tab>}
+                    {isItem && obtainedFrom.length > 0 && <Tabs.Tab value="obtainedFrom">{t("knowledge.tabs.obtained.from", { count: obtainedFrom.length })}</Tabs.Tab>}
                     {isItem && usedIn.length > 0 && <Tabs.Tab value="usedIn">{t("knowledge.tabs.used.in", { count: usedIn.length })}</Tabs.Tab>}
                 </Tabs.List>
 
@@ -100,9 +102,7 @@ export function KnowledgeEntityDetailsView(props: KnowledgeEntityDetailsViewProp
                                     {t("knowledge.entity.qualities")}:
                                 </Text>
                                 {qualities.map((quality) => (
-                                    <Badge size="md" key={quality.entity.key} variant="outline" style={{ cursor: "pointer", textTransform: "none" }} onClick={() => props.onOpen(quality.entity.key)}>
-                                        {quality.entity.name} {readNumber(quality.metadata.level) ?? 1}
-                                    </Badge>
+                                    <KnowledgeQualityRequirementBadge key={quality.entity.key} alternative={{ kind: "requires-quality", entity: quality.entity, metadata: quality.metadata }} />
                                 ))}
                             </Group>
                         )}
@@ -111,19 +111,25 @@ export function KnowledgeEntityDetailsView(props: KnowledgeEntityDetailsViewProp
 
                 {isItem && recipes.length > 0 && (
                     <Tabs.Panel value="recipes" pt="md">
-                        <RecipeList recipes={recipes} relatedEntities={props.relatedEntities} relatedRelations={props.relatedRelations} onOpen={props.onOpen} />
+                        <RecipeList recipes={recipes} relatedEntities={props.relatedEntities} relatedRelations={props.relatedRelations} />
                     </Tabs.Panel>
                 )}
 
-                {isItem && disassembly.length > 0 && (
-                    <Tabs.Panel value="disassembly" pt="md">
-                        <RecipeList recipes={disassembly} relatedEntities={props.relatedEntities} relatedRelations={props.relatedRelations} onOpen={props.onOpen} />
+                {isItem && destruction.length > 0 && (
+                    <Tabs.Panel value="destruction" pt="md">
+                        <KnowledgeItemDestructionView actions={destruction} />
+                    </Tabs.Panel>
+                )}
+
+                {isItem && obtainedFrom.length > 0 && (
+                    <Tabs.Panel value="obtainedFrom" pt="md">
+                        <KnowledgeItemDestructionView actions={obtainedFrom} compactSources />
                     </Tabs.Panel>
                 )}
 
                 {isItem && usedIn.length > 0 && (
                     <Tabs.Panel value="usedIn" pt="md">
-                        <RecipeList recipes={usedIn} relatedEntities={props.relatedEntities} relatedRelations={props.relatedRelations} onOpen={props.onOpen} />
+                        <RecipeList recipes={usedIn} relatedEntities={props.relatedEntities} relatedRelations={props.relatedRelations} />
                     </Tabs.Panel>
                 )}
             </Tabs>
@@ -135,19 +141,17 @@ export function KnowledgeEntityDetailsView(props: KnowledgeEntityDetailsViewProp
 function RecipeList({
     recipes,
     relatedEntities,
-    relatedRelations,
-    onOpen
+    relatedRelations
 }: {
     recipes: KnowledgeEntityRelation[];
     relatedEntities: Record<string, KnowledgeEntityDetails>;
     relatedRelations: Record<string, KnowledgeEntityRelations>;
-    onOpen: (key: string) => void;
 }): React.JSX.Element {
     const t = useTranslate();
     const cards = recipes.map((recipe, index) => ({
         key: `${recipe.entity.key}:${index}`,
         label: getRecipeTabLabel(relatedEntities[recipe.entity.key], index, t),
-        content: <KnowledgeRecipeCard recipe={recipe} entity={relatedEntities[recipe.entity.key]} relations={relatedRelations[recipe.entity.key]} onOpen={onOpen} />
+        content: <KnowledgeRecipeCard recipe={recipe} entity={relatedEntities[recipe.entity.key]} relations={relatedRelations[recipe.entity.key]} />
     }));
 
     if (cards.length === 1) return cards[0].content;
@@ -179,8 +183,4 @@ function getRecipeTabLabel(entity: KnowledgeEntityDetails | undefined, index: nu
 
 function filterRelations(relations: KnowledgeEntityRelation[], kind: KnowledgeEntityRelation["kind"]): KnowledgeEntityRelation[] {
     return relations.filter((relation) => relation.kind === kind);
-}
-
-function readNumber(value: unknown): number | null {
-    return typeof value === "number" && Number.isFinite(value) ? value : null;
 }

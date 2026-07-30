@@ -1,5 +1,5 @@
 import { NumericOperation } from "../applyNumericOperation";
-import { TJsonRecord } from "../../types/TJsonRecord";
+import { TJsonRecord } from "@shared/TJsonRecord";
 import { isNumericRecord } from "@shared/utils/isNumericRecord";
 import { transformJsonRecord } from "../../../utils/transformJsonRecord";
 import { TStructuralOperationResult } from "./TStructuralOperationResult";

@@ -1,5 +1,5 @@
 import { deepEqual } from "../utils/deepEqual";
-import { TJsonRecord } from "../types/TJsonRecord";
+import { TJsonRecord } from "@shared/TJsonRecord";
 import { isRecord } from "@shared/utils/isRecord";
 
 export function applyDeleteOperation(target: TJsonRecord, operation: unknown): TJsonRecord {

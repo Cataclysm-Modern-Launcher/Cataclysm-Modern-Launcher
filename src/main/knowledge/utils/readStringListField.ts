@@ -1,5 +1,5 @@
 import { flattenStrings } from "../../utils/flattenStrings";
-import { TJsonRecord } from "../types/TJsonRecord";
+import { TJsonRecord } from "@shared/TJsonRecord";
 
 export function readStringListField(value: TJsonRecord, field: string): string[] {
     return uniqueNonEmptyStrings(flattenStrings(value[field]));

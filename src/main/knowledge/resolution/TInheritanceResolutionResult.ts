@@ -1,5 +1,5 @@
 import { UnsupportedNumericPath } from "./applyNumericOperation";
-import { TJsonRecord } from "../types/TJsonRecord";
+import { TJsonRecord } from "@shared/TJsonRecord";
 
 export type TInheritanceResolutionResult = {
     value: TJsonRecord;

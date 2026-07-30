@@ -12,16 +12,15 @@ import { readString } from "@shared/utils/readString";
 import { IconBook2 } from "@tabler/icons-react";
 import React from "react";
 import { KnowledgeRecipeResults } from "@renderer/knowledge/recipes/KnowledgeRecipeResults";
-import { KnowledgeQualityRequirementBadge } from "@renderer/knowledge/recipes/KnowledgeQualityRequirementBadge";
+import { KnowledgeQualityRequirementBadge } from "@renderer/knowledge/KnowledgeQualityRequirementBadge";
 
 type Props = {
     recipe: KnowledgeEntityRelation;
     entity: KnowledgeEntityDetails | undefined;
     relations: KnowledgeEntityRelations | undefined;
-    onOpen: (key: string) => void;
 };
 
-export function KnowledgeRecipeCard({ recipe, entity, relations, onOpen }: Props): React.JSX.Element {
+export function KnowledgeRecipeCard({ recipe, entity, relations }: Props): React.JSX.Element {
     const t = useTranslate();
     const outgoing = relations?.outgoing ?? [];
     const skills = outgoing.filter((relation) => relation.kind === "requires-skill");
@@ -60,7 +59,7 @@ export function KnowledgeRecipeCard({ recipe, entity, relations, onOpen }: Props
                             canAutoLearn && autolearnSkills.length > 0 ? (
                                 <Group gap={4} wrap="wrap">
                                     {autolearnSkills.map((skill) => (
-                                        <RelationLink key={`${skill.entity.key}:${skill.metadata.level}`} relation={skill} onOpen={onOpen} />
+                                        <RelationLink key={`${skill.entity.key}:${skill.metadata.level}`} relation={skill} />
                                     ))}
                                 </Group>
                             ) : canAutoLearn ? (
@@ -70,8 +69,8 @@ export function KnowledgeRecipeCard({ recipe, entity, relations, onOpen }: Props
                                     </Text>
                                 </Tooltip>
                             ) : null,
-                            ...books.map((book) => <RelationLink key={book.entity.key} relation={book} onOpen={onOpen} iconClass={IconBook2} />),
-                            ...decompSkills.map((skill) => <RelationLink key={`${skill.entity.key}:${skill.metadata.level}`} relation={skill} onOpen={onOpen} />),
+                            ...books.map((book) => <RelationLink key={book.entity.key} relation={book} iconClass={IconBook2} />),
+                            ...decompSkills.map((skill) => <RelationLink key={`${skill.entity.key}:${skill.metadata.level}`} relation={skill} />),
                             raw?.never_learn === true ? (
                                 <Tooltip label={t("knowledge.recipe.never.learn.tooltip")}>
                                     <Text size="sm" fw={500}>
@@ -87,54 +86,52 @@ export function KnowledgeRecipeCard({ recipe, entity, relations, onOpen }: Props
                             ) : null
                         ]}
                     />
-                    <SummaryValue label={t("knowledge.recipe.results")} value={<KnowledgeRecipeResults results={results} byproducts={byproducts} technicalResults={technicalResults} onOpen={onOpen} />} />
+                    <SummaryValue label={t("knowledge.recipe.results")} value={<KnowledgeRecipeResults results={results} byproducts={byproducts} technicalResults={technicalResults} />} />
                 </Group>
 
                 <Group gap="lg" align="flex-start" wrap="wrap">
                     <SummaryValue
                         label={t("knowledge.recipe.required.skills")}
                         value={skills.map((skill) => (
-                            <RelationLink key={skill.entity.key} relation={skill} onOpen={onOpen} />
+                            <RelationLink key={skill.entity.key} relation={skill} />
                         ))}
                     />
                     <SummaryValue
                         label={t("knowledge.recipe.proficiencies")}
                         value={proficiencies.map((proficiency) => (
-                            <RelationLink key={proficiency.entity.key} relation={proficiency} onOpen={onOpen} />
+                            <RelationLink key={proficiency.entity.key} relation={proficiency} />
                         ))}
                     />
                 </Group>
 
-                {!!requirements?.qualities.length && <QualitySection groups={requirements.qualities} onOpen={onOpen} />}
-                {!!requirements?.tools.length && <RequirementSection label={t("knowledge.recipe.tools")} groups={requirements.tools} onOpen={onOpen} />}
-                {!!requirements?.components.length && <RequirementSection label={t("knowledge.recipe.components")} groups={requirements.components} onOpen={onOpen} />}
-                {!!requirements?.recoveredComponents.length && <RequirementSection label={t("knowledge.recipe.disassembly.result")} groups={requirements.recoveredComponents} onOpen={onOpen} />}
+                {!!requirements?.qualities.length && <QualitySection groups={requirements.qualities} />}
+                {!!requirements?.tools.length && <RequirementSection label={t("knowledge.recipe.tools")} groups={requirements.tools} />}
+                {!!requirements?.components.length && <RequirementSection label={t("knowledge.recipe.components")} groups={requirements.components} />}
+                {!!requirements?.recoveredComponents.length && <RequirementSection label={t("knowledge.recipe.disassembly.result")} groups={requirements.recoveredComponents} />}
             </Stack>
         </Paper>
     );
 }
 
-function QualitySection({ groups, onOpen }: { groups: KnowledgeRecipeRequirementGroup[]; onOpen: (key: string) => void }): React.JSX.Element {
+function QualitySection({ groups }: { groups: KnowledgeRecipeRequirementGroup[] }): React.JSX.Element {
     const t = useTranslate();
     return (
         <Stack gap={6}>
             <Divider label={t("knowledge.recipe.qualities")} labelPosition="left" />
             <Group gap={6} wrap="wrap">
-                {groups.flatMap((group) =>
-                    group.alternatives.map((alternative, index) => <KnowledgeQualityRequirementBadge key={`${group.key}:${alternative.entity.key}:${index}`} alternative={alternative} onOpen={onOpen} />)
-                )}
+                {groups.flatMap((group) => group.alternatives.map((alternative, index) => <KnowledgeQualityRequirementBadge key={`${group.key}:${alternative.entity.key}:${index}`} alternative={alternative} />))}
             </Group>
         </Stack>
     );
 }
 
-function RequirementSection({ label, groups, onOpen }: { label: string; groups: KnowledgeRecipeRequirementGroup[]; onOpen: (key: string) => void }): React.JSX.Element {
+function RequirementSection({ label, groups }: { label: string; groups: KnowledgeRecipeRequirementGroup[] }): React.JSX.Element {
     return (
         <Stack gap={6}>
             <Divider label={label} labelPosition="left" />
             <Stack gap={6}>
                 {groups.map((group) => (
-                    <AlternativeGroup key={group.key} alternatives={group.alternatives} onOpen={onOpen} />
+                    <AlternativeGroup key={group.key} alternatives={group.alternatives} />
                 ))}
             </Stack>
         </Stack>
@@ -143,7 +140,7 @@ function RequirementSection({ label, groups, onOpen }: { label: string; groups: 
 
 const alternativesCountCollapse = 3;
 
-function AlternativeGroup({ alternatives, onOpen }: { alternatives: KnowledgeRecipeRequirementAlternative[]; onOpen: (key: string) => void }): React.JSX.Element {
+function AlternativeGroup({ alternatives }: { alternatives: KnowledgeRecipeRequirementAlternative[] }): React.JSX.Element {
     const t = useTranslate();
     const [opened, { toggle }] = useDisclosure(false);
     const collapsible = alternatives.length > alternativesCountCollapse;
@@ -158,7 +155,7 @@ function AlternativeGroup({ alternatives, onOpen }: { alternatives: KnowledgeRec
                                     {t("knowledge.recipe.or")}
                                 </Text>
                             )}
-                            <RelationLink relation={toRelation(alternative)} onOpen={onOpen} />
+                            <RelationLink relation={toRelation(alternative)} />
                         </React.Fragment>
                     ))}
                 </Group>

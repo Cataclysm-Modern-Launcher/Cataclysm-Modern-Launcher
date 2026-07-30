@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
-import { ActionIcon, AppShell, Badge, Box, Center, Group, ScrollArea, Stack, Switch, Text, TextInput, Title, Tooltip } from "@mantine/core";
-import { IconRefresh, IconSearch } from "@tabler/icons-react";
+import { ActionIcon, AppShell, Badge, Box, Center, Group, Menu, ScrollArea, Stack, Switch, Text, TextInput, Title, Tooltip } from "@mantine/core";
+import { IconChevronDown, IconHistory, IconRefresh, IconSearch, IconTrash } from "@tabler/icons-react";
 import { KnowledgeEntitySummary } from "@shared/knowledge/KnowledgeEntitySummary";
 import { KnowledgeIndexStatus } from "@shared/knowledge/KnowledgeIndexStatus";
 import { useTranslate } from "@renderer/stores/useLocaleStore";
@@ -14,14 +14,11 @@ export type KnowledgeReadyViewProps = {
     query: string;
     category: string | null;
     entities: KnowledgeEntitySummary[];
-    selected: KnowledgePage | null;
-    canGoBack: boolean;
-    canGoForward: boolean;
+    selected: (KnowledgePage & { tab: string }) | null;
+    searchHistory: string[];
     onQueryChange: (value: string) => void;
+    onClearSearchHistory: () => void;
     onCategoryChange: (value: string | null) => void;
-    onOpen: (key: string) => void;
-    onBack: () => void;
-    onForward: () => void;
     onRebuild: () => void;
     localized: boolean;
     onLocalizedChange: (value: boolean) => void;
@@ -34,6 +31,29 @@ export function KnowledgeReadyView(props: KnowledgeReadyViewProps): React.JSX.El
     useEffect(() => {
         resultsViewportRef.current?.scrollTo({ top: 0 });
     }, [props.entities]);
+
+    const historyButton = (
+        <Menu position="bottom-end" withinPortal>
+            <Menu.Target>
+                <ActionIcon variant="subtle" size="sm" disabled={props.searchHistory.length === 0} aria-label={t("knowledge.search.history")}>
+                    <IconChevronDown size={15} />
+                </ActionIcon>
+            </Menu.Target>
+            <Menu.Dropdown>
+                <Menu.Label>{t("knowledge.search.history")}</Menu.Label>
+                {props.searchHistory.map((item) => (
+                    <Menu.Item key={item} leftSection={<IconHistory size={14} />} onClick={() => props.onQueryChange(item)}>
+                        {item}
+                    </Menu.Item>
+                ))}
+                <Menu.Divider />
+                <Menu.Item color="red" leftSection={<IconTrash size={14} />} onClick={props.onClearSearchHistory}>
+                    {t("knowledge.search.history.clear")}
+                </Menu.Item>
+            </Menu.Dropdown>
+        </Menu>
+    );
+
     return (
         <AppShell navbar={{ width: 380, breakpoint: "sm" }} padding={0} h="100vh" styles={{ main: { height: "100vh", overflow: "hidden" } }}>
             <AppShell.Navbar p="md">
@@ -41,7 +61,6 @@ export function KnowledgeReadyView(props: KnowledgeReadyViewProps): React.JSX.El
                     <Group justify="space-between">
                         <Group gap="sm">
                             <Title order={2}>{t("knowledge.title")}</Title>
-
                             {props.status.language.hasTranslation && (
                                 <Tooltip label={t("knowledge.language.switch.tooltip")} refProp="rootRef">
                                     <Switch
@@ -54,7 +73,6 @@ export function KnowledgeReadyView(props: KnowledgeReadyViewProps): React.JSX.El
                                 </Tooltip>
                             )}
                         </Group>
-
                         <Group gap="xs">
                             <Badge variant="light">{props.status.entityCount}</Badge>
                             <Tooltip label={t("knowledge.index.rebuild")}>
@@ -65,11 +83,18 @@ export function KnowledgeReadyView(props: KnowledgeReadyViewProps): React.JSX.El
                         </Group>
                     </Group>
                     <KnowledgeCategorySelect categories={props.status.categories} value={props.category} onChange={props.onCategoryChange} />
-                    <TextInput value={props.query} onChange={(event) => props.onQueryChange(event.currentTarget.value)} leftSection={<IconSearch size={16} />} placeholder={t("knowledge.search.entities")} />
+                    <TextInput
+                        value={props.query}
+                        onChange={(event) => props.onQueryChange(event.currentTarget.value)}
+                        leftSection={<IconSearch size={16} />}
+                        rightSection={historyButton}
+                        rightSectionPointerEvents="all"
+                        placeholder={t("knowledge.search.entities")}
+                    />
                     <ScrollArea flex={1} offsetScrollbars viewportRef={resultsViewportRef}>
                         <Stack gap={4} pr="xs">
                             {props.entities.map((entity) => (
-                                <KnowledgeEntityCard key={entity.key} entity={entity} onOpen={props.onOpen} />
+                                <KnowledgeEntityCard key={entity.key} entity={entity} />
                             ))}
                         </Stack>
                     </ScrollArea>
@@ -88,18 +113,12 @@ export function KnowledgeReadyView(props: KnowledgeReadyViewProps): React.JSX.El
                     </Center>
                 ) : (
                     <ScrollArea key={props.selected.entity.key} h="100%" offsetScrollbars>
-                        <Box p="md" className="selectable-text">
+                        <Box p="md">
                             <KnowledgeEntityDetailsView
-                                key={props.selected.entity.key}
                                 entity={props.selected.entity}
                                 relations={props.selected.relations}
                                 relatedEntities={props.selected.relatedEntities}
                                 relatedRelations={props.selected.relatedRelations}
-                                canGoBack={props.canGoBack}
-                                canGoForward={props.canGoForward}
-                                onOpen={props.onOpen}
-                                onBack={props.onBack}
-                                onForward={props.onForward}
                             />
                         </Box>
                     </ScrollArea>

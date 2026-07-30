@@ -24,6 +24,8 @@ import { KnowledgeLanguageInfo } from "@shared/knowledge/KnowledgeLanguageInfo";
 import { KnowledgeRecipeRequirements } from "@shared/knowledge/KnowledgeRecipeRequirements";
 import { KnowledgeRecipeRequirementGroup } from "@shared/knowledge/KnowledgeRecipeRequirementGroup";
 import { KnowledgeRecipeRequirementAlternative } from "@shared/knowledge/KnowledgeRecipeRequirementAlternative";
+import { KnowledgeItemDestruction, KnowledgeItemDestructionAction, KnowledgeItemDestructionResult } from "@shared/knowledge/KnowledgeItemDestruction";
+import { isRecord } from "@shared/utils/isRecord";
 
 class KnowledgeService {
     private context: TKnowledgeIndexContext | null = null;
@@ -219,8 +221,131 @@ class KnowledgeService {
 
     private localizeEntity(entity: KnowledgeEntityDetails, localized: boolean): KnowledgeEntityDetails {
         const localizedEntity = localized ? { ...this.localizeSummary(entity, true), sourceFile: entity.sourceFile, raw: this.translations.translateValue(entity.raw) as Record<string, unknown> } : entity;
-        if (entity.jsonType !== "recipe" && entity.jsonType !== "uncraft") return localizedEntity;
-        return { ...localizedEntity, recipeRequirements: this.buildRecipeRequirements(entity.key, localized) };
+        if (entity.jsonType === "recipe" || entity.jsonType === "uncraft") {
+            return { ...localizedEntity, recipeRequirements: this.buildRecipeRequirements(entity.key, localized) };
+        }
+        if (entity.jsonType === "ITEM") {
+            return { ...localizedEntity, itemDestruction: this.buildItemDestruction(entity, localized) };
+        }
+        return localizedEntity;
+    }
+
+    private buildItemDestruction(entity: KnowledgeEntityDetails, localized: boolean): KnowledgeItemDestruction {
+        return {
+            actions: this.buildDestructionActions(entity.key, localized),
+            obtainedFrom: this.buildObtainedFromActions(entity.key, localized)
+        };
+    }
+
+    private buildDestructionActions(itemKey: string, localized: boolean): KnowledgeItemDestructionAction[] {
+        const actions: KnowledgeItemDestructionAction[] = [];
+
+        for (const edge of this.incomingEdgesByKey.get(itemKey) ?? []) {
+            if (edge.kind !== "uncrafts-item") continue;
+            const recipe = this.entityByKey.get(edge.sourceKey);
+            if (recipe !== undefined) actions.push(this.buildDisassemblyAction(recipe, localized));
+        }
+
+        const salvage = this.buildSalvageAction(itemKey, localized);
+        if (salvage !== null) actions.push(salvage);
+
+        const breakage = this.buildBreakageAction(itemKey, localized);
+        if (breakage !== null) actions.push(breakage);
+
+        return actions;
+    }
+
+    private buildObtainedFromActions(itemKey: string, localized: boolean): KnowledgeItemDestructionAction[] {
+        const actions = new Map<string, KnowledgeItemDestructionAction>();
+
+        for (const edge of this.incomingEdgesByKey.get(itemKey) ?? []) {
+            if (edge.kind === "recovers-component") {
+                const recipe = this.entityByKey.get(edge.sourceKey);
+                if (recipe === undefined) continue;
+                const original = (this.outgoingEdgesByKey.get(recipe.key) ?? []).find((candidate) => candidate.kind === "uncrafts-item");
+                if (original === undefined) continue;
+                actions.set(`disassembly:${recipe.key}`, this.highlightResult(this.buildDisassemblyAction(recipe, localized, original.targetKey), itemKey));
+                continue;
+            }
+
+            if (edge.kind === "salvages-into") {
+                const action = this.buildSalvageAction(edge.sourceKey, localized, edge.sourceKey);
+                if (action !== null) actions.set(`salvage:${edge.sourceKey}`, this.highlightResult(action, itemKey));
+                continue;
+            }
+
+            if (edge.kind === "breaks-into") {
+                const action = this.buildBreakageAction(edge.sourceKey, localized, edge.sourceKey);
+                if (action !== null) actions.set(`breakage:${edge.sourceKey}`, this.highlightResult(action, itemKey));
+            }
+        }
+
+        return [...actions.values()];
+    }
+
+    private buildDisassemblyAction(recipe: KnowledgeEntityDetails, localized: boolean, sourceItemKey?: string): KnowledgeItemDestructionAction {
+        return {
+            kind: "disassembly",
+            source: sourceItemKey === undefined ? this.getEntityReference(recipe.key, localized) : this.getEntityReference(sourceItemKey, localized),
+            time: readTime(readDisassemblyTime(recipe.raw)),
+            results: this.readEdgeResults(recipe.key, "recovers-component", localized),
+            requirements: this.buildRecipeRequirements(recipe.key, localized),
+            dependencies: ["damage", "component history", "UNRECOVERABLE components"]
+        };
+    }
+
+    private buildSalvageAction(itemKey: string, localized: boolean, sourceItemKey?: string): KnowledgeItemDestructionAction | null {
+        const results = this.readEdgeResults(itemKey, "salvages-into", localized);
+        if (results.length === 0) return null;
+        const moves = this.findSalvageMoves();
+        return {
+            kind: "salvage",
+            source: sourceItemKey === undefined ? undefined : this.getEntityReference(sourceItemKey, localized),
+            timeNote: moves.length === 0 ? undefined : `${Math.min(...moves)}–${Math.max(...moves)} moves per recovered part, depending on the tool`,
+            results,
+            dependencies: ["item weight and material portions", "fabrication skill", "dexterity", "item damage", "actual component history"]
+        };
+    }
+
+    private buildBreakageAction(itemKey: string, localized: boolean, sourceItemKey?: string): KnowledgeItemDestructionAction | null {
+        const results = this.readEdgeResults(itemKey, "breaks-into", localized);
+        if (results.length === 0) return null;
+        return {
+            kind: "breakage",
+            source: sourceItemKey === undefined ? undefined : this.getEntityReference(sourceItemKey, localized),
+            results,
+            dependencies: ["vehicle-part damage roll"]
+        };
+    }
+
+    private readEdgeResults(sourceKey: string, kind: "recovers-component" | "salvages-into" | "breaks-into", localized: boolean): KnowledgeItemDestructionResult[] {
+        return (this.outgoingEdgesByKey.get(sourceKey) ?? [])
+            .filter((edge) => edge.kind === kind)
+            .map((edge) => ({
+                entity: this.getEntityReference(edge.targetKey, localized),
+                count: readFiniteNumber(edge.metadata.count) ?? undefined,
+                countMin: readFiniteNumber(edge.metadata.countMin) ?? undefined,
+                countMax: readFiniteNumber(edge.metadata.countMax) ?? undefined,
+                note: readMetadataString(edge.metadata.materialId) ?? undefined
+            }));
+    }
+
+    private highlightResult(action: KnowledgeItemDestructionAction, itemKey: string): KnowledgeItemDestructionAction {
+        return {
+            ...action,
+            results: action.results.map((result) => ({ ...result, highlighted: result.entity.key === itemKey }))
+        };
+    }
+
+    private findSalvageMoves(): number[] {
+        const values: number[] = [];
+        for (const entity of this.entityByKey.values()) {
+            if (entity.jsonType !== "ITEM") continue;
+            for (const action of readUseActions(entity.raw.use_action)) {
+                if (action.type === "salvage") values.push(readFiniteNumber(action.moves_per_part) ?? 25);
+            }
+        }
+        return values;
     }
 
     private buildRecipeRequirements(recipeKey: string, localized: boolean): KnowledgeRecipeRequirements {
@@ -336,6 +461,23 @@ function readFiniteNumber(value: unknown): number | null {
 
 function readMetadataString(value: unknown): string | null {
     return typeof value === "string" && value.length > 0 ? value : null;
+}
+
+function readDisassemblyTime(raw: Record<string, unknown>): unknown {
+    if (raw.reversible !== null && typeof raw.reversible === "object" && !Array.isArray(raw.reversible)) {
+        const time = (raw.reversible as Record<string, unknown>).time;
+        if (time !== undefined) return time;
+    }
+    return raw.time;
+}
+
+function readTime(value: unknown): string | number | undefined {
+    return typeof value === "string" || typeof value === "number" ? value : undefined;
+}
+
+function readUseActions(value: unknown): Record<string, unknown>[] {
+    if (isRecord(value)) return [value];
+    return Array.isArray(value) ? value.filter(isRecord) : [];
 }
 
 function append<TKey, TValue>(map: Map<TKey, TValue[]>, key: TKey, value: TValue): void {

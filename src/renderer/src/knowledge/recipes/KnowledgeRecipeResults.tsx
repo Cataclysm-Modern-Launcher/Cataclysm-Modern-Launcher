@@ -8,33 +8,30 @@ interface Props {
     results: KnowledgeEntityRelation[];
     byproducts: KnowledgeEntityRelation[];
     technicalResults: KnowledgeEntityRelation[];
-    onOpen: (key: string) => void;
 }
 
-export function KnowledgeRecipeResults({ results, byproducts, technicalResults, onOpen }: Props): React.JSX.Element | null {
+export function KnowledgeRecipeResults({ results, byproducts, technicalResults }: Props): React.JSX.Element | null {
     const t = useTranslate();
     if (results.length === 0 && byproducts.length === 0 && technicalResults.length === 0) return null;
     return (
         <Stack gap={4}>
             {results.map((result) => (
-                <RelationLink key={`${result.kind}:${result.entity.key}`} relation={result} onOpen={onOpen} />
+                <RelationLink key={`${result.kind}:${result.entity.key}`} relation={result} />
             ))}
             {byproducts.map((byproduct) => (
-                <Badge key={byproduct.entity.key} variant="light" color="gray" size="md" style={{ textTransform: "none" }}>
-                    <Group gap={4} wrap="nowrap">
-                        <Text size="xs" c="dimmed">
-                            {t("knowledge.recipe.byproduct")}:
-                        </Text>
-                        <RelationLink relation={byproduct} onOpen={onOpen} />
-                    </Group>
-                </Badge>
+                <Group gap={4} wrap="nowrap" key={byproduct.entity.key}>
+                    <RelationLink relation={byproduct} c="cyan" />
+                    <Text size="xs" c="dimmed">
+                        ({t("knowledge.recipe.byproduct")})
+                    </Text>
+                </Group>
             ))}
             {technicalResults.map((result) => (
                 <Group key={`${result.kind}:${result.entity.key}`} gap={4} wrap="nowrap">
                     <Badge size="xs" variant="outline" color="gray">
                         {technicalResultLabel(result.kind, t)}
                     </Badge>
-                    <RelationLink relation={result} onOpen={onOpen} />
+                    <RelationLink relation={result} />
                 </Group>
             ))}
         </Stack>

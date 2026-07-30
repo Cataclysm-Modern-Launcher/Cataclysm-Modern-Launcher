@@ -1,6 +1,6 @@
 import { TKnowledgeTypeDescriptor } from "../types/TKnowledgeTypeDescriptor";
 import { TResolvedKnowledgeIdentity } from "../types/TResolvedKnowledgeIdentity";
-import { TJsonRecord } from "../types/TJsonRecord";
+import { TJsonRecord } from "@shared/TJsonRecord";
 import { TIdentifiedKnowledgeDefinition } from "../types/TIdentifiedKnowledgeDefinition";
 import { TResolvedKnowledgeDefinition } from "../types/TResolvedKnowledgeDefinition";
 

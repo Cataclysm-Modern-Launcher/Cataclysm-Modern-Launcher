@@ -1,5 +1,5 @@
 import { NumericOperation } from "../applyNumericOperation";
-import { TJsonRecord } from "../../types/TJsonRecord";
+import { TJsonRecord } from "@shared/TJsonRecord";
 import { cloneRecord } from "../../../utils/cloneRecord";
 import { isRecord } from "@shared/utils/isRecord";
 import { readString } from "@shared/utils/readString";

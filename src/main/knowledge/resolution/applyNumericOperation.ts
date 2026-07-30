@@ -1,7 +1,7 @@
 import { applyScalarOperation } from "./scalars/applyScalarOperation";
 import { applyStructuralOperation } from "./structures/applyStructuralOperation";
 import { getDefinitionDefault } from "./defaults/getDefinitionDefault";
-import { TJsonRecord } from "../types/TJsonRecord";
+import { TJsonRecord } from "@shared/TJsonRecord";
 import { isRecord } from "@shared/utils/isRecord";
 import { isStructured } from "@shared/utils/isStructured";
 

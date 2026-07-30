@@ -7,7 +7,7 @@ import { IKnowledgeIndexPersistence } from "./types/IKnowledgeIndexPersistence";
 import { createHash } from "node:crypto";
 
 const KNOWLEDGE_INDEX_SCHEMA_VERSION = 10;
-const KNOWLEDGE_GRAPH_SCHEMA_VERSION = 2;
+const KNOWLEDGE_GRAPH_SCHEMA_VERSION = 6;
 
 class KnowledgeIndexStore implements IKnowledgeIndexPersistence {
     async load(context: TKnowledgeIndexContext): Promise<TKnowledgeIndex | null> {

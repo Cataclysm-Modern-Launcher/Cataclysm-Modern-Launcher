@@ -1,4 +1,4 @@
-import { TJsonRecord } from "./TJsonRecord";
+import { TJsonRecord } from "@shared/TJsonRecord";
 
 export type TScannedKnowledgeDefinition = {
     jsonType: string;

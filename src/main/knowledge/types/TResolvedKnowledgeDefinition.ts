@@ -1,5 +1,5 @@
 import { TIdentifiedKnowledgeDefinition } from "./TIdentifiedKnowledgeDefinition";
-import { TJsonRecord } from "./TJsonRecord";
+import { TJsonRecord } from "@shared/TJsonRecord";
 
 export type TResolvedKnowledgeDefinition = TIdentifiedKnowledgeDefinition & {
     effectiveId: string;

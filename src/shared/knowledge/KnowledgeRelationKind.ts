@@ -13,6 +13,8 @@ export type KnowledgeRelationKind =
     | "provides-quality"
     | "uncrafts-item"
     | "recovers-component"
+    | "salvages-into"
+    | "breaks-into"
     | "applies-mapgen"
     | "provides-camp-feature"
     | "triggers-eoc";
