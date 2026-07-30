@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { ActionIcon, AppShell, Badge, Box, Center, Group, ScrollArea, Stack, Switch, Text, TextInput, Title, Tooltip } from "@mantine/core";
 import { IconRefresh, IconSearch } from "@tabler/icons-react";
 import { KnowledgeEntitySummary } from "@shared/knowledge/KnowledgeEntitySummary";
@@ -29,6 +29,11 @@ export type KnowledgeReadyViewProps = {
 
 export function KnowledgeReadyView(props: KnowledgeReadyViewProps): React.JSX.Element {
     const t = useTranslate();
+    const resultsViewportRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        resultsViewportRef.current?.scrollTo({ top: 0 });
+    }, [props.entities]);
     return (
         <AppShell navbar={{ width: 380, breakpoint: "sm" }} padding={0} h="100vh" styles={{ main: { height: "100vh", overflow: "hidden" } }}>
             <AppShell.Navbar p="md">
@@ -61,7 +66,7 @@ export function KnowledgeReadyView(props: KnowledgeReadyViewProps): React.JSX.El
                     </Group>
                     <KnowledgeCategorySelect categories={props.status.categories} value={props.category} onChange={props.onCategoryChange} />
                     <TextInput value={props.query} onChange={(event) => props.onQueryChange(event.currentTarget.value)} leftSection={<IconSearch size={16} />} placeholder={t("knowledge.search.entities")} />
-                    <ScrollArea flex={1} offsetScrollbars>
+                    <ScrollArea flex={1} offsetScrollbars viewportRef={resultsViewportRef}>
                         <Stack gap={4} pr="xs">
                             {props.entities.map((entity) => (
                                 <KnowledgeEntityCard key={entity.key} entity={entity} onOpen={props.onOpen} />
@@ -82,10 +87,10 @@ export function KnowledgeReadyView(props: KnowledgeReadyViewProps): React.JSX.El
                         <Text c="dimmed">{t("knowledge.entity.select")}</Text>
                     </Center>
                 ) : (
-                    <ScrollArea h="100%" offsetScrollbars>
+                    <ScrollArea key={props.selected.entity.key} h="100%" offsetScrollbars>
                         <Box p="md">
                             <KnowledgeEntityDetailsView
-                                key={`${props.selected.entity.key}:${props.localized ? props.status.language.gameLanguage : "en"}`}
+                                key={props.selected.entity.key}
                                 entity={props.selected.entity}
                                 relations={props.selected.relations}
                                 relatedRelations={props.selected.relatedRelations}
