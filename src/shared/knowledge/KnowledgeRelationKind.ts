@@ -1,5 +1,6 @@
 export type KnowledgeRelationKind =
     | "produces"
+    | "produces-byproduct"
     | "uses-component"
     | "uses-tool"
     | "requires-quality"

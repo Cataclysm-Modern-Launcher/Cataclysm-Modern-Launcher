@@ -32,6 +32,16 @@ export function extractRecipeRelations(definition: TResolvedKnowledgeDefinition,
         }
     }
 
+    if (!isUncraft && Array.isArray(raw.byproducts)) {
+        raw.byproducts.forEach((entry, index) => {
+            if (typeof entry === "string") {
+                result.push(make(definition, sourceKey, "produces-byproduct", entry, "ITEM", `byproducts[${index}]`, { quantity: 1 }));
+            } else if (Array.isArray(entry) && typeof entry[0] === "string") {
+                result.push(make(definition, sourceKey, "produces-byproduct", entry[0], "ITEM", `byproducts[${index}]`, { quantity: typeof entry[1] === "number" ? entry[1] : 1 }));
+            }
+        });
+    }
+
     if (Array.isArray(raw.result_eocs)) {
         raw.result_eocs.forEach((entry, index) => {
             if (typeof entry === "string") {

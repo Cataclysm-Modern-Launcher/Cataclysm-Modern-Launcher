@@ -8,6 +8,9 @@ type RelationExtractor = (definition: TResolvedKnowledgeDefinition, sourceKey: s
 
 const extractorsByType = new Map<string, RelationExtractor>([
     ["ITEM", extractItemRelations],
+    ["furniture", extractItemRelations],
+    ["terrain", extractItemRelations],
+    ["vehicle_part", extractItemRelations],
     ["recipe", extractRecipeRelations],
     ["uncraft", extractRecipeRelations],
     ["requirement", extractRequirementRelations]

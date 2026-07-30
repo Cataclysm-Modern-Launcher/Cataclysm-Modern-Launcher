@@ -218,27 +218,19 @@ class KnowledgeService {
     }
 
     private localizeEntity(entity: KnowledgeEntityDetails, localized: boolean): KnowledgeEntityDetails {
-        const localizedEntity = localized
-            ? { ...this.localizeSummary(entity, true), sourceFile: entity.sourceFile, raw: this.translations.translateValue(entity.raw) as Record<string, unknown> }
-            : entity;
+        const localizedEntity = localized ? { ...this.localizeSummary(entity, true), sourceFile: entity.sourceFile, raw: this.translations.translateValue(entity.raw) as Record<string, unknown> } : entity;
         if (entity.jsonType !== "recipe" && entity.jsonType !== "uncraft") return localizedEntity;
         return { ...localizedEntity, recipeRequirements: this.buildRecipeRequirements(entity.key, localized) };
     }
 
     private buildRecipeRequirements(recipeKey: string, localized: boolean): KnowledgeRecipeRequirements {
-        const toolsAndQualities = new Map<string, KnowledgeRecipeRequirementAlternative[]>();
+        const tools = new Map<string, KnowledgeRecipeRequirementAlternative[]>();
+        const qualities = new Map<string, KnowledgeRecipeRequirementAlternative[]>();
         const components = new Map<string, KnowledgeRecipeRequirementAlternative[]>();
         const recoveredComponents = new Map<string, KnowledgeRecipeRequirementAlternative[]>();
 
         const appendEdge = (edge: TKnowledgeGraphEdge, groupKey: string, multiplier: number): void => {
-            const target =
-                edge.kind === "uses-tool" || edge.kind === "requires-quality"
-                    ? toolsAndQualities
-                    : edge.kind === "uses-component"
-                      ? components
-                      : edge.kind === "recovers-component"
-                        ? recoveredComponents
-                        : null;
+            const target = edge.kind === "uses-tool" ? tools : edge.kind === "requires-quality" ? qualities : edge.kind === "uses-component" ? components : edge.kind === "recovers-component" ? recoveredComponents : null;
             if (target === null) return;
             const count = readFiniteNumber(edge.metadata.count);
             const metadata = {
@@ -282,7 +274,8 @@ class KnowledgeService {
         }
 
         return {
-            toolsAndQualities: toRequirementGroups(toolsAndQualities),
+            tools: toRequirementGroups(tools),
+            qualities: toRequirementGroups(qualities),
             components: toRequirementGroups(components),
             recoveredComponents: toRequirementGroups(recoveredComponents)
         };
@@ -329,10 +322,12 @@ class KnowledgeService {
 }
 
 function toRequirementGroups(groups: Map<string, KnowledgeRecipeRequirementAlternative[]>): KnowledgeRecipeRequirementGroup[] {
-    return [...groups.entries()].map(([key, alternatives]) => ({
-        key,
-        alternatives: alternatives.sort((left, right) => (readFiniteNumber(left.metadata.alternativeIndex) ?? 0) - (readFiniteNumber(right.metadata.alternativeIndex) ?? 0))
-    }));
+    return [...groups.entries()]
+        .map(([key, alternatives]) => ({
+            key,
+            alternatives: alternatives.sort((left, right) => (readFiniteNumber(left.metadata.alternativeIndex) ?? 0) - (readFiniteNumber(right.metadata.alternativeIndex) ?? 0))
+        }))
+        .sort((left, right) => right.alternatives.length - left.alternatives.length);
 }
 
 function readFiniteNumber(value: unknown): number | null {
@@ -342,7 +337,6 @@ function readFiniteNumber(value: unknown): number | null {
 function readMetadataString(value: unknown): string | null {
     return typeof value === "string" && value.length > 0 ? value : null;
 }
-
 
 function append<TKey, TValue>(map: Map<TKey, TValue[]>, key: TKey, value: TValue): void {
     const values = map.get(key);

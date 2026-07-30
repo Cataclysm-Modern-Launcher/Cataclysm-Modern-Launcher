@@ -146,8 +146,8 @@ function RecipeList({
     const t = useTranslate();
     const cards = recipes.map((recipe, index) => ({
         key: `${recipe.entity.key}:${index}`,
-        label: getRecipeTabLabel(recipe, relatedEntities[recipe.entity.key], index, t),
-        content: <KnowledgeRecipeCard recipe={recipe} entity={relatedEntities[recipe.entity.key]} relations={relatedRelations[recipe.entity.key]} relatedRelations={relatedRelations} onOpen={onOpen} />
+        label: getRecipeTabLabel(relatedEntities[recipe.entity.key], index, t),
+        content: <KnowledgeRecipeCard recipe={recipe} entity={relatedEntities[recipe.entity.key]} relations={relatedRelations[recipe.entity.key]} onOpen={onOpen} />
     }));
 
     if (cards.length === 1) return cards[0].content;
@@ -170,7 +170,7 @@ function RecipeList({
     );
 }
 
-function getRecipeTabLabel(recipe: KnowledgeEntityRelation, entity: KnowledgeEntityDetails | undefined, index: number, t: ReturnType<typeof useTranslate>): string {
+function getRecipeTabLabel(entity: KnowledgeEntityDetails | undefined, index: number, t: ReturnType<typeof useTranslate>): string {
     const raw = entity?.raw;
     const suffix = typeof raw?.id_suffix === "string" && raw.id_suffix.length > 0 ? raw.id_suffix.replaceAll("_", " ") : null;
     if (suffix !== null) return suffix;
