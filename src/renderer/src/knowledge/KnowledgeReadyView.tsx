@@ -1,5 +1,5 @@
 import React from "react";
-import { ActionIcon, AppShell, Badge, Box, Center, Group, ScrollArea, Stack, Text, TextInput, Title, Tooltip } from "@mantine/core";
+import { ActionIcon, AppShell, Badge, Box, Center, Group, ScrollArea, Stack, Switch, Text, TextInput, Title, Tooltip } from "@mantine/core";
 import { IconRefresh, IconSearch } from "@tabler/icons-react";
 import { KnowledgeEntitySummary } from "@shared/knowledge/KnowledgeEntitySummary";
 import { KnowledgeIndexStatus } from "@shared/knowledge/KnowledgeIndexStatus";
@@ -23,6 +23,8 @@ export type KnowledgeReadyViewProps = {
     onBack: () => void;
     onForward: () => void;
     onRebuild: () => void;
+    localized: boolean;
+    onLocalizedChange: (value: boolean) => void;
 };
 
 export function KnowledgeReadyView(props: KnowledgeReadyViewProps): React.JSX.Element {
@@ -32,7 +34,22 @@ export function KnowledgeReadyView(props: KnowledgeReadyViewProps): React.JSX.El
             <AppShell.Navbar p="md">
                 <Stack h="100%" gap="sm">
                     <Group justify="space-between">
-                        <Title order={2}>{t("knowledge.title")}</Title>
+                        <Group gap="sm">
+                            <Title order={2}>{t("knowledge.title")}</Title>
+
+                            {props.status.language.hasTranslation && (
+                                <Tooltip label={t("knowledge.language.switch.tooltip")} refProp="rootRef">
+                                    <Switch
+                                        size="md"
+                                        checked={props.localized}
+                                        onChange={(event) => props.onLocalizedChange(event.currentTarget.checked)}
+                                        onLabel="EN"
+                                        offLabel={props.status.language.gameLanguage.toUpperCase()}
+                                    />
+                                </Tooltip>
+                            )}
+                        </Group>
+
                         <Group gap="xs">
                             <Badge variant="light">{props.status.entityCount}</Badge>
                             <Tooltip label={t("knowledge.index.rebuild")}>
@@ -51,10 +68,12 @@ export function KnowledgeReadyView(props: KnowledgeReadyViewProps): React.JSX.El
                             ))}
                         </Stack>
                     </ScrollArea>
-                    <Text size="xs" c="dimmed">
-                        {t("knowledge.index.sources", { count: props.status.sourceCount })}
-                        {props.status.loadedFromCache ? ` · ${t("knowledge.index.cached")}` : ""}
-                    </Text>
+                    <Group justify="space-between" gap="sm" wrap="nowrap">
+                        <Text size="xs" c="dimmed">
+                            {t("knowledge.index.sources", { count: props.status.sourceCount })}
+                            {props.status.loadedFromCache ? ` · ${t("knowledge.index.cached")}` : ""}
+                        </Text>
+                    </Group>
                 </Stack>
             </AppShell.Navbar>
             <AppShell.Main>
@@ -66,7 +85,7 @@ export function KnowledgeReadyView(props: KnowledgeReadyViewProps): React.JSX.El
                     <ScrollArea h="100%" offsetScrollbars>
                         <Box p="md">
                             <KnowledgeEntityDetailsView
-                                key={props.selected.entity.key}
+                                key={`${props.selected.entity.key}:${props.localized ? props.status.language.gameLanguage : "en"}`}
                                 entity={props.selected.entity}
                                 relations={props.selected.relations}
                                 relatedRelations={props.selected.relatedRelations}

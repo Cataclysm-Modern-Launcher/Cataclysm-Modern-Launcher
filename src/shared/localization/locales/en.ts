@@ -349,5 +349,6 @@ export const EN_LOCALE = {
         "workspace.setup.rule.persisted.path": "The selected path is stored in the launcher profile and survives app updates.",
         "workspace.setup.select.button": "Select workspace folder",
         "workspace.setup.title": "Cataclysm Modern Launcher",
+        "knowledge.language.switch.tooltip": "Toggle game language"
     }
 } satisfies LocaleFile;

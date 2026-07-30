@@ -1,0 +1,15 @@
+.switchRoot:not(:has(input:disabled)),
+.switchTrack {
+    cursor: pointer;
+}
+
+.switchTrack {
+    transition:
+        filter 120ms ease,
+        border-color 120ms ease,
+        background-color 120ms ease;
+}
+
+.switchRoot:not(:has(input:disabled)):hover .switchTrack {
+    filter: brightness(1.12);
+}

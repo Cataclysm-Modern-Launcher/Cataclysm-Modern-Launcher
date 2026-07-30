@@ -347,5 +347,6 @@ export const RU_LOCALE = {
         "workspace.setup.rule.persisted.path": "Выбранный путь хранится в профиле лаунчера и переживает обновления приложения.",
         "workspace.setup.select.button": "Выбрать рабочую папку",
         "workspace.setup.title": "Cataclysm Modern Launcher",
+        "knowledge.language.switch.tooltip": "Переключить язык игры"
     }
 } satisfies LocaleFileImpl;

@@ -19,6 +19,8 @@ import { TKnowledgeIndexContext } from "./types/TKnowledgeIndexContext";
 import { TKnowledgeGraphEdge } from "./graph/types/TKnowledgeGraphEdge";
 import { TKnowledgeGraphNode } from "./graph/types/TKnowledgeGraphNode";
 import { isKnowledgeEntitySearchable } from "./isKnowledgeEntitySearchable";
+import { KnowledgeTranslationService } from "./KnowledgeTranslationService";
+import { KnowledgeLanguageInfo } from "@shared/knowledge/KnowledgeLanguageInfo";
 
 class KnowledgeService {
     private context: TKnowledgeIndexContext | null = null;
@@ -31,15 +33,17 @@ class KnowledgeService {
     private lastProgressPublishAt = 0;
     private progressPublishCount = 0;
     private progressPublishDurationMs = 0;
+    private readonly translations = new KnowledgeTranslationService();
 
     initialize(): void {
         ipcMain.handle(Bridge.Knowledge.open, (_, worldFolderName: string) => this.open(worldFolderName));
         ipcMain.handle(Bridge.Knowledge.rebuild, () => this.rebuild());
         ipcMain.handle(Bridge.Knowledge.getStatus, () => this.status);
-        ipcMain.handle(Bridge.Knowledge.searchEntities, (_, query: string, category: string | null, limit = 200) => this.search(query, category, limit));
-        ipcMain.handle(Bridge.Knowledge.getEntity, (_, key: string) => this.getEntity(key));
-        ipcMain.handle(Bridge.Knowledge.getEntityRelations, (_, key: string) => this.getEntityRelations(key));
-        ipcMain.handle(Bridge.Knowledge.getEntityRelationsBatch, (_, keys: string[]) => this.getEntityRelationsBatch(keys));
+        ipcMain.handle(Bridge.Knowledge.getLanguage, () => this.getLanguage());
+        ipcMain.handle(Bridge.Knowledge.searchEntities, (_, query: string, category: string | null, limit = 200, localized = true) => this.search(query, category, limit, localized));
+        ipcMain.handle(Bridge.Knowledge.getEntity, (_, key: string, localized = true) => this.getEntity(key, localized));
+        ipcMain.handle(Bridge.Knowledge.getEntityRelations, (_, key: string, localized = true) => this.getEntityRelations(key, localized));
+        ipcMain.handle(Bridge.Knowledge.getEntityRelationsBatch, (_, keys: string[], localized = true) => this.getEntityRelationsBatch(keys, localized));
     }
 
     private async open(worldFolderName: string): Promise<void> {
@@ -51,6 +55,7 @@ class KnowledgeService {
         if (bundle === null || workspace === null) throw new Error("Active game bundle or workspace is not available.");
         const parsed = parse(await readFile(join(bundle.userdataPath, "save", worldFolderName, "mods.json"), "utf8")) as unknown;
         const modIds = Array.isArray(parsed) ? parsed.filter((value): value is string => typeof value === "string") : [];
+        await this.translations.load(bundle.path, bundle.userdataPath);
         this.context = { bundleId: bundle.id, bundlePath: bundle.path, userdataPath: bundle.userdataPath, worldFolderName, modIds, workspacePath: workspace.path };
 
         const cached = await knowledgeIndexStore.load(this.context);
@@ -120,7 +125,7 @@ class KnowledgeService {
         this.progressPublishDurationMs += performance.now() - publishStarted;
     }
 
-    private search(query: string, category: string | null, limit: number): KnowledgeEntitySummary[] {
+    private search(query: string, category: string | null, limit: number, localized: boolean): KnowledgeEntitySummary[] {
         if (this.index === null) return [];
         const normalized = query.trim().toLocaleLowerCase();
         return (
@@ -129,47 +134,48 @@ class KnowledgeService {
                 .filter((entity) => category === null || entity.category === category)
                 .filter(
                     (entity) =>
-                        normalized.length === 0 || entity.name.toLocaleLowerCase().includes(normalized) || entity.id.toLocaleLowerCase().includes(normalized) || entity.jsonType.toLocaleLowerCase().includes(normalized)
+                        normalized.length === 0 || entity.name.toLocaleLowerCase().includes(normalized) || this.translations.translate(entity.name).toLocaleLowerCase().includes(normalized) || entity.id.toLocaleLowerCase().includes(normalized) || entity.jsonType.toLocaleLowerCase().includes(normalized)
                 )
-                .sort((left, right) => left.name.localeCompare(right.name))
+                .sort((left, right) => this.displayName(left, localized).localeCompare(this.displayName(right, localized), this.translations.getLanguage()))
                 .slice(0, limit)
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                .map(({ sourceFile: _sourceFile, raw: _raw, ...summary }) => summary)
+                .map(({ sourceFile: _sourceFile, raw: _raw, ...summary }) => this.localizeSummary(summary, localized))
         );
     }
 
-    private getEntity(key: string): KnowledgeEntityDetails | null {
-        return this.entityByKey.get(key) ?? null;
+    private getEntity(key: string, localized: boolean): KnowledgeEntityDetails | null {
+        const entity = this.entityByKey.get(key);
+        return entity === undefined ? null : this.localizeEntity(entity, localized);
     }
 
-    private getEntityRelations(key: string): KnowledgeEntityRelations {
+    private getEntityRelations(key: string, localized: boolean): KnowledgeEntityRelations {
         return {
-            incoming: (this.incomingEdgesByKey.get(key) ?? []).map((edge) => this.toRelation(edge, "incoming")),
-            outgoing: (this.outgoingEdgesByKey.get(key) ?? []).map((edge) => this.toRelation(edge, "outgoing"))
+            incoming: (this.incomingEdgesByKey.get(key) ?? []).map((edge) => this.toRelation(edge, "incoming", localized)),
+            outgoing: (this.outgoingEdgesByKey.get(key) ?? []).map((edge) => this.toRelation(edge, "outgoing", localized))
         };
     }
 
-    private getEntityRelationsBatch(keys: string[]): Record<string, KnowledgeEntityRelations> {
-        return Object.fromEntries([...new Set(keys)].map((key) => [key, this.getEntityRelations(key)]));
+    private getEntityRelationsBatch(keys: string[], localized: boolean): Record<string, KnowledgeEntityRelations> {
+        return Object.fromEntries([...new Set(keys)].map((key) => [key, this.getEntityRelations(key, localized)]));
     }
 
-    private toRelation(edge: TKnowledgeGraphEdge, direction: KnowledgeEntityRelation["direction"]): KnowledgeEntityRelation {
+    private toRelation(edge: TKnowledgeGraphEdge, direction: KnowledgeEntityRelation["direction"], localized: boolean): KnowledgeEntityRelation {
         const relatedKey = direction === "incoming" ? edge.sourceKey : edge.targetKey;
         return {
             kind: edge.kind,
             direction,
-            entity: this.getEntityReference(relatedKey),
+            entity: this.getEntityReference(relatedKey, localized),
             metadata: edge.metadata
         };
     }
 
-    private getEntityReference(key: string): KnowledgeEntityReference {
+    private getEntityReference(key: string, localized: boolean): KnowledgeEntityReference {
         const entity = this.entityByKey.get(key);
         if (entity !== undefined) {
             return {
                 key: entity.key,
                 id: entity.id,
-                name: entity.name,
+                name: this.displayName(entity, localized),
                 jsonType: entity.jsonType,
                 sourceModId: entity.sourceModId,
                 virtual: false
@@ -189,6 +195,24 @@ class KnowledgeService {
         }
 
         return { key, id: key, name: key, jsonType: "unknown", sourceModId: "unknown", virtual: true };
+    }
+
+    private getLanguage(): KnowledgeLanguageInfo {
+        return { gameLanguage: this.translations.getLanguage(), hasTranslation: this.translations.hasTranslation };
+    }
+
+    private displayName(entity: KnowledgeEntitySummary, localized: boolean): string {
+        return localized ? this.translations.translate(entity.name) : entity.name;
+    }
+
+    private localizeSummary(entity: KnowledgeEntitySummary, localized: boolean): KnowledgeEntitySummary {
+        if (!localized) return entity;
+        return { ...entity, name: this.translations.translate(entity.name), description: entity.description === null ? null : this.translations.translate(entity.description) };
+    }
+
+    private localizeEntity(entity: KnowledgeEntityDetails, localized: boolean): KnowledgeEntityDetails {
+        if (!localized) return entity;
+        return { ...this.localizeSummary(entity, true), sourceFile: entity.sourceFile, raw: this.translations.translateValue(entity.raw) as Record<string, unknown> };
     }
 
     private setIndex(index: TKnowledgeIndex): void {
@@ -225,7 +249,8 @@ class KnowledgeService {
             sourceCount: index.sourceCount,
             modIds: index.modIds,
             categories: [...counts].map(([id, count]) => ({ id, count })).sort((left, right) => left.id.localeCompare(right.id)),
-            loadedFromCache
+            loadedFromCache,
+            language: this.getLanguage()
         };
     }
 }

@@ -67,6 +67,7 @@ export const Bridge = {
     Knowledge: {
         open: "knowledge:open",
         getStatus: "knowledge:get-status",
+        getLanguage: "knowledge:get-language",
         searchEntities: "knowledge:search-entities",
         getEntity: "knowledge:get-entity",
         getEntityRelations: "knowledge:get-entity-relations",

@@ -8,10 +8,11 @@ export function registerPreloadKnowledgeApi(): KnowledgeApi {
         open: (worldFolderName) => ipcRenderer.invoke(Bridge.Knowledge.open, worldFolderName),
         rebuild: () => ipcRenderer.invoke(Bridge.Knowledge.rebuild),
         getStatus: () => ipcRenderer.invoke(Bridge.Knowledge.getStatus),
-        searchEntities: (query, category, limit) => ipcRenderer.invoke(Bridge.Knowledge.searchEntities, query, category, limit),
-        getEntity: (key) => ipcRenderer.invoke(Bridge.Knowledge.getEntity, key),
-        getEntityRelations: (key) => ipcRenderer.invoke(Bridge.Knowledge.getEntityRelations, key),
-        getEntityRelationsBatch: (keys) => ipcRenderer.invoke(Bridge.Knowledge.getEntityRelationsBatch, keys),
+        getLanguage: () => ipcRenderer.invoke(Bridge.Knowledge.getLanguage),
+        searchEntities: (query, category, limit, localized) => ipcRenderer.invoke(Bridge.Knowledge.searchEntities, query, category, limit, localized),
+        getEntity: (key, localized) => ipcRenderer.invoke(Bridge.Knowledge.getEntity, key, localized),
+        getEntityRelations: (key, localized) => ipcRenderer.invoke(Bridge.Knowledge.getEntityRelations, key, localized),
+        getEntityRelationsBatch: (keys, localized) => ipcRenderer.invoke(Bridge.Knowledge.getEntityRelationsBatch, keys, localized),
         onStatusChanged: (callback) => {
             const listener = (_event: IpcRendererEvent, status: KnowledgeIndexStatus): void => callback(status);
             ipcRenderer.on(Bridge.Knowledge.statusChanged, listener);

@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import classes from "./theme.module.css";
 import { useConfigStore } from "@renderer/stores/useConfigStore";
 import { useAppearanceStore } from "@renderer/stores/useAppearanceStore";
 import { useModsStore } from "@renderer/stores/useModsStore";
@@ -10,7 +11,7 @@ import { useGameFileOperationStore } from "@renderer/stores/useGameFileOperation
 import { useGameBundleInstallStore } from "@renderer/stores/useGameBundleInstallStore";
 import { useGameBackupStore } from "@renderer/stores/useGameBackupStore";
 import { KnowledgeContent } from "@renderer/knowledge/KnowledgeContent";
-import { MantineProvider } from "@mantine/core";
+import { createTheme, MantineProvider, Switch } from "@mantine/core";
 import { ModalsProvider } from "@mantine/modals";
 import { defaultModalProps } from "@renderer/utils/DefaultModalProps";
 import { contextModals } from "@renderer/modals/contextModals";
@@ -23,6 +24,17 @@ import { DrawerOwner } from "@renderer/components/DrawerOwner";
 export function Root(): React.JSX.Element {
     return new URLSearchParams(window.location.search).get("view") === "knowledge" ? <KnowledgeRoot /> : <LauncherRoot />;
 }
+
+const theme = createTheme({
+    components: {
+        Switch: Switch.extend({
+            classNames: {
+                root: classes.switchRoot,
+                track: classes.switchTrack
+            }
+        })
+    }
+});
 
 function LauncherRoot(): React.JSX.Element {
     // Appearance settings bridge
@@ -59,7 +71,7 @@ function LauncherRoot(): React.JSX.Element {
     const colorTheme = useAppearanceStore((state) => state.theme);
 
     return (
-        <MantineProvider forceColorScheme={colorTheme}>
+        <MantineProvider theme={theme} forceColorScheme={colorTheme}>
             <ModalsProvider modalProps={defaultModalProps} modals={contextModals}>
                 <Notifications position="top-right" />
 
@@ -84,10 +96,10 @@ function KnowledgeRoot(): React.JSX.Element {
     const mountLocale = useLocaleStoreMount();
     useEffect(() => mountLocale(), [mountLocale]);
 
-    const theme = useAppearanceStore((state) => state.theme);
+    const colorTheme = useAppearanceStore((state) => state.theme);
 
     return (
-        <MantineProvider forceColorScheme={theme}>
+        <MantineProvider theme={theme} forceColorScheme={colorTheme}>
             <KnowledgeContent />
         </MantineProvider>
     );
