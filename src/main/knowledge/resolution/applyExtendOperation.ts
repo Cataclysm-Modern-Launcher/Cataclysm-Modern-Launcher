@@ -1,5 +1,5 @@
 import { TJsonRecord } from "../types/TJsonRecord";
-import { isRecord } from "../../utils/isRecord";
+import { isRecord } from "@shared/utils/isRecord";
 import { cloneJsonValue } from "../utils/cloneJsonValue";
 
 export function applyExtendOperation(target: TJsonRecord, operation: unknown): TJsonRecord {

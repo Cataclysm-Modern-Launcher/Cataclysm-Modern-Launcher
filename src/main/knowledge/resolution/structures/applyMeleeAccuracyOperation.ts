@@ -1,5 +1,5 @@
 import { NumericOperation } from "../applyNumericOperation";
-import { isRecord } from "../../../utils/isRecord";
+import { isRecord } from "@shared/utils/isRecord";
 import { TStructuralOperationResult } from "./TStructuralOperationResult";
 
 const GRIP = { bad: 0, none: 1, solid: 2, weapon: 3 } as const;

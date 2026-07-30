@@ -6,7 +6,7 @@ import { app } from "electron";
 import { TAppThemeSource } from "@shared/appearance/TAppThemeSource";
 import { isNodeError } from "../utils/isNodeError";
 import { getDefaultWindowState, parseWindowState, WindowState } from "./WindowState";
-import { isRecord } from "../utils/isRecord";
+import { isRecord } from "@shared/utils/isRecord";
 
 const WRITE_DEBOUNCE_MS = 250;
 

@@ -1,6 +1,6 @@
 import { Rectangle, screen } from "electron";
-import { isRecord } from "../utils/isRecord";
-import { isFiniteNumber } from "../utils/isFiniteNumber";
+import { isRecord } from "@shared/utils/isRecord";
+import { isFiniteNumber } from "@shared/utils/isFiniteNumber";
 import { clamp } from "../utils/clamp";
 
 export interface WindowState {

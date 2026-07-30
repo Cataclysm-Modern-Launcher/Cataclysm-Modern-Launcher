@@ -1,4 +1,4 @@
-import { isRecord } from "../../utils/isRecord";
+import { isRecord } from "@shared/utils/isRecord";
 
 export function cloneJsonValue(value: unknown): unknown {
     if (Array.isArray(value)) return value.map(cloneJsonValue);

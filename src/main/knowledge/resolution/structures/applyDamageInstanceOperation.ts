@@ -1,8 +1,8 @@
 import { NumericOperation } from "../applyNumericOperation";
 import { TJsonRecord } from "../../types/TJsonRecord";
 import { cloneRecord } from "../../../utils/cloneRecord";
-import { isRecord } from "../../../utils/isRecord";
-import { isString } from "../../../utils/isString";
+import { isRecord } from "@shared/utils/isRecord";
+import { isString } from "@shared/utils/isString";
 import { TStructuralOperationResult } from "./TStructuralOperationResult";
 
 const DAMAGE_FIELDS = ["amount", "damage_multiplier", "armor_penetration", "armor_multiplier", "constant_armor_multiplier", "constant_damage_multiplier"] as const;

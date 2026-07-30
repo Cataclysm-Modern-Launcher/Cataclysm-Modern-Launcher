@@ -1,5 +1,5 @@
 import { NumericOperation } from "../applyNumericOperation";
-import { isTupleArray } from "../../../utils/isTupleArray";
+import { isTupleArray } from "@shared/utils/isTupleArray";
 import { TStructuralOperationResult } from "./TStructuralOperationResult";
 
 export function applyKeyedTupleArrayOperation(current: unknown, operand: unknown, operation: NumericOperation, path: string): TStructuralOperationResult {

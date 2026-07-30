@@ -11,7 +11,7 @@ import { readdir, readFile, stat } from "node:fs/promises";
 import { parse } from "jsonc-parser";
 import { TKnowledgeScanResult } from "./types/TKnowledgeScanResult";
 import { TScannedKnowledgeDefinition } from "./types/TScannedKnowledgeDefinition";
-import { isRecord } from "../utils/isRecord";
+import { isRecord } from "@shared/utils/isRecord";
 import { buildKnowledgeGraph } from "./graph/buildKnowledgeGraph";
 
 export async function buildKnowledgeIndex(context: TKnowledgeIndexContext, onProgress: (progress: ScanProgress) => void): Promise<TKnowledgeIndex> {

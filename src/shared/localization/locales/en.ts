@@ -211,6 +211,8 @@ export const EN_LOCALE = {
         "knowledge.entity.abstract": "Abstract",
         "knowledge.entity.id": "ID",
         "knowledge.entity.qualities": "Qualities",
+        "knowledge.entity.raw.json": "View raw JSON",
+        "knowledge.entity.raw.json.title": "Raw JSON",
         "knowledge.entity.select": "Select an entity",
         "knowledge.entity.source": "Source",
         "knowledge.index.building": "Building knowledge index",

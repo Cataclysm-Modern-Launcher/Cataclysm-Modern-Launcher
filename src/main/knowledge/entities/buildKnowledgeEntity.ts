@@ -1,7 +1,7 @@
 import { KnowledgeEntityDetails } from "@shared/knowledge/KnowledgeEntityDetails";
 import { getKnowledgeCategory } from "./getKnowledgeCategory";
 import { TResolvedKnowledgeDefinition } from "../types/TResolvedKnowledgeDefinition";
-import { isRecord } from "../../utils/isRecord";
+import { isRecord } from "@shared/utils/isRecord";
 
 export function buildKnowledgeEntity(definition: TResolvedKnowledgeDefinition): KnowledgeEntityDetails {
     const id = definition.effectiveId;

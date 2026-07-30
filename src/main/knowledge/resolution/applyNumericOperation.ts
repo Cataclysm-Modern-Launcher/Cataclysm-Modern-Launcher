@@ -2,8 +2,8 @@ import { applyScalarOperation } from "./scalars/applyScalarOperation";
 import { applyStructuralOperation } from "./structures/applyStructuralOperation";
 import { getDefinitionDefault } from "./defaults/getDefinitionDefault";
 import { TJsonRecord } from "../types/TJsonRecord";
-import { isRecord } from "../../utils/isRecord";
-import { isStructured } from "../../utils/isStructured";
+import { isRecord } from "@shared/utils/isRecord";
+import { isStructured } from "@shared/utils/isStructured";
 
 export type NumericOperation = "relative" | "proportional";
 export type UnsupportedNumericReason = "missing-target" | "type-mismatch" | "unsupported-structure";

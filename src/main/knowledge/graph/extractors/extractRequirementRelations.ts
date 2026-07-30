@@ -1,6 +1,6 @@
 import { TResolvedKnowledgeDefinition } from "../../types/TResolvedKnowledgeDefinition";
 import { TKnowledgeRelationCandidate } from "../types/TKnowledgeRelationCandidate";
-import { isRecord } from "../../../utils/isRecord";
+import { isRecord } from "@shared/utils/isRecord";
 
 export function extractRequirementRelations(definition: TResolvedKnowledgeDefinition, sourceKey: string): TKnowledgeRelationCandidate[] {
     const result: TKnowledgeRelationCandidate[] = [];

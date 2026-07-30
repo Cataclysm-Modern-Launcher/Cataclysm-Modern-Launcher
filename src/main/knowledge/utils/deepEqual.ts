@@ -1,4 +1,4 @@
-import { isRecord } from "../../utils/isRecord";
+import { isRecord } from "@shared/utils/isRecord";
 
 export function deepEqual(left: unknown, right: unknown): boolean {
     if (Object.is(left, right)) return true;

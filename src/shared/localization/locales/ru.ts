@@ -209,6 +209,8 @@ export const RU_LOCALE = {
         "knowledge.entity.abstract": "Абстрактный объект",
         "knowledge.entity.id": "ID",
         "knowledge.entity.qualities": "Качества",
+        "knowledge.entity.raw.json": "Показать исходный JSON",
+        "knowledge.entity.raw.json.title": "Исходный JSON",
         "knowledge.entity.select": "Выберите сущность",
         "knowledge.entity.source": "Источник",
         "knowledge.index.building": "Создание индекса базы знаний",
