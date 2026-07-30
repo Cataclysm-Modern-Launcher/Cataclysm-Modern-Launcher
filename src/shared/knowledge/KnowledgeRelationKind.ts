@@ -6,6 +6,8 @@ export type KnowledgeRelationKind =
     | "requires-skill"
     | "requires-proficiency"
     | "learned-from"
+    | "autolearned-at"
+    | "learned-by-disassembly"
     | "uses-requirement"
     | "provides-quality"
     | "uncrafts-item"

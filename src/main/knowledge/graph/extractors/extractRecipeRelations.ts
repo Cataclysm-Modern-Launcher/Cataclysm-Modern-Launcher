@@ -67,12 +67,7 @@ export function extractRecipeRelations(definition: TResolvedKnowledgeDefinition,
                 make(definition, sourceKey, "requires-proficiency", entry.proficiency, "proficiency", `proficiencies[${index}]`, {
                     required: entry.required === true,
                     timeMultiplier: typeof entry.time_multiplier === "number" ? entry.time_multiplier : undefined,
-                    skillPenalty:
-                        typeof entry.skill_penalty === "number"
-                            ? entry.skill_penalty
-                            : typeof entry.fail_multiplier === "number"
-                              ? entry.fail_multiplier - 1
-                              : undefined
+                    skillPenalty: typeof entry.skill_penalty === "number" ? entry.skill_penalty : typeof entry.fail_multiplier === "number" ? entry.fail_multiplier - 1 : undefined
                 })
             );
         });
@@ -80,7 +75,30 @@ export function extractRecipeRelations(definition: TResolvedKnowledgeDefinition,
     if (Array.isArray(raw.book_learn)) {
         raw.book_learn.forEach((entry, index) => {
             if (!Array.isArray(entry) || typeof entry[0] !== "string") return;
-            result.push(make(definition, sourceKey, "learned-from", entry[0], "ITEM", `book_learn[${index}]`, { level: typeof entry[1] === "number" ? entry[1] : 0 }));
+            result.push(make(definition, sourceKey, "learned-from", entry[0], "ITEM", `book_learn[${index}]`, { level: typeof entry[1] === "number" ? entry[1] : undefined }));
+        });
+    }
+    if (Array.isArray(raw.autolearn)) {
+        raw.autolearn.forEach((entry, index) => {
+            if (!Array.isArray(entry) || typeof entry[0] !== "string") return;
+            result.push(make(definition, sourceKey, "autolearned-at", entry[0], "skill", `autolearn[${index}]`, { level: typeof entry[1] === "number" ? entry[1] : 0 }));
+        });
+    } else if (raw.autolearn === true) {
+        const levels = new Map<string, number>();
+        if (Array.isArray(raw.skills_required)) {
+            raw.skills_required.forEach((entry) => {
+                if (Array.isArray(entry) && typeof entry[0] === "string") levels.set(entry[0], typeof entry[1] === "number" ? entry[1] : 0);
+            });
+        }
+        if (typeof raw.skill_used === "string" && raw.skill_used.length > 0) levels.set(raw.skill_used, typeof raw.difficulty === "number" ? raw.difficulty : 0);
+        [...levels].forEach(([skill, level], index) => result.push(make(definition, sourceKey, "autolearned-at", skill, "skill", `autolearn[derived:${index}]`, { level })));
+    }
+    if (typeof raw.decomp_learn === "number" && typeof raw.skill_used === "string" && raw.skill_used.length > 0) {
+        result.push(make(definition, sourceKey, "learned-by-disassembly", raw.skill_used, "skill", "decomp_learn", { level: raw.decomp_learn }));
+    } else if (Array.isArray(raw.decomp_learn)) {
+        raw.decomp_learn.forEach((entry, index) => {
+            if (!Array.isArray(entry) || typeof entry[0] !== "string") return;
+            result.push(make(definition, sourceKey, "learned-by-disassembly", entry[0], "skill", `decomp_learn[${index}]`, { level: typeof entry[1] === "number" ? entry[1] : 0 }));
         });
     }
     if (Array.isArray(raw.using)) {

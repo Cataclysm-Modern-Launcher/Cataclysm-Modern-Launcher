@@ -3,7 +3,7 @@ import { readNumber } from "@shared/utils/readNumber";
 import { readString } from "@shared/utils/readString";
 import React, { ReactNode } from "react";
 import { Anchor, AnchorProps, Badge, Group, Text, Tooltip } from "@mantine/core";
-import { IconBook2, IconBrain, IconClock, IconProps, IconRosette, IconTool } from "@tabler/icons-react";
+import { IconBook2, IconBrain, IconClock, IconProps, IconRecycle, IconRosette, IconTool } from "@tabler/icons-react";
 import { useTranslate } from "@renderer/stores/useLocaleStore";
 
 interface Props extends AnchorProps {
@@ -87,7 +87,7 @@ export function RelationLink(props: Props): React.JSX.Element {
     }
 
     if (relation.kind === "learned-from") {
-        const level = readNumber(relation.metadata.level) ?? 0;
+        const level = readNumber(relation.metadata.level);
         return (
             <Group gap={2} wrap="nowrap">
                 <Wrap {...props}>
@@ -96,8 +96,40 @@ export function RelationLink(props: Props): React.JSX.Element {
                         <Text size="xs">{relation.entity.name}</Text>
                     </Group>
                 </Wrap>
-                {!!level && <Text size="xs">({level})</Text>}
+                {level !== null && (
+                    <Tooltip label={t("knowledge.recipe.book.level.tooltip", { level })}>
+                        <Text size="xs">({level})</Text>
+                    </Tooltip>
+                )}
             </Group>
+        );
+    }
+
+    if (relation.kind === "autolearned-at") {
+        const level = readNumber(relation.metadata.level) ?? 0;
+        return (
+            <Wrap {...props} tooltip={t("knowledge.recipe.autolearn.skill.tooltip")}>
+                <Group gap={2} wrap="nowrap">
+                    <IconBrain {...iconProps} />
+                    <Text size="xs">
+                        {relation.entity.name} {level}
+                    </Text>
+                </Group>
+            </Wrap>
+        );
+    }
+
+    if (relation.kind === "learned-by-disassembly") {
+        const level = readNumber(relation.metadata.level) ?? 0;
+        return (
+            <Wrap {...props} tooltip={t("knowledge.recipe.decomp.tooltip")}>
+                <Group gap={2} wrap="nowrap">
+                    <IconRecycle {...iconProps} />
+                    <Text size="xs">
+                        {relation.entity.name} {level}
+                    </Text>
+                </Group>
+            </Wrap>
         );
     }
 

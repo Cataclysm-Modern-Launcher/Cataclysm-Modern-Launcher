@@ -1,4 +1,4 @@
-import { Badge, Box, Code, Divider, Group, Paper, Stack, Text, UnstyledButton } from "@mantine/core";
+import { Badge, Box, Code, Divider, Group, Paper, Stack, Text, Tooltip, UnstyledButton } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { RelationLink } from "@renderer/knowledge/RelationLink";
 import { SummaryValue } from "@renderer/knowledge/SummaryValue";
@@ -25,11 +25,13 @@ export function KnowledgeRecipeCard({ recipe, entity, relations, onOpen }: Props
     const skills = outgoing.filter((relation) => relation.kind === "requires-skill");
     const proficiencies = outgoing.filter((relation) => relation.kind === "requires-proficiency");
     const books = outgoing.filter((relation) => relation.kind === "learned-from");
+    const autolearnSkills = outgoing.filter((relation) => relation.kind === "autolearned-at");
+    const decompSkills = outgoing.filter((relation) => relation.kind === "learned-by-disassembly");
     const raw = entity?.raw;
 
     const requirements = entity?.recipeRequirements;
-
     const canAutoLearn = raw?.autolearn === true || Array.isArray(raw?.autolearn);
+    const hasLearningSource = canAutoLearn || books.length > 0 || decompSkills.length > 0;
 
     return (
         <Paper withBorder p="md">
@@ -52,16 +54,33 @@ export function KnowledgeRecipeCard({ recipe, entity, relations, onOpen }: Props
                     <SummaryValue
                         label={t("knowledge.recipe.learning")}
                         value={[
-                            canAutoLearn ? (
-                                <Text size="sm" fw={500}>
-                                    {t("knowledge.recipe.autolearn.available")}
-                                </Text>
+                            canAutoLearn && autolearnSkills.length > 0 ? (
+                                <Group gap={4} wrap="wrap">
+                                    {autolearnSkills.map((skill) => (
+                                        <RelationLink key={`${skill.entity.key}:${skill.metadata.level}`} relation={skill} onOpen={onOpen} />
+                                    ))}
+                                </Group>
+                            ) : canAutoLearn ? (
+                                <Tooltip label={t("knowledge.recipe.autolearn.immediate.tooltip")}>
+                                    <Text size="sm" fw={500}>
+                                        {t("knowledge.recipe.autolearn.available")}
+                                    </Text>
+                                </Tooltip>
                             ) : null,
                             ...books.map((book) => <RelationLink key={book.entity.key} relation={book} onOpen={onOpen} iconClass={IconBook2} />),
-                            !canAutoLearn && !books.length ? (
-                                <Text size="sm" fw={500}>
-                                    {t("knowledge.recipe.none")}
-                                </Text>
+                            ...decompSkills.map((skill) => <RelationLink key={`${skill.entity.key}:${skill.metadata.level}`} relation={skill} onOpen={onOpen} />),
+                            raw?.never_learn === true ? (
+                                <Tooltip label={t("knowledge.recipe.never.learn.tooltip")}>
+                                    <Text size="sm" fw={500}>
+                                        {t("knowledge.recipe.never.learn")}
+                                    </Text>
+                                </Tooltip>
+                            ) : !hasLearningSource ? (
+                                <Tooltip label={t("knowledge.recipe.learning.unspecified.tooltip")}>
+                                    <Text size="sm" fw={500}>
+                                        {t("knowledge.recipe.learning.unspecified")}
+                                    </Text>
+                                </Tooltip>
                             ) : null
                         ]}
                     />
