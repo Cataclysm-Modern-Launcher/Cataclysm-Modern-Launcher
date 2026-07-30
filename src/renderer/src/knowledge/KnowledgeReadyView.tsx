@@ -88,7 +88,7 @@ export function KnowledgeReadyView(props: KnowledgeReadyViewProps): React.JSX.El
                     </Center>
                 ) : (
                     <ScrollArea key={props.selected.entity.key} h="100%" offsetScrollbars>
-                        <Box p="md">
+                        <Box p="md" className="selectable-text">
                             <KnowledgeEntityDetailsView
                                 key={props.selected.entity.key}
                                 entity={props.selected.entity}

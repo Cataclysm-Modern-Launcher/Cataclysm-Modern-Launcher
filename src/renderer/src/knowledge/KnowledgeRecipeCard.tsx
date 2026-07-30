@@ -18,7 +18,9 @@ export function KnowledgeRecipeCard({ recipe, relations, onOpen }: { recipe: Kno
                 <Group justify="space-between" align="flex-start" wrap="nowrap">
                     <div>
                         <Text fw={600}>{recipe.entity.name}</Text>
-                        <Text size="xs" c="dimmed">{recipe.entity.id}</Text>
+                        <Text size="xs" c="dimmed">
+                            {recipe.entity.id}
+                        </Text>
                     </div>
                     <Badge variant="light">{recipe.entity.sourceModId}</Badge>
                 </Group>

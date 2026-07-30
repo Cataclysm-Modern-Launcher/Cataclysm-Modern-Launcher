@@ -41,6 +41,7 @@ export function KnowledgeJsonModal(props: KnowledgeJsonModalProps): React.JSX.El
             centered
         >
             <CodeMirror
+                className="selectable-text"
                 value={source}
                 height="70vh"
                 extensions={[json()]}

@@ -56,14 +56,9 @@ export function KnowledgeContent(): React.JSX.Element {
 
     const selected = navigation.index >= 0 ? navigation.entries[navigation.index] : null;
     const loadPage = async (key: string, useGameLanguage: boolean): Promise<KnowledgePage | null> => {
-        const [entity, relations] = await Promise.all([
-            window.api.knowledge.getEntity(key, useGameLanguage),
-            window.api.knowledge.getEntityRelations(key, useGameLanguage),
-        ]);
+        const [entity, relations] = await Promise.all([window.api.knowledge.getEntity(key, useGameLanguage), window.api.knowledge.getEntityRelations(key, useGameLanguage)]);
         if (entity === null) return null;
-        const relatedKeys = relations.incoming
-            .filter((relation) => relation.entity.jsonType === "recipe" || relation.entity.jsonType === "uncraft")
-            .map((relation) => relation.entity.key);
+        const relatedKeys = relations.incoming.filter((relation) => relation.entity.jsonType === "recipe" || relation.entity.jsonType === "uncraft").map((relation) => relation.entity.key);
         const relatedRelations = await window.api.knowledge.getEntityRelationsBatch(relatedKeys, useGameLanguage);
         return { entity, relations, relatedRelations };
     };

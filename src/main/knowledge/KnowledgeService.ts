@@ -134,7 +134,11 @@ class KnowledgeService {
                 .filter((entity) => category === null || entity.category === category)
                 .filter(
                     (entity) =>
-                        normalized.length === 0 || entity.name.toLocaleLowerCase().includes(normalized) || this.translations.translate(entity.name).toLocaleLowerCase().includes(normalized) || entity.id.toLocaleLowerCase().includes(normalized) || entity.jsonType.toLocaleLowerCase().includes(normalized)
+                        normalized.length === 0 ||
+                        entity.name.toLocaleLowerCase().includes(normalized) ||
+                        this.translations.translate(entity.name).toLocaleLowerCase().includes(normalized) ||
+                        entity.id.toLocaleLowerCase().includes(normalized) ||
+                        entity.jsonType.toLocaleLowerCase().includes(normalized)
                 )
                 .sort((left, right) => this.displayName(left, localized).localeCompare(this.displayName(right, localized), this.translations.getLanguage()))
                 .slice(0, limit)
