@@ -7,7 +7,8 @@ export async function copyDirectoryContents(sourcePath: string, targetPath: stri
         (await readdir(sourcePath)).map((entry) =>
             cp(join(sourcePath, entry), join(targetPath, entry), {
                 recursive: true,
-                force: true
+                force: true,
+                dereference: true
             })
         )
     );

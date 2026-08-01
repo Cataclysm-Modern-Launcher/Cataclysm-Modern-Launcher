@@ -66,30 +66,44 @@ class GameReleaseService {
         await rm(tempPath, { recursive: true, force: true });
         await rm(gameBundlePath, { recursive: true, force: true });
 
-        await this.downloadFile(release.asset.downloadUrl, downloadPath, release.name, release.asset.size);
-        await this.extractArchive(downloadPath, tempPath, release.name);
-        broadcastInstallIPC({ status: "preparing-saves", releaseName: release.name });
+        const userdataExisted = await pathExists(userdataPath);
 
-        const sourceUserdata = options.copyUserdata ? findUserdataSource(gameBundlesBefore, config.activeGameBundleByChannel[channel.id]) : null;
-        await mkdir(userdataPath, { recursive: true });
-        if (sourceUserdata !== null && (await pathExists(sourceUserdata.userdataPath))) await copyDirectoryContents(sourceUserdata.userdataPath, userdataPath);
+        try {
+            await this.downloadFile(release.asset.downloadUrl, downloadPath, release.name, release.asset.size);
+            await this.extractArchive(downloadPath, tempPath, release.name);
+            broadcastInstallIPC({ status: "preparing-saves", releaseName: release.name });
 
-        const manifest: GameBundleManifest = {
-            schemaVersion: 2,
-            channelId: channel.id,
-            releaseId: release.id,
-            releaseName: release.name,
-            publishedAt: release.publishedAt,
-            htmlUrl: release.htmlUrl,
-            installedAt: new Date().toISOString()
-        };
-        await writeFile(join(tempPath, GAME_BUNDLE_MANIFEST_FILE_NAME), `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
-        await rename(tempPath, gameBundlePath);
+            const sourceUserdata = options.copyUserdata ? findUserdataSource(gameBundlesBefore, config.activeGameBundleByChannel[channel.id]) : null;
+            await mkdir(userdataPath, { recursive: true });
+            if (sourceUserdata !== null && (await pathExists(sourceUserdata.userdataPath))) await copyDirectoryContents(sourceUserdata.userdataPath, userdataPath);
 
-        const gameBundle = { id: release.id, path: gameBundlePath, userdataPath, manifest, isActive: false };
+            const manifest: GameBundleManifest = {
+                schemaVersion: 2,
+                channelId: channel.id,
+                releaseId: release.id,
+                releaseName: release.name,
+                publishedAt: release.publishedAt,
+                htmlUrl: release.htmlUrl,
+                installedAt: new Date().toISOString()
+            };
+            await writeFile(join(tempPath, GAME_BUNDLE_MANIFEST_FILE_NAME), `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
+            await rename(tempPath, gameBundlePath);
 
-        broadcastInstallIPC({ status: "finalizing", releaseName: release.name });
-        return gameBundle;
+            const gameBundle = { id: release.id, path: gameBundlePath, userdataPath, manifest, isActive: false };
+
+            broadcastInstallIPC({ status: "finalizing", releaseName: release.name });
+            return gameBundle;
+        } catch (error) {
+            await rm(tempPath, { recursive: true, force: true }).catch((cleanupError) => {
+                console.error("[game-bundle] failed to remove temporary game bundle", cleanupError);
+            });
+            if (!userdataExisted) {
+                await rm(userdataPath, { recursive: true, force: true }).catch((cleanupError) => {
+                    console.error("[game-bundle] failed to remove incomplete userdata", cleanupError);
+                });
+            }
+            throw error;
+        }
     }
 
     async cleanupDownloads(workspacePath: string, channelId: string): Promise<void> {

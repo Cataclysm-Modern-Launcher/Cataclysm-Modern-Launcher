@@ -157,6 +157,7 @@ class GameBundleService {
 
         const gameBundles: GameBundle[] = [];
         for (const entry of entries) {
+            if (entry.includes(".tmp-")) continue;
             const gameBundlePath = join(channelGameBundlesPath, entry);
             try {
                 if (!(await stat(gameBundlePath)).isDirectory()) continue;

@@ -4,11 +4,12 @@ import { GameBundleDeleteOptions } from "@shared/game-bundle/GameBundleDeleteOpt
 import { GameBundleInstallOptions } from "@shared/game-bundle/GameBundleInstallOptions";
 import { GameBundleInstallProgress } from "@shared/game-bundle/GameBundleInstallProgress";
 import { isGameBundleInstallRunning } from "@renderer/utils/isGameBundleInstallRunning";
+import { EGameBundleInstallResult } from "@shared/game-bundle/EGameBundleInstallResult";
 
 interface GameBundleInstallStoreState extends IMountableState {
     progress: GameBundleInstallProgress;
     isInstalling: boolean;
-    installLatest: (options: GameBundleInstallOptions) => Promise<boolean>;
+    installLatest: (options: GameBundleInstallOptions) => Promise<EGameBundleInstallResult>;
     cancelDownload: () => Promise<boolean>;
     setActive: (gameBundleId: string) => Promise<boolean>;
     delete: (gameBundleId: string, options: GameBundleDeleteOptions) => Promise<boolean>;
@@ -24,9 +25,8 @@ export const useGameBundleInstallStore = create<GameBundleInstallStoreState>()((
         set({ isInstalling: true });
         try {
             const result = await window.api.game.installLatestGameBundle(options);
-            if (result.status === "installed") return true;
-            if (result.status !== "cancelled") console.error("Failed to install game bundle", result.message);
-            return false;
+            if (result.status !== "installed" && result.status !== "cancelled") console.error("Failed to install game bundle", result.message);
+            return result;
         } finally {
             set({ isInstalling: false });
         }

@@ -34,9 +34,14 @@ export function InstallReleaseModal({ id, innerProps: { release, hasInstalledVer
     const handleClose = useCallback(() => modals.close(id), [id]);
 
     const handleConfirm = useCallback(async () => {
+        setError(null);
         try {
-            const installed = await installLatestGameBundle({ releaseId: release.id, makeActive: true, copyUserdata, removeOlderGameBundles });
-            if (installed) handleClose();
+            const result = await installLatestGameBundle({ releaseId: release.id, makeActive: true, copyUserdata, removeOlderGameBundles });
+            if (result.status === "installed") {
+                handleClose();
+            } else if (result.status !== "cancelled") {
+                setError(result.message);
+            }
         } catch (e) {
             console.error("Can't install", e);
             setError(getErrorMessage(e));
