@@ -35,7 +35,7 @@ type RegisteredActivity = {
     shouldRebuildWatchers: boolean;
 };
 
-const DEFAULT_SETTLE_DELAY_MS = 1500;
+const DEFAULT_SETTLE_DELAY_MS = 3000;
 const WATCH_REBUILD_DELAY_MS = 300;
 const SAVE_DIRECTORY_NAME = "save";
 
@@ -174,20 +174,18 @@ export class GameSaveMonitor {
             return { shouldSettle: false, shouldRebuildWatchers: true };
         }
 
+        this.pendingEventCount += 1;
+        this.pendingChangedPaths.add(changedPath);
+
         const keyKind = getKeySaveFileKind(changedPath);
-        if (keyKind === null) {
-            return { shouldSettle: false, shouldRebuildWatchers: false };
+        if (keyKind !== null) {
+            this.pendingKeyEventCount += 1;
+            this.pendingKeyChangedPaths.add(changedPath);
+            if (keyKind === "master") this.pendingMasterSaveChange = true;
+            else this.pendingPlayerSaveArchiveChange = true;
         }
 
-        this.pendingEventCount += 1;
-        this.pendingKeyEventCount += 1;
-        this.pendingChangedPaths.add(changedPath);
-        this.pendingKeyChangedPaths.add(changedPath);
-        if (keyKind === "master") this.pendingMasterSaveChange = true;
-        else this.pendingPlayerSaveArchiveChange = true;
-        console.info(`[game-save] key event type=${eventType} kind=${keyKind} path=${changedPath}`);
-
-        return { shouldSettle: true, shouldRebuildWatchers: true };
+        return { shouldSettle: true, shouldRebuildWatchers: keyKind !== null };
     }
 
     private registerUserdataActivity(eventType: string, changedPath: string): RegisteredActivity {
@@ -222,8 +220,8 @@ export class GameSaveMonitor {
         const activity = this.consumePendingActivity();
         if (activity.eventCount === 0) return;
 
-        console.info(
-            `[game-save] settled events=${activity.eventCount} keyEvents=${activity.keyEventCount} changedPaths=${activity.changedPaths.length} keyPaths=${activity.keyChangedPaths.length} realSave=${activity.hasSaveFileChange ? "yes" : "no"}`
+        console.debug(
+            `[game-save] activity settled events=${activity.eventCount} keyEvents=${activity.keyEventCount} changedPaths=${activity.changedPaths.length} keyPaths=${activity.keyChangedPaths.length} realSave=${activity.hasSaveFileChange ? "yes" : "no"}`
         );
         if (!activity.hasSaveFileChange) {
             if (this.isStable()) this.emitSaveActivityChanged(true);

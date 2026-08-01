@@ -96,7 +96,7 @@ export class GameSaveCoordinator {
     }
 
     private async processSettledSaveActivity(gameBundleId: string, activity: GameSaveSettledActivity): Promise<void> {
-        console.info(`[game-save] refresh save summary gameBundleId=${gameBundleId} events=${activity.eventCount} changedPaths=${activity.changedPaths.length}`);
+        console.debug(`[game-save] refresh save summary gameBundleId=${gameBundleId} events=${activity.eventCount} changedPaths=${activity.changedPaths.length}`);
         const changedWorldFolderNames = getChangedWorldFolderNames(activity);
         const gameBundle = await gameBundleService.getActiveGameBundle();
         if (gameBundle?.id !== gameBundleId) return;
