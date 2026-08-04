@@ -8,8 +8,8 @@ class ModDeploymentService {
         await this.synchronizeMods(repositoryPath, channelId, userdataPaths, Object.values(registry.mods));
     }
 
-    async synchronizeMods(repositoryPath: string, channelId: string, userdataPaths: string[], mods: ModInfo[]): Promise<void> {
-        await modAttachmentService.synchronize(userdataPaths, mods, (mod) => modRegistryStore.getModPath(repositoryPath, channelId, mod));
+    async synchronizeMods(repositoryPath: string, channelId: string, userdataPaths: string[], mods: ModInfo[], options: { replaceConflicts?: boolean } = {}): Promise<void> {
+        await modAttachmentService.synchronize(userdataPaths, mods, (mod) => modRegistryStore.getModPath(repositoryPath, channelId, mod), options);
     }
 
     async detach(userdataPaths: string[], mod: ModInfo): Promise<void> {

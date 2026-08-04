@@ -300,7 +300,8 @@ class ModRepositoryService {
             await this.synchronizeAttachments(
                 context.repositoryPath,
                 context.channelId,
-                related.map((item) => registry.mods[item.id])
+                related.map((item) => registry.mods[item.id]),
+                { replaceConflicts: true }
             );
             const state = await this.publishState();
             return { status: "updated", state, mod: state.mods.find((item) => item.id === mod.id)! };
@@ -454,8 +455,8 @@ class ModRepositoryService {
         }));
     }
 
-    private async synchronizeAttachments(repositoryPath: string, channelId: string, mods: ModInfo[]): Promise<void> {
-        await modDeploymentService.synchronizeMods(repositoryPath, channelId, await this.getUserdataPaths(), mods);
+    private async synchronizeAttachments(repositoryPath: string, channelId: string, mods: ModInfo[], options: { replaceConflicts?: boolean } = {}): Promise<void> {
+        await modDeploymentService.synchronizeMods(repositoryPath, channelId, await this.getUserdataPaths(), mods, options);
     }
     private async getUserdataPaths(): Promise<string[]> {
         return (await gameBundleService.getGameBundles()).map((bundle) => bundle.userdataPath);
