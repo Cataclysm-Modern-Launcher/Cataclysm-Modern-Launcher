@@ -1,6 +1,6 @@
 {
     "name": "cataclysm-modern-launcher",
-    "version": "1.0.6",
+    "version": "1.0.7",
     "description": "A modern launcher for Cataclysm games and forks.",
     "main": "./out/main/index.js",
     "author": "Johnson1893",
