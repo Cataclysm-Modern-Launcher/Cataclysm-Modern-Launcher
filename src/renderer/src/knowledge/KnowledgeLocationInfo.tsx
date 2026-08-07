@@ -1,0 +1,161 @@
+import { Box, Group, Paper, SegmentedControl, Stack, Text, Tooltip, UnstyledButton } from "@mantine/core";
+import { useTranslate } from "@renderer/stores/useLocaleStore";
+import { useKnowledgeNavigate } from "@renderer/stores/useKnowledgeNavigationStore";
+import { KnowledgeEntityDetails } from "@shared/knowledge/KnowledgeEntityDetails";
+import { KnowledgeLocationCell, KnowledgeLocationLayout } from "@shared/knowledge/KnowledgeLocation";
+import React, { useEffect, useMemo, useState } from "react";
+
+export function KnowledgeLocationInfo({ entity }: { entity: KnowledgeEntityDetails }): React.JSX.Element {
+    const t = useTranslate();
+    const location = entity.location;
+    const layouts = location?.layouts ?? [];
+    const defaultZ = layouts.some((layout) => layout.z === 0) ? 0 : (layouts[0]?.z ?? 0);
+    const [z, setZ] = useState(defaultZ);
+
+    useEffect(() => setZ(defaultZ), [entity.key, defaultZ]);
+
+    const layout = useMemo(() => layouts.find((candidate) => candidate.z === z) ?? layouts[0], [layouts, z]);
+
+    return (
+        <Stack gap="md">
+            {entity.description !== null && (
+                <Text size="xs" c="dimmed" style={{ whiteSpace: "pre-wrap" }}>
+                    {entity.description}
+                </Text>
+            )}
+
+            {location?.generationWeight !== null && location?.generationWeight !== undefined && (
+                <Group gap="xs">
+                    <Text size="sm" fw={600}>
+                        {t("knowledge.location.generation.weight")}:
+                    </Text>
+                    <Tooltip label={t("knowledge.location.generation.weight.tooltip")}>
+                        <Text size="sm" style={{ borderBottom: "1px dotted currentColor", cursor: "help" }}>
+                            {location.generationWeight}
+                        </Text>
+                    </Tooltip>
+                </Group>
+            )}
+
+            {location?.occurrences !== null && location?.occurrences !== undefined && (
+                <Group gap="xs">
+                    <Text size="sm" fw={600}>
+                        {t("knowledge.location.generation.occurrences")}:
+                    </Text>
+                    <Tooltip label={t("knowledge.location.generation.occurrences.tooltip")}>
+                        <Text size="sm" style={{ borderBottom: "1px dotted currentColor", cursor: "help" }}>
+                            {formatOccurrences(location.occurrences)}
+                        </Text>
+                    </Tooltip>
+                </Group>
+            )}
+
+            {location?.dynamicLayout === true && (
+                <Text size="sm" c="dimmed">
+                    {t("knowledge.location.layout.dynamic")}
+                </Text>
+            )}
+
+            {layout !== undefined && (
+                <Stack gap="xs">
+                    {layouts.length > 1 && (
+                        <Group gap="xs">
+                            <Text size="sm" fw={600}>
+                                {t("knowledge.location.layout.layer")}
+                            </Text>
+                            <SegmentedControl
+                                size="xs"
+                                value={String(layout.z)}
+                                onChange={(value) => setZ(Number(value))}
+                                data={layouts.map((candidate) => ({
+                                    value: String(candidate.z),
+                                    label: candidate.z === 0 ? t("knowledge.location.layout.surface") : String(candidate.z)
+                                }))}
+                            />
+                        </Group>
+                    )}
+                    {layouts.length === 1 && layout.z !== 0 && (
+                        <Text size="sm" fw={600}>
+                            {t("knowledge.location.layout.layer.value", { z: layout.z })}
+                        </Text>
+                    )}
+                    <LocationLayout layout={layout} />
+                </Stack>
+            )}
+        </Stack>
+    );
+}
+
+function LocationLayout({ layout }: { layout: KnowledgeLocationLayout }): React.JSX.Element {
+    const columns = Math.max(0, ...layout.rows.map((row) => row.length));
+
+    return (
+        <Paper withBorder p="sm" style={{ overflowX: "auto" }}>
+            <Box
+                style={{
+                    display: "grid",
+                    gridTemplateColumns: `repeat(${columns}, 28px)`,
+                    gridAutoRows: "28px",
+                    width: "max-content",
+                    fontFamily: "var(--mantine-font-family-monospace)"
+                }}
+            >
+                {layout.rows.flatMap((row, y) => Array.from({ length: columns }, (_, x) => <LocationCell key={`${x}:${y}`} cell={row[x] ?? { symbol: " ", color: null, name: null, entityKey: null }} />))}
+            </Box>
+        </Paper>
+    );
+}
+
+function LocationCell({ cell }: { cell: KnowledgeLocationCell }): React.JSX.Element {
+    const navigate = useKnowledgeNavigate();
+    const style: React.CSSProperties = {
+        width: 28,
+        height: 28,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: 18,
+        lineHeight: 1,
+        color: cataColor(cell.color),
+        userSelect: "text"
+    };
+
+    const content =
+        cell.entityKey === null ? (
+            <Box style={style}>{cell.symbol}</Box>
+        ) : (
+            <UnstyledButton onClick={() => navigate(cell.entityKey!)} style={{ ...style, cursor: "pointer" }} aria-label={cell.name ?? undefined}>
+                {cell.symbol}
+            </UnstyledButton>
+        );
+
+    return cell.name === null ? content : <Tooltip label={cell.name}>{content}</Tooltip>;
+}
+
+function formatOccurrences([min, max]: [number, number]): string {
+    return min === max ? String(min) : `${min}–${max}`;
+}
+
+function cataColor(value: string | null): string | undefined {
+    if (value === null) return undefined;
+    const color = value.replace(/^c_/, "");
+    const colors: Record<string, string> = {
+        black: "#000000",
+        dark_gray: "#555555",
+        light_gray: "#aaaaaa",
+        white: "#ffffff",
+        red: "#aa0000",
+        light_red: "#ff5555",
+        green: "#00aa00",
+        light_green: "#55ff55",
+        brown: "#aa5500",
+        yellow: "#ffff55",
+        blue: "#0000aa",
+        light_blue: "#5555ff",
+        magenta: "#aa00aa",
+        pink: "#ff55ff",
+        cyan: "#00aaaa",
+        light_cyan: "#55ffff"
+    };
+    return colors[color];
+}

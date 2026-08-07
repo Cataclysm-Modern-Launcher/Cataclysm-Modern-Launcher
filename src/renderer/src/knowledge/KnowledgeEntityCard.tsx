@@ -2,9 +2,11 @@ import { Badge, Group, Paper, Text } from "@mantine/core";
 import { KnowledgeEntitySummary } from "@shared/knowledge/KnowledgeEntitySummary";
 import React from "react";
 import { useKnowledgeNavigate } from "@renderer/stores/useKnowledgeNavigationStore";
+import { useTranslate } from "@renderer/stores/useLocaleStore";
 
 export function KnowledgeEntityCard({ entity }: { entity: KnowledgeEntitySummary }): React.JSX.Element {
     const navigate = useKnowledgeNavigate();
+    const t = useTranslate();
     return (
         <Paper withBorder p="sm" onClick={() => navigate(entity.key)} style={{ cursor: "pointer" }}>
             <Group justify="space-between" wrap="nowrap">
@@ -12,7 +14,7 @@ export function KnowledgeEntityCard({ entity }: { entity: KnowledgeEntitySummary
                     {entity.name}
                 </Text>
                 <Badge size="xs" variant="light">
-                    {entity.jsonType}
+                    {entity.jsonType === "LOCATION" ? t("knowledge.location.type") : entity.jsonType}
                 </Badge>
             </Group>
         </Paper>

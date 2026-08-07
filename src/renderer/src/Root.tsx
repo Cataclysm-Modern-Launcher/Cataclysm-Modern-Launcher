@@ -35,7 +35,14 @@ const theme = createTheme({
         }),
         Tooltip: Tooltip.extend({
             defaultProps: {
-                openDelay: 300
+                openDelay: 300,
+                multiline: true
+            },
+            styles: {
+                tooltip: {
+                    maxWidth: "50vw",
+                    whiteSpace: "normal"
+                }
             }
         })
     }

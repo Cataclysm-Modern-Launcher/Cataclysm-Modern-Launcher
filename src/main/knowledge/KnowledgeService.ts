@@ -27,6 +27,9 @@ import { KnowledgeRecipeRequirementAlternative } from "@shared/knowledge/Knowled
 import { KnowledgeItemDestruction, KnowledgeItemDestructionAction, KnowledgeItemDestructionResult } from "@shared/knowledge/KnowledgeItemDestruction";
 import { isRecord } from "@shared/utils/isRecord";
 import { KnowledgeMonsterHarvest, KnowledgeMonsterHarvestEntry } from "@shared/knowledge/KnowledgeMonsterHarvest";
+import { KnowledgeLocationSpawn } from "@shared/knowledge/KnowledgeLocation";
+import type { LocationBuildIndex } from "./locations/buildKnowledgeLocations";
+import { buildKnowledgeLocations, buildKnowledgeTerrainLocation, createKnowledgeLocationBuildIndex } from "./locations/buildKnowledgeLocations";
 
 function normalizeSearchText(value: string): string {
     return value.toLocaleLowerCase().replaceAll("ё", "е");
@@ -37,6 +40,8 @@ class KnowledgeService {
     private index: TKnowledgeIndex | null = null;
     private status: KnowledgeIndexStatus = { status: "idle" };
     private readonly entityByKey = new Map<string, KnowledgeEntityDetails>();
+    private locationEntities: KnowledgeEntityDetails[] = [];
+    private locationBuildIndex: LocationBuildIndex | null = null;
     private readonly nodeByKey = new Map<string, TKnowledgeGraphNode>();
     private readonly incomingEdgesByKey = new Map<string, TKnowledgeGraphEdge[]>();
     private readonly outgoingEdgesByKey = new Map<string, TKnowledgeGraphEdge[]>();
@@ -139,7 +144,7 @@ class KnowledgeService {
         if (this.index === null) return [];
         const normalized = normalizeSearchText(query.trim());
         return (
-            this.index.entities
+            [...this.index.entities, ...this.locationEntities]
                 .filter(isKnowledgeEntitySearchable)
                 .filter((entity) => category === null || entity.category === category)
                 .filter(
@@ -158,7 +163,11 @@ class KnowledgeService {
     }
 
     private getEntity(key: string, localized: boolean): KnowledgeEntityDetails | null {
-        const entity = this.entityByKey.get(key);
+        let entity = this.entityByKey.get(key);
+        if (entity === undefined && this.locationBuildIndex !== null) {
+            entity = buildKnowledgeTerrainLocation(key, this.locationBuildIndex) ?? undefined;
+            if (entity !== undefined) this.entityByKey.set(entity.key, entity);
+        }
         return entity === undefined ? null : this.localizeEntity(entity, localized);
     }
 
@@ -230,13 +239,54 @@ class KnowledgeService {
             return { ...localizedEntity, recipeRequirements: this.buildRecipeRequirements(entity.key, localized) };
         }
         if (entity.jsonType === "ITEM") {
-            return { ...localizedEntity, itemDestruction: this.buildItemDestruction(entity, localized) };
+            return {
+                ...localizedEntity,
+                itemDestruction: this.buildItemDestruction(entity, localized),
+                locationAppearances: this.buildLocationAppearances(entity.key, "loot", localized)
+            };
         }
         if (entity.jsonType === "MONSTER") {
             const monsterHarvest = this.buildMonsterHarvest(entity, localized);
-            return monsterHarvest === undefined ? localizedEntity : { ...localizedEntity, monsterHarvest };
+            return {
+                ...localizedEntity,
+                ...(monsterHarvest === undefined ? {} : { monsterHarvest }),
+                locationAppearances: this.buildLocationAppearances(entity.key, "monsters", localized)
+            };
+        }
+        if (entity.jsonType === "LOCATION" && entity.location !== undefined) {
+            return {
+                ...localizedEntity,
+                location: {
+                    ...entity.location,
+                    layouts: this.localizeLocationLayouts(entity.location.layouts, localized),
+                    furniture: this.localizeLocationSpawns(entity.location.furniture, localized),
+                    loot: this.localizeLocationSpawns(entity.location.loot, localized),
+                    monsters: this.localizeLocationSpawns(entity.location.monsters, localized)
+                }
+            };
         }
         return localizedEntity;
+    }
+
+    private buildLocationAppearances(entityKey: string, kind: "loot" | "monsters", localized: boolean): KnowledgeLocationSpawn[] {
+        return this.locationEntities.flatMap((location): KnowledgeLocationSpawn[] => {
+            const appearance = location.location?.[kind].find((entry) => entry.entity.key === entityKey);
+            if (appearance === undefined) return [];
+            return [{ entity: this.getEntityReference(location.key, localized), chance: appearance.chance, approximate: appearance.approximate }];
+        });
+    }
+
+    private localizeLocationSpawns(spawns: KnowledgeLocationSpawn[], localized: boolean): KnowledgeLocationSpawn[] {
+        if (!localized) return spawns;
+        return spawns.map((spawn) => ({ ...spawn, entity: this.getEntityReference(spawn.entity.key, true) }));
+    }
+
+    private localizeLocationLayouts(layouts: NonNullable<KnowledgeEntityDetails["location"]>["layouts"], localized: boolean): NonNullable<KnowledgeEntityDetails["location"]>["layouts"] {
+        if (!localized) return layouts;
+        return layouts.map((layout) => ({
+            ...layout,
+            rows: layout.rows.map((row) => row.map((cell) => (cell.name === null ? cell : { ...cell, name: this.translations.translate(cell.name) })))
+        }));
     }
 
     private buildMonsterHarvest(entity: KnowledgeEntityDetails, localized: boolean): KnowledgeMonsterHarvest | undefined {
@@ -443,6 +493,11 @@ class KnowledgeService {
         this.clearIndex();
         this.index = index;
         for (const entity of index.entities) this.entityByKey.set(entity.key, entity);
+        const locationsStarted = performance.now();
+        this.locationBuildIndex = createKnowledgeLocationBuildIndex(index.entities);
+        this.locationEntities = buildKnowledgeLocations(index.entities, this.locationBuildIndex);
+        console.info(`[knowledge:locations] build durationMs=${Math.round(performance.now() - locationsStarted)} locations=${this.locationEntities.length}`);
+        for (const entity of this.locationEntities) this.entityByKey.set(entity.key, entity);
         for (const node of index.graph.nodes) this.nodeByKey.set(node.key, node);
         for (const edge of index.graph.edges) {
             append(this.outgoingEdgesByKey, edge.sourceKey, edge);
@@ -452,6 +507,8 @@ class KnowledgeService {
 
     private clearIndex(): void {
         this.index = null;
+        this.locationEntities = [];
+        this.locationBuildIndex = null;
         this.entityByKey.clear();
         this.nodeByKey.clear();
         this.incomingEdgesByKey.clear();
@@ -464,7 +521,7 @@ class KnowledgeService {
     }
 
     private createReadyStatus(index: TKnowledgeIndex, loadedFromCache: boolean): KnowledgeIndexStatus {
-        const searchableEntities = index.entities.filter(isKnowledgeEntitySearchable);
+        const searchableEntities = [...index.entities, ...this.locationEntities].filter(isKnowledgeEntitySearchable);
         const counts = new Map<string, number>();
         for (const entity of searchableEntities) counts.set(entity.category, (counts.get(entity.category) ?? 0) + 1);
         return {

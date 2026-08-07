@@ -13,6 +13,8 @@ import { KnowledgeQualityRequirementBadge } from "./KnowledgeQualityRequirementB
 import { KnowledgeMonsterInfo } from "./KnowledgeMonsterInfo";
 import { KnowledgeMonsterHarvestView } from "./KnowledgeMonsterHarvestView";
 import { KnowledgeMonsterDropsView } from "./KnowledgeMonsterDropsView";
+import { KnowledgeLocationInfo } from "./KnowledgeLocationInfo";
+import { KnowledgeLocationSpawnList } from "./KnowledgeLocationSpawnList";
 
 export type KnowledgeEntityDetailsViewProps = {
     entity: KnowledgeEntityDetails;
@@ -32,6 +34,11 @@ export function KnowledgeEntityDetailsView(props: KnowledgeEntityDetailsViewProp
     const qualities = filterRelations(props.relations.outgoing, "provides-quality");
     const isItem = props.entity.jsonType === "ITEM";
     const isMonster = props.entity.jsonType === "MONSTER";
+    const isLocation = props.entity.jsonType === "LOCATION";
+    const locationAppearances = props.entity.locationAppearances ?? [];
+    const locationFurniture = props.entity.location?.furniture ?? [];
+    const locationLoot = props.entity.location?.loot ?? [];
+    const locationMonsters = props.entity.location?.monsters ?? [];
     const monsterDrops = filterRelations(props.relations.outgoing, "drops-item");
     const droppedByMonsters = filterRelations(props.relations.incoming, "drops-item");
     const monsterHarvest = props.entity.monsterHarvest?.entries ?? [];
@@ -61,7 +68,7 @@ export function KnowledgeEntityDetailsView(props: KnowledgeEntityDetailsViewProp
                     </Group>
                     <Group gap="xs" mt="xs">
                         <Badge size="xs" variant="outline">
-                            {props.entity.jsonType}
+                            {isLocation ? t("knowledge.location.type") : props.entity.jsonType}
                         </Badge>
                         <Badge size="xs" variant="light">
                             {props.entity.sourceModId}
@@ -96,27 +103,38 @@ export function KnowledgeEntityDetailsView(props: KnowledgeEntityDetailsViewProp
                     {isItem && usedIn.length > 0 && <Tabs.Tab value="usedIn">{t("knowledge.tabs.used.in", { count: usedIn.length })}</Tabs.Tab>}
                     {isMonster && monsterDrops.length > 0 && <Tabs.Tab value="drops">{t("knowledge.monster.tabs.drops", { count: monsterDrops.length })}</Tabs.Tab>}
                     {isMonster && monsterHarvest.length > 0 && <Tabs.Tab value="harvest">{t("knowledge.monster.tabs.harvest", { count: monsterHarvest.length })}</Tabs.Tab>}
+                    {isItem && locationAppearances.length > 0 && <Tabs.Tab value="locations">{t("knowledge.item.tabs.locations", { count: locationAppearances.length })}</Tabs.Tab>}
+                    {isMonster && locationAppearances.length > 0 && <Tabs.Tab value="locations">{t("knowledge.monster.tabs.locations", { count: locationAppearances.length })}</Tabs.Tab>}
+                    {isLocation && locationFurniture.length > 0 && <Tabs.Tab value="furniture">{t("knowledge.location.tabs.furniture", { count: locationFurniture.length })}</Tabs.Tab>}
+                    {isLocation && locationLoot.length > 0 && <Tabs.Tab value="loot">{t("knowledge.location.tabs.loot", { count: locationLoot.length })}</Tabs.Tab>}
+                    {isLocation && locationMonsters.length > 0 && <Tabs.Tab value="monsters">{t("knowledge.location.tabs.monsters", { count: locationMonsters.length })}</Tabs.Tab>}
                 </Tabs.List>
 
                 <Tabs.Panel value="info" pt="md">
-                    {isMonster ? <KnowledgeMonsterInfo entity={props.entity} /> : <Stack gap="sm">
-                        {props.entity.description !== null && (
-                            <Text size="xs" c="dimmed" style={{ whiteSpace: "pre-wrap" }}>
-                                {props.entity.description}
-                            </Text>
-                        )}
-
-                        {qualities.length > 0 && (
-                            <Group gap={6} mt="xs">
-                                <Text size="sm" fw={600}>
-                                    {t("knowledge.entity.qualities")}:
+                    {isMonster ? (
+                        <KnowledgeMonsterInfo entity={props.entity} />
+                    ) : isLocation ? (
+                        <KnowledgeLocationInfo entity={props.entity} />
+                    ) : (
+                        <Stack gap="sm">
+                            {props.entity.description !== null && (
+                                <Text size="xs" c="dimmed" style={{ whiteSpace: "pre-wrap" }}>
+                                    {props.entity.description}
                                 </Text>
-                                {qualities.map((quality) => (
-                                    <KnowledgeQualityRequirementBadge key={quality.entity.key} alternative={{ kind: "requires-quality", entity: quality.entity, metadata: quality.metadata }} />
-                                ))}
-                            </Group>
-                        )}
-                    </Stack>}
+                            )}
+
+                            {qualities.length > 0 && (
+                                <Group gap={6} mt="xs">
+                                    <Text size="sm" fw={600}>
+                                        {t("knowledge.entity.qualities")}:
+                                    </Text>
+                                    {qualities.map((quality) => (
+                                        <KnowledgeQualityRequirementBadge key={quality.entity.key} alternative={{ kind: "requires-quality", entity: quality.entity, metadata: quality.metadata }} />
+                                    ))}
+                                </Group>
+                            )}
+                        </Stack>
+                    )}
                 </Tabs.Panel>
 
                 {isItem && recipes.length > 0 && (
@@ -158,6 +176,30 @@ export function KnowledgeEntityDetailsView(props: KnowledgeEntityDetailsViewProp
                 {isMonster && monsterHarvest.length > 0 && (
                     <Tabs.Panel value="harvest" pt="md">
                         <KnowledgeMonsterHarvestView entries={monsterHarvest} />
+                    </Tabs.Panel>
+                )}
+
+                {(isItem || isMonster) && locationAppearances.length > 0 && (
+                    <Tabs.Panel value="locations" pt="md">
+                        <KnowledgeLocationSpawnList entries={locationAppearances} />
+                    </Tabs.Panel>
+                )}
+
+                {isLocation && locationFurniture.length > 0 && (
+                    <Tabs.Panel value="furniture" pt="md">
+                        <KnowledgeLocationSpawnList entries={locationFurniture} />
+                    </Tabs.Panel>
+                )}
+
+                {isLocation && locationLoot.length > 0 && (
+                    <Tabs.Panel value="loot" pt="md">
+                        <KnowledgeLocationSpawnList entries={locationLoot} />
+                    </Tabs.Panel>
+                )}
+
+                {isLocation && locationMonsters.length > 0 && (
+                    <Tabs.Panel value="monsters" pt="md">
+                        <KnowledgeLocationSpawnList entries={locationMonsters} hint={t("knowledge.location.monsters.hint")} />
                     </Tabs.Panel>
                 )}
             </Tabs>
