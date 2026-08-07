@@ -17,6 +17,7 @@ export type KnowledgeReadyViewProps = {
     selected: (KnowledgePage & { tab: string }) | null;
     searchHistory: string[];
     onQueryChange: (value: string) => void;
+    onQueryCommit: (value: string) => void;
     onClearSearchHistory: () => void;
     onCategoryChange: (value: string | null) => void;
     onRebuild: () => void;
@@ -86,6 +87,10 @@ export function KnowledgeReadyView(props: KnowledgeReadyViewProps): React.JSX.El
                     <TextInput
                         value={props.query}
                         onChange={(event) => props.onQueryChange(event.currentTarget.value)}
+                        onBlur={() => props.onQueryCommit(props.query)}
+                        onKeyDown={(event) => {
+                            if (event.key === "Enter") props.onQueryCommit(props.query);
+                        }}
                         leftSection={<IconSearch size={16} />}
                         rightSection={historyButton}
                         rightSectionPointerEvents="all"

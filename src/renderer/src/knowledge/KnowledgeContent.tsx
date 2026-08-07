@@ -28,10 +28,9 @@ export function KnowledgeContent(): React.JSX.Element {
         if (status.status !== "ready") return;
         const timeout = window.setTimeout(() => {
             void window.api.knowledge.searchEntities(query, category, 300, localized).then(setEntities);
-            searchHistory.remember(query);
         }, 500);
         return () => window.clearTimeout(timeout);
-    }, [query, category, status, localized, searchHistory.remember, searchHistory]);
+    }, [query, category, status, localized]);
 
     if (status.status === "idle" || status.status === "building")
         return (
@@ -74,6 +73,7 @@ export function KnowledgeContent(): React.JSX.Element {
             selected={selected}
             searchHistory={searchHistory.history}
             onQueryChange={setQuery}
+            onQueryCommit={searchHistory.remember}
             onClearSearchHistory={searchHistory.clear}
             onCategoryChange={setCategory}
             onRebuild={() => void rebuild()}
