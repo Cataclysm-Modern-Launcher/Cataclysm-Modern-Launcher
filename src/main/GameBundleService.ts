@@ -109,7 +109,7 @@ class GameBundleService {
 
             const gameBundle = await gameReleaseService.install(ws.path, ws.config, channel, release, options, gameBundlesBefore);
             createdGameBundle = gameBundle;
-            await modDeploymentService.synchronize(ws.path, channel.id, [gameBundle.userdataPath]);
+            await modDeploymentService.synchronize(ws.path, channel.id, [gameBundle.userdataPath], { replaceConflicts: options.copyUserdata });
             const config = options.makeActive ? await this.activateBundle(ws.config, channel.id, gameBundle.id) : ws.config;
             if (options.removeOlderGameBundles) {
                 await this.removeOlder(ws.path, config, channel.id, gameBundle.id, true);

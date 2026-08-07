@@ -3,9 +3,9 @@ import { modAttachmentService } from "./ModAttachmentService";
 import { modRegistryStore } from "./ModRegistryStore";
 
 class ModDeploymentService {
-    async synchronize(repositoryPath: string, channelId: string, userdataPaths: string[]): Promise<void> {
+    async synchronize(repositoryPath: string, channelId: string, userdataPaths: string[], options: { replaceConflicts?: boolean } = {}): Promise<void> {
         const registry = await modRegistryStore.read(repositoryPath, channelId);
-        await this.synchronizeMods(repositoryPath, channelId, userdataPaths, Object.values(registry.mods));
+        await this.synchronizeMods(repositoryPath, channelId, userdataPaths, Object.values(registry.mods), options);
     }
 
     async synchronizeMods(repositoryPath: string, channelId: string, userdataPaths: string[], mods: ModInfo[], options: { replaceConflicts?: boolean } = {}): Promise<void> {
