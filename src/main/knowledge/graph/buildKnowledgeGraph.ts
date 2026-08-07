@@ -5,6 +5,7 @@ import { extractRelations } from "./extractors/extractRelations";
 import { extractItemDestructionRelations } from "./extractors/extractItemDestructionRelations";
 import { extractReversibleRecipeRelations } from "./extractors/extractReversibleRecipeRelations";
 import { buildItemMigrationMap, resolveItemMigration } from "./resolveItemMigration";
+import { extractMonsterDropRelations } from "./extractors/extractMonsterDropRelations";
 
 export function buildKnowledgeGraph(definitions: TResolvedKnowledgeDefinition[]): TKnowledgeGraph {
     const started = performance.now();
@@ -23,7 +24,8 @@ export function buildKnowledgeGraph(definitions: TResolvedKnowledgeDefinition[])
     const candidates = [
         ...definitions.flatMap((definition) => extractRelations(definition, key(definition.canonicalType, definition.effectiveId))),
         ...extractItemDestructionRelations(definitions),
-        ...extractReversibleRecipeRelations(definitions)
+        ...extractReversibleRecipeRelations(definitions),
+        ...extractMonsterDropRelations(definitions)
     ];
     for (const candidate of candidates) {
         const target = candidate.virtualTarget;

@@ -17,4 +17,5 @@ export type KnowledgeRelationKind =
     | "breaks-into"
     | "applies-mapgen"
     | "provides-camp-feature"
-    | "triggers-eoc";
+    | "triggers-eoc"
+    | "drops-item";

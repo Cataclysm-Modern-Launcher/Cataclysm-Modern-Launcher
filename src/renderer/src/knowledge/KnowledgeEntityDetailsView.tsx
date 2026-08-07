@@ -10,6 +10,9 @@ import { KnowledgeRecipeCard } from "./KnowledgeRecipeCard";
 import { KnowledgeItemDestructionView } from "./KnowledgeItemDestructionView";
 import { useKnowledgeNavigationStore } from "@renderer/stores/useKnowledgeNavigationStore";
 import { KnowledgeQualityRequirementBadge } from "./KnowledgeQualityRequirementBadge";
+import { KnowledgeMonsterInfo } from "./KnowledgeMonsterInfo";
+import { KnowledgeMonsterHarvestView } from "./KnowledgeMonsterHarvestView";
+import { KnowledgeMonsterDropsView } from "./KnowledgeMonsterDropsView";
 
 export type KnowledgeEntityDetailsViewProps = {
     entity: KnowledgeEntityDetails;
@@ -28,6 +31,10 @@ export function KnowledgeEntityDetailsView(props: KnowledgeEntityDetailsViewProp
     const usedIn = props.relations.incoming.filter((relation) => relation.kind === "uses-component" || relation.kind === "uses-tool");
     const qualities = filterRelations(props.relations.outgoing, "provides-quality");
     const isItem = props.entity.jsonType === "ITEM";
+    const isMonster = props.entity.jsonType === "MONSTER";
+    const monsterDrops = filterRelations(props.relations.outgoing, "drops-item");
+    const droppedByMonsters = filterRelations(props.relations.incoming, "drops-item");
+    const monsterHarvest = props.entity.monsterHarvest?.entries ?? [];
     const [jsonOpened, setJsonOpened] = useState(false);
 
     return (
@@ -85,11 +92,14 @@ export function KnowledgeEntityDetailsView(props: KnowledgeEntityDetailsViewProp
                     {isItem && recipes.length > 0 && <Tabs.Tab value="recipes">{t("knowledge.tabs.recipes", { count: recipes.length })}</Tabs.Tab>}
                     {isItem && destruction.length > 0 && <Tabs.Tab value="destruction">{t("knowledge.tabs.destruction", { count: destruction.length })}</Tabs.Tab>}
                     {isItem && obtainedFrom.length > 0 && <Tabs.Tab value="obtainedFrom">{t("knowledge.tabs.obtained.from", { count: obtainedFrom.length })}</Tabs.Tab>}
+                    {isItem && droppedByMonsters.length > 0 && <Tabs.Tab value="monsterDrops">{t("knowledge.tabs.monster.drops", { count: droppedByMonsters.length })}</Tabs.Tab>}
                     {isItem && usedIn.length > 0 && <Tabs.Tab value="usedIn">{t("knowledge.tabs.used.in", { count: usedIn.length })}</Tabs.Tab>}
+                    {isMonster && monsterDrops.length > 0 && <Tabs.Tab value="drops">{t("knowledge.monster.tabs.drops", { count: monsterDrops.length })}</Tabs.Tab>}
+                    {isMonster && monsterHarvest.length > 0 && <Tabs.Tab value="harvest">{t("knowledge.monster.tabs.harvest", { count: monsterHarvest.length })}</Tabs.Tab>}
                 </Tabs.List>
 
                 <Tabs.Panel value="info" pt="md">
-                    <Stack gap="sm">
+                    {isMonster ? <KnowledgeMonsterInfo entity={props.entity} /> : <Stack gap="sm">
                         {props.entity.description !== null && (
                             <Text size="xs" c="dimmed" style={{ whiteSpace: "pre-wrap" }}>
                                 {props.entity.description}
@@ -106,7 +116,7 @@ export function KnowledgeEntityDetailsView(props: KnowledgeEntityDetailsViewProp
                                 ))}
                             </Group>
                         )}
-                    </Stack>
+                    </Stack>}
                 </Tabs.Panel>
 
                 {isItem && recipes.length > 0 && (
@@ -127,9 +137,27 @@ export function KnowledgeEntityDetailsView(props: KnowledgeEntityDetailsViewProp
                     </Tabs.Panel>
                 )}
 
+                {isItem && droppedByMonsters.length > 0 && (
+                    <Tabs.Panel value="monsterDrops" pt="md">
+                        <KnowledgeMonsterDropsView drops={droppedByMonsters} />
+                    </Tabs.Panel>
+                )}
+
                 {isItem && usedIn.length > 0 && (
                     <Tabs.Panel value="usedIn" pt="md">
                         <RecipeList recipes={usedIn} relatedEntities={props.relatedEntities} relatedRelations={props.relatedRelations} />
+                    </Tabs.Panel>
+                )}
+
+                {isMonster && monsterDrops.length > 0 && (
+                    <Tabs.Panel value="drops" pt="md">
+                        <KnowledgeMonsterDropsView drops={monsterDrops} />
+                    </Tabs.Panel>
+                )}
+
+                {isMonster && monsterHarvest.length > 0 && (
+                    <Tabs.Panel value="harvest" pt="md">
+                        <KnowledgeMonsterHarvestView entries={monsterHarvest} />
                     </Tabs.Panel>
                 )}
             </Tabs>

@@ -26,6 +26,7 @@ import { KnowledgeRecipeRequirementGroup } from "@shared/knowledge/KnowledgeReci
 import { KnowledgeRecipeRequirementAlternative } from "@shared/knowledge/KnowledgeRecipeRequirementAlternative";
 import { KnowledgeItemDestruction, KnowledgeItemDestructionAction, KnowledgeItemDestructionResult } from "@shared/knowledge/KnowledgeItemDestruction";
 import { isRecord } from "@shared/utils/isRecord";
+import { KnowledgeMonsterHarvest, KnowledgeMonsterHarvestEntry } from "@shared/knowledge/KnowledgeMonsterHarvest";
 
 class KnowledgeService {
     private context: TKnowledgeIndexContext | null = null;
@@ -227,7 +228,33 @@ class KnowledgeService {
         if (entity.jsonType === "ITEM") {
             return { ...localizedEntity, itemDestruction: this.buildItemDestruction(entity, localized) };
         }
+        if (entity.jsonType === "MONSTER") {
+            const monsterHarvest = this.buildMonsterHarvest(entity, localized);
+            return monsterHarvest === undefined ? localizedEntity : { ...localizedEntity, monsterHarvest };
+        }
         return localizedEntity;
+    }
+
+    private buildMonsterHarvest(entity: KnowledgeEntityDetails, localized: boolean): KnowledgeMonsterHarvest | undefined {
+        const harvestId = typeof entity.raw.harvest === "string" ? entity.raw.harvest : undefined;
+        if (harvestId === undefined) return undefined;
+        const harvest = this.entityByKey.get(`harvest:${harvestId}`);
+        if (harvest === undefined || !Array.isArray(harvest.raw.entries)) return undefined;
+
+        const entries = harvest.raw.entries.flatMap((value): KnowledgeMonsterHarvestEntry[] => {
+            if (!isRecord(value) || typeof value.drop !== "string") return [];
+            const item = this.entityByKey.get(`ITEM:${value.drop}`);
+            return [{
+                dropId: value.drop,
+                ...(item === undefined ? {} : { drop: this.getEntityReference(item.key, localized) }),
+                type: typeof value.type === "string" ? value.type : null,
+                ...readHarvestNumberField("baseNum", value.base_num),
+                ...readHarvestNumberField("scaleNum", value.scale_num),
+                ...(typeof value.max === "number" ? { max: value.max } : {}),
+                ...(typeof value.mass_ratio === "number" ? { massRatio: value.mass_ratio } : {})
+            }];
+        });
+        return { id: harvestId, entries };
     }
 
     private buildItemDestruction(entity: KnowledgeEntityDetails, localized: boolean): KnowledgeItemDestruction {
@@ -484,6 +511,15 @@ function append<TKey, TValue>(map: Map<TKey, TValue[]>, key: TKey, value: TValue
     const values = map.get(key);
     if (values === undefined) map.set(key, [value]);
     else values.push(value);
+}
+
+
+function readHarvestNumberField<K extends "baseNum" | "scaleNum">(key: K, value: unknown): Partial<Record<K, number | [number, number]>> {
+    if (typeof value === "number") return { [key]: value } as Partial<Record<K, number | [number, number]>>;
+    if (Array.isArray(value) && value.length === 2 && typeof value[0] === "number" && typeof value[1] === "number") {
+        return { [key]: [value[0], value[1]] } as Partial<Record<K, number | [number, number]>>;
+    }
+    return {};
 }
 
 export const knowledgeService = new KnowledgeService();
