@@ -186,7 +186,7 @@ function buildDetails(points: Point[], dynamicLayout: boolean, index: LocationBu
 
     for (const occurrence of terrainOccurrences) {
         const terrain = by.get(`overmap_terrain:${occurrence.id}`);
-        if (terrain) candidates.push(...oterMonsterSpawns(terrain.raw, occurrence.baseChance, occurrence.approximate, index));
+        if (terrain) candidates.push(...oterMonsterSpawns(terrain.raw, occurrence.baseChance, index));
 
         const variants = index.mapgensByTerrain.get(stripRotation(occurrence.id)) ?? [];
         candidates.push(...weightedMapgenVariants(variants, occurrence.baseChance, occurrence.approximate, index));
@@ -406,7 +406,7 @@ function monsterSpawns(o: Record<string, unknown>, base: number, approximateBase
     return result;
 }
 
-function oterMonsterSpawns(raw: Record<string, unknown>, base: number, approximateBase: boolean, index: LocationBuildIndex): Candidate[] {
+function oterMonsterSpawns(raw: Record<string, unknown>, base: number, index: LocationBuildIndex): Candidate[] {
     return isRecord(raw.spawns) && typeof raw.spawns.group === "string" ? monsterGroup(raw.spawns.group, mul(base, percentEstimate(raw.spawns.chance)), index, new Set()) : [];
 }
 
