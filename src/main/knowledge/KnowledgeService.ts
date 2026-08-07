@@ -28,6 +28,10 @@ import { KnowledgeItemDestruction, KnowledgeItemDestructionAction, KnowledgeItem
 import { isRecord } from "@shared/utils/isRecord";
 import { KnowledgeMonsterHarvest, KnowledgeMonsterHarvestEntry } from "@shared/knowledge/KnowledgeMonsterHarvest";
 
+function normalizeSearchText(value: string): string {
+    return value.toLocaleLowerCase().replaceAll("ё", "е");
+}
+
 class KnowledgeService {
     private context: TKnowledgeIndexContext | null = null;
     private index: TKnowledgeIndex | null = null;
@@ -133,7 +137,7 @@ class KnowledgeService {
 
     private search(query: string, category: string | null, limit: number, localized: boolean): KnowledgeEntitySummary[] {
         if (this.index === null) return [];
-        const normalized = query.trim().toLocaleLowerCase();
+        const normalized = normalizeSearchText(query.trim());
         return (
             this.index.entities
                 .filter(isKnowledgeEntitySearchable)
@@ -141,10 +145,10 @@ class KnowledgeService {
                 .filter(
                     (entity) =>
                         normalized.length === 0 ||
-                        entity.name.toLocaleLowerCase().includes(normalized) ||
-                        this.translations.translate(entity.name).toLocaleLowerCase().includes(normalized) ||
-                        entity.id.toLocaleLowerCase().includes(normalized) ||
-                        entity.jsonType.toLocaleLowerCase().includes(normalized)
+                        normalizeSearchText(entity.name).includes(normalized) ||
+                        normalizeSearchText(this.translations.translate(entity.name)).includes(normalized) ||
+                        normalizeSearchText(entity.id).includes(normalized) ||
+                        normalizeSearchText(entity.jsonType).includes(normalized)
                 )
                 .sort((left, right) => this.displayName(left, localized).localeCompare(this.displayName(right, localized), this.translations.getLanguage()))
                 .slice(0, limit)
@@ -244,15 +248,17 @@ class KnowledgeService {
         const entries = harvest.raw.entries.flatMap((value): KnowledgeMonsterHarvestEntry[] => {
             if (!isRecord(value) || typeof value.drop !== "string") return [];
             const item = this.entityByKey.get(`ITEM:${value.drop}`);
-            return [{
-                dropId: value.drop,
-                ...(item === undefined ? {} : { drop: this.getEntityReference(item.key, localized) }),
-                type: typeof value.type === "string" ? value.type : null,
-                ...readHarvestNumberField("baseNum", value.base_num),
-                ...readHarvestNumberField("scaleNum", value.scale_num),
-                ...(typeof value.max === "number" ? { max: value.max } : {}),
-                ...(typeof value.mass_ratio === "number" ? { massRatio: value.mass_ratio } : {})
-            }];
+            return [
+                {
+                    dropId: value.drop,
+                    ...(item === undefined ? {} : { drop: this.getEntityReference(item.key, localized) }),
+                    type: typeof value.type === "string" ? value.type : null,
+                    ...readHarvestNumberField("baseNum", value.base_num),
+                    ...readHarvestNumberField("scaleNum", value.scale_num),
+                    ...(typeof value.max === "number" ? { max: value.max } : {}),
+                    ...(typeof value.mass_ratio === "number" ? { massRatio: value.mass_ratio } : {})
+                }
+            ];
         });
         return { id: harvestId, entries };
     }
@@ -512,7 +518,6 @@ function append<TKey, TValue>(map: Map<TKey, TValue[]>, key: TKey, value: TValue
     if (values === undefined) map.set(key, [value]);
     else values.push(value);
 }
-
 
 function readHarvestNumberField<K extends "baseNum" | "scaleNum">(key: K, value: unknown): Partial<Record<K, number | [number, number]>> {
     if (typeof value === "number") return { [key]: value } as Partial<Record<K, number | [number, number]>>;
