@@ -104,7 +104,6 @@ export function GameBundlesDrawer(): React.JSX.Element {
                                     isGameBundleReady={gameBundleIds.has(release.id)}
                                     isInstallingGameBundle={isInstallingGameBundle}
                                     actionDisabled={fileOperationRunning}
-                                    isLastInstalledVersion={gameState.gameBundles.length === 1}
                                     onRequestInstall={openInstallModal}
                                 />
                             ))
