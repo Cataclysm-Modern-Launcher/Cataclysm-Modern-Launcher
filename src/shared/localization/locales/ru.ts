@@ -295,6 +295,8 @@ export const RU_LOCALE = {
         "knowledge.tabs.monster.drops": "Дроп с монстров ({count})",
         "knowledge.monster.tabs.drops": "Дроп ({count})",
         "knowledge.location.type": "Локация",
+        "knowledge.location.variants": "Варианты",
+        "knowledge.location.variants.count": "вариантов: {count}",
         "knowledge.location.tabs.furniture": "Мебель ({count})",
         "knowledge.location.tabs.loot": "Лут ({count})",
         "knowledge.location.tabs.monsters": "Монстры ({count})",

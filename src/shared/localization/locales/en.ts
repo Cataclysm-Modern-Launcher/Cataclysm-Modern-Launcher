@@ -297,6 +297,8 @@ export const EN_LOCALE = {
         "knowledge.tabs.monster.drops": "Dropped by monsters ({count})",
         "knowledge.monster.tabs.drops": "Drops ({count})",
         "knowledge.location.type": "Location",
+        "knowledge.location.variants": "Variants",
+        "knowledge.location.variants.count": "{count} variants",
         "knowledge.location.tabs.furniture": "Furniture ({count})",
         "knowledge.location.tabs.loot": "Loot ({count})",
         "knowledge.location.tabs.monsters": "Monsters ({count})",

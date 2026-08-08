@@ -146,20 +146,24 @@ class KnowledgeService {
         return (
             [...this.index.entities, ...this.locationEntities]
                 .filter(isKnowledgeEntitySearchable)
+                .filter(isKnowledgeSearchRepresentative)
                 .filter((entity) => category === null || entity.category === category)
-                .filter(
-                    (entity) =>
-                        normalized.length === 0 ||
-                        normalizeSearchText(entity.name).includes(normalized) ||
-                        normalizeSearchText(this.translations.translate(entity.name)).includes(normalized) ||
-                        normalizeSearchText(entity.id).includes(normalized) ||
-                        normalizeSearchText(entity.jsonType).includes(normalized)
-                )
+                .filter((entity) => normalized.length === 0 || this.matchesSearch(entity, normalized))
                 .sort((left, right) => this.displayName(left, localized).localeCompare(this.displayName(right, localized), this.translations.getLanguage()))
                 .slice(0, limit)
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 .map(({ sourceFile: _sourceFile, raw: _raw, ...summary }) => this.localizeSummary(summary, localized))
         );
+    }
+
+    private matchesSearch(entity: KnowledgeEntityDetails, normalized: string): boolean {
+        const matches = (name: string, id: string, jsonType: string): boolean =>
+            normalizeSearchText(name).includes(normalized) ||
+            normalizeSearchText(this.translations.translate(name)).includes(normalized) ||
+            normalizeSearchText(id).includes(normalized) ||
+            normalizeSearchText(jsonType).includes(normalized);
+        if (matches(entity.name, entity.id, entity.jsonType)) return true;
+        return entity.location?.appearanceVariants?.some((variant) => matches(variant.name, variant.id, variant.jsonType)) === true;
     }
 
     private getEntity(key: string, localized: boolean): KnowledgeEntityDetails | null {
@@ -261,7 +265,8 @@ class KnowledgeService {
                     layouts: this.localizeLocationLayouts(entity.location.layouts, localized),
                     furniture: this.localizeLocationSpawns(entity.location.furniture, localized),
                     loot: this.localizeLocationSpawns(entity.location.loot, localized),
-                    monsters: this.localizeLocationSpawns(entity.location.monsters, localized)
+                    monsters: this.localizeLocationSpawns(entity.location.monsters, localized),
+                    appearanceVariants: entity.location.appearanceVariants?.map((variant) => ({ ...variant, name: localized ? this.translations.translate(variant.name) : variant.name }))
                 }
             };
         }
@@ -521,7 +526,7 @@ class KnowledgeService {
     }
 
     private createReadyStatus(index: TKnowledgeIndex, loadedFromCache: boolean): KnowledgeIndexStatus {
-        const searchableEntities = [...index.entities, ...this.locationEntities].filter(isKnowledgeEntitySearchable);
+        const searchableEntities = [...index.entities, ...this.locationEntities].filter(isKnowledgeEntitySearchable).filter(isKnowledgeSearchRepresentative);
         const counts = new Map<string, number>();
         for (const entity of searchableEntities) counts.set(entity.category, (counts.get(entity.category) ?? 0) + 1);
         return {
@@ -534,6 +539,10 @@ class KnowledgeService {
             language: this.getLanguage()
         };
     }
+}
+
+function isKnowledgeSearchRepresentative(entity: KnowledgeEntityDetails): boolean {
+    return entity.location?.appearanceRepresentativeKey === undefined || entity.location.appearanceRepresentativeKey === entity.key;
 }
 
 function toRequirementGroups(groups: Map<string, KnowledgeRecipeRequirementAlternative[]>): KnowledgeRecipeRequirementGroup[] {

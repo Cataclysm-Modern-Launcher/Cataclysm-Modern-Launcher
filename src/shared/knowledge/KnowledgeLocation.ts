@@ -27,4 +27,6 @@ export type KnowledgeLocationDetails = {
     dynamicLayout: boolean;
     generationWeight: number | null;
     occurrences: [number, number] | null;
+    appearanceVariants?: KnowledgeEntityReference[];
+    appearanceRepresentativeKey?: string;
 };

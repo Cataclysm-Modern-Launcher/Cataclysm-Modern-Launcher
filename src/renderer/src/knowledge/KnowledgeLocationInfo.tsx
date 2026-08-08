@@ -1,4 +1,4 @@
-import { Box, Group, Paper, SegmentedControl, Stack, Text, Tooltip, UnstyledButton } from "@mantine/core";
+import { Anchor, Box, Group, Paper, SegmentedControl, Stack, Text, Tooltip, UnstyledButton } from "@mantine/core";
 import { useTranslate } from "@renderer/stores/useLocaleStore";
 import { useKnowledgeNavigate } from "@renderer/stores/useKnowledgeNavigationStore";
 import { KnowledgeEntityDetails } from "@shared/knowledge/KnowledgeEntityDetails";
@@ -7,6 +7,7 @@ import React, { useEffect, useMemo, useState } from "react";
 
 export function KnowledgeLocationInfo({ entity }: { entity: KnowledgeEntityDetails }): React.JSX.Element {
     const t = useTranslate();
+    const navigate = useKnowledgeNavigate();
     const location = entity.location;
     const layouts = location?.layouts ?? [];
     const defaultZ = layouts.some((layout) => layout.z === 0) ? 0 : (layouts[0]?.z ?? 0);
@@ -47,6 +48,29 @@ export function KnowledgeLocationInfo({ entity }: { entity: KnowledgeEntityDetai
                             {formatOccurrences(location.occurrences)}
                         </Text>
                     </Tooltip>
+                </Group>
+            )}
+
+            {location?.appearanceVariants !== undefined && location.appearanceVariants.length > 1 && (
+                <Group gap="xs" align="baseline">
+                    <Text size="sm" fw={600}>
+                        {t("knowledge.location.variants")}:
+                    </Text>
+                    <Group gap="xs">
+                        {location.appearanceVariants.map((variant) =>
+                            variant.key === entity.key ? (
+                                <Text key={variant.key} size="sm" fw={600}>
+                                    {variant.id}
+                                </Text>
+                            ) : (
+                                <Tooltip key={variant.key} label={variant.name}>
+                                    <Anchor component="button" type="button" size="sm" onClick={() => navigate(variant.key)}>
+                                        {variant.id}
+                                    </Anchor>
+                                </Tooltip>
+                            )
+                        )}
+                    </Group>
                 </Group>
             )}
 

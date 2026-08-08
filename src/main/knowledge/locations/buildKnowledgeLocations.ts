@@ -25,6 +25,7 @@ export function buildKnowledgeLocations(entities: KnowledgeEntityDetails[], inde
     const emittedSignatures = new Set<string>();
     const campTerrainIds = collectCampTerrainIds(entities, index);
     const locations: KnowledgeEntityDetails[] = [];
+    const appearanceGroups = new Map<string, KnowledgeEntityDetails[]>();
 
     const appendOwner = (owner: KnowledgeEntityDetails, points: Point[]): void => {
         const normalized = points.map((point) => ({ ...point, id: stripRotation(normalizeOter(point.id, by)) }));
@@ -34,7 +35,9 @@ export function buildKnowledgeLocations(entities: KnowledgeEntityDetails[], inde
 
         for (const point of normalized) referenced.add(point.id);
         const location = buildDetails(points, owner.raw.subtype === "mutable", index, owner.raw, points.length > 1);
-        locations.push(toLocation(owner, deriveLocationName(owner, points, by), location));
+        const entity = toLocation(owner, deriveLocationName(owner, points, by), location);
+        locations.push(entity);
+        if (owner.jsonType === "overmap_special") appendArray(appearanceGroups, locationAppearanceSignature(points, by), entity);
     };
 
     for (const owner of entities.filter((entity) => entity.jsonType === "overmap_special")) {
@@ -61,6 +64,7 @@ export function buildKnowledgeLocations(entities: KnowledgeEntityDetails[], inde
         const location = buildDetails([{ x: 0, y: 0, z: 0, id: terrain.id }], false, index, terrain.raw, false);
         locations.push(toLocation(terrain, terrain.name, location));
     }
+    applyAppearanceGroups(appearanceGroups);
     return locations;
 }
 
@@ -518,12 +522,7 @@ function deriveLocationName(owner: KnowledgeEntityDetails, points: Point[], by: 
             if (name !== undefined) return name;
         }
     }
-    return deriveName(owner.id, points, by);
-}
-
-function deriveName(fallback: string, points: Point[], by: Map<string, KnowledgeEntityDetails>): string {
-    const surface = points.filter((point) => point.z === 0);
-    return mostCommonTerrainName(surface.length > 0 ? surface : points, by) ?? fallback.replaceAll("_", " ");
+    return owner.id;
 }
 
 function mostCommonTerrainName(points: Point[], by: Map<string, KnowledgeEntityDetails>): string | null {
@@ -557,6 +556,52 @@ function locationSignature(points: Point[]): string {
         .map((point) => `${point.x - minX},${point.y - minY},${point.z}:${point.id}`)
         .sort()
         .join("|");
+}
+
+function locationAppearanceSignature(points: Point[], by: Map<string, KnowledgeEntityDetails>): string {
+    const levels = [...new Set(points.map((point) => point.z))];
+    if (levels.length === 0) return "";
+    const z = levels.includes(0) ? 0 : [...levels].sort((left, right) => Math.abs(left) - Math.abs(right) || right - left)[0];
+    const layer = points.filter((point) => point.z === z);
+    const minX = Math.min(...layer.map((point) => point.x));
+    const minY = Math.min(...layer.map((point) => point.y));
+    const maxX = Math.max(...layer.map((point) => point.x));
+    const maxY = Math.max(...layer.map((point) => point.y));
+    const cells = new Map(layer.map((point) => [`${point.x},${point.y}`, appearanceSignatureCell(point.id, by)]));
+    const rows: string[] = [];
+    for (let y = minY; y <= maxY; y += 1) {
+        const row: string[] = [];
+        for (let x = minX; x <= maxX; x += 1) row.push(cells.get(`${x},${y}`) ?? "");
+        rows.push(row.join("\u001f"));
+    }
+    return `${maxX - minX + 1}x${maxY - minY + 1}:${rows.join("\u001e")}`;
+}
+
+function appearanceSignatureCell(id: string, by: Map<string, KnowledgeEntityDetails>): string {
+    const appearance = oterAppearance(stripRotation(normalizeOter(id, by)), by, false);
+    return `${appearance.symbol}\u001d${appearance.color ?? ""}\u001d${appearance.name ?? ""}`;
+}
+
+function applyAppearanceGroups(groups: Map<string, KnowledgeEntityDetails[]>): void {
+    for (const group of groups.values()) {
+        if (group.length < 2) continue;
+        const sorted = [...group].sort((left, right) => left.id.length - right.id.length || left.id.localeCompare(right.id));
+        const representative = sorted[0];
+        const variants: KnowledgeEntityReference[] = sorted.map((entity) => ({
+            key: entity.key,
+            id: entity.id,
+            name: entity.name,
+            jsonType: entity.jsonType,
+            sourceModId: entity.sourceModId,
+            virtual: false
+        }));
+        for (const entity of group) {
+            if (entity.location === undefined) continue;
+            entity.location.appearanceVariants = variants;
+            entity.location.appearanceRepresentativeKey = representative.key;
+            entity.variantCount = variants.length;
+        }
+    }
 }
 
 function collectCampTerrainIds(entities: KnowledgeEntityDetails[], index: LocationBuildIndex): Set<string> {

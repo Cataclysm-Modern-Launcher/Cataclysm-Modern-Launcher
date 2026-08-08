@@ -9,4 +9,5 @@ export type KnowledgeEntitySummary = {
     abstract: boolean;
     identityKind: "explicit" | "composite" | "deferred" | "anonymous" | "unknown";
     rawDefinitionCount: number;
+    variantCount?: number;
 };
