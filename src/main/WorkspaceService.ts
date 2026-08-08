@@ -8,11 +8,10 @@ import { WorkspaceConfig } from "@shared/WorkspaceConfig";
 import { ReadyWorkspaceStatus, WorkspaceStatus } from "@shared/workspace/WorkspaceStatus";
 import { SettingsIPC } from "@shared/SettingsIPC";
 import { BUILT_IN_GAME_CHANNELS } from "@shared/game-channel/BUILT_IN_GAME_CHANNELS";
-import { GameChannelDefinition } from "@shared/game-channel/GameChannelDefinition";
+import { GameChannelDefinition, GameReleaseAssetDefinition } from "@shared/game-channel/GameChannelDefinition";
 import { isNodeError } from "./utils/isNodeError";
 import { getDirectoryState } from "./utils/getDirectoryState";
 import { normalizeStringRecord } from "./utils/normalizeStringRecord";
-import { DEFAULT_RELEASE_ASSET_VARIANT } from "@shared/release-asset/DEFAULT_RELEASE_ASSET_VARIANT";
 import { DEFAULT_BACKUP_SETTINGS } from "@shared/backups/DEFAULT_BACKUP_SETTINGS";
 import { appSettings } from "./settings/AppSettings";
 import { Bridge } from "@shared/bridge-api/Bridge";
@@ -20,13 +19,11 @@ import { EWorkspaceSelectResult } from "@shared/workspace/EWorkspaceSelectResult
 import { TBackupRotationLimit } from "@shared/backups/types/TBackupRotationLimit";
 import { TAutoBackupLimit } from "@shared/backups/types/TAutoBackupLimit";
 import { TAutoBackupCooldown } from "@shared/backups/types/TAutoBackupCooldown";
-import { TReleaseAssetVariant } from "@shared/release-asset/TReleaseAssetVariant";
 import { parse, ParseError, printParseErrorCode } from "jsonc-parser";
 import { publishGameState, synchronizeActiveBundle } from "./game/GameStateEvents";
 import { broadcastIPC } from "./utils/broadcastIPC";
 
 const DEFAULT_WORKSPACE_SETTINGS: SettingsIPC = {
-    releaseAssetVariant: DEFAULT_RELEASE_ASSET_VARIANT,
     backupsEnabled: DEFAULT_BACKUP_SETTINGS.backupsEnabled,
     autoBackupLimit: DEFAULT_BACKUP_SETTINGS.autoBackupLimit,
     manualBackupRotationLimit: DEFAULT_BACKUP_SETTINGS.manualBackupRotationLimit,
@@ -53,7 +50,6 @@ class WorkspaceService {
         });
 
         ipcMain.handle(Bridge.Settings.get, () => this.getWorkspaceSettings());
-        ipcMain.handle(Bridge.Settings.setReleaseAssetVariant, async (_, releaseAssetVariant: TReleaseAssetVariant): Promise<SettingsIPC> => this.updateWorkspaceSettings({ releaseAssetVariant }));
         ipcMain.handle(Bridge.Settings.setBackupsEnabled, (_, backupsEnabled: boolean) => this.updateWorkspaceSettings({ backupsEnabled }));
         ipcMain.handle(Bridge.Settings.setAutoBackupLimit, async (_, autoBackupLimit: TAutoBackupLimit): Promise<SettingsIPC> => this.updateWorkspaceSettings({ autoBackupLimit }));
         ipcMain.handle(Bridge.Settings.setAutoBackupCooldown, async (_, autoBackupCooldown: TAutoBackupCooldown): Promise<SettingsIPC> => this.updateWorkspaceSettings({ autoBackupCooldown }));
@@ -160,7 +156,6 @@ class WorkspaceService {
             selectedChannelId,
             customGameChannels: customChannels,
             activeGameBundleByChannel: normalizeStringRecord(config.activeGameBundleByChannel),
-            releaseAssetVariant: isReleaseAssetVariant(config.releaseAssetVariant) ? config.releaseAssetVariant : DEFAULT_RELEASE_ASSET_VARIANT,
             backupsEnabled: typeof config.backupsEnabled === "boolean" ? config.backupsEnabled : DEFAULT_BACKUP_SETTINGS.backupsEnabled,
             autoBackupLimit: isAutoBackupLimit(config.autoBackupLimit) ? config.autoBackupLimit : DEFAULT_BACKUP_SETTINGS.autoBackupLimit,
             manualBackupRotationLimit: isBackupRotationLimit(config.manualBackupRotationLimit) ? config.manualBackupRotationLimit : DEFAULT_BACKUP_SETTINGS.manualBackupRotationLimit,
@@ -257,7 +252,6 @@ class WorkspaceService {
 
 function configToWorkspaceSettings(config: WorkspaceConfig): SettingsIPC {
     return {
-        releaseAssetVariant: config.releaseAssetVariant,
         backupsEnabled: config.backupsEnabled,
         autoBackupLimit: config.autoBackupLimit,
         manualBackupRotationLimit: config.manualBackupRotationLimit,
@@ -269,9 +263,31 @@ function areWorkspaceConfigsEqual(left: WorkspaceConfig, right: WorkspaceConfig)
     return JSON.stringify(left) === JSON.stringify(right);
 }
 
-function normalizeAssetNameIncludes(value: unknown): string[] {
-    if (Array.isArray(value)) return value.filter((item): item is string => typeof item === "string");
-    return typeof value === "string" && value.length > 0 ? [value] : [];
+function normalizeStringArray(value: unknown): string[] | null {
+    if (!Array.isArray(value) || !value.every((item) => typeof item === "string")) return null;
+    return value;
+}
+
+function normalizeReleaseAssetDefinitions(value: unknown): GameReleaseAssetDefinition[] | null {
+    if (!Array.isArray(value)) return null;
+
+    const result: GameReleaseAssetDefinition[] = [];
+    for (const item of value) {
+        if (typeof item !== "object" || item === null) return null;
+        const candidate = item as Partial<GameReleaseAssetDefinition>;
+        const nameIncludes = normalizeStringArray(candidate.nameIncludes);
+        const nameExcludes = candidate.nameExcludes === undefined ? undefined : normalizeStringArray(candidate.nameExcludes);
+        if (
+            (candidate.soundVariant !== "with-sounds" && candidate.soundVariant !== "without-sounds") ||
+            nameIncludes === null ||
+            nameIncludes.length === 0 ||
+            nameExcludes === null
+        ) {
+            return null;
+        }
+        result.push({ soundVariant: candidate.soundVariant, nameIncludes, ...(nameExcludes === undefined ? {} : { nameExcludes }) });
+    }
+    return result;
 }
 
 function normalizeCustomChannel(channel: unknown): GameChannelDefinition | null {
@@ -280,8 +296,22 @@ function normalizeCustomChannel(channel: unknown): GameChannelDefinition | null 
     }
 
     const candidate = channel as Partial<GameChannelDefinition>;
+    const executableNames = candidate.executableNames;
+    const windowsReleaseAssets = normalizeReleaseAssetDefinitions(candidate.releaseAssets?.windows);
+    const linuxReleaseAssets = normalizeReleaseAssetDefinitions(candidate.releaseAssets?.linux);
+    const windowsExecutableNames = normalizeStringArray(executableNames?.windows);
+    const linuxExecutableNames = normalizeStringArray(executableNames?.linux);
 
-    if (candidate.source !== "custom" || typeof candidate.id !== "string") {
+    if (
+        candidate.source !== "custom" ||
+        typeof candidate.id !== "string" ||
+        (candidate.releaseDiscovery !== "list" && candidate.releaseDiscovery !== "latest") ||
+        (candidate.releaseFilter !== "stable" && candidate.releaseFilter !== "experimental" && candidate.releaseFilter !== "all") ||
+        windowsReleaseAssets === null ||
+        linuxReleaseAssets === null ||
+        windowsExecutableNames === null ||
+        linuxExecutableNames === null
+    ) {
         return null;
     }
 
@@ -297,9 +327,15 @@ function normalizeCustomChannel(channel: unknown): GameChannelDefinition | null 
         githubRepo: typeof candidate.githubRepo === "string" ? candidate.githubRepo : "",
         githubBranch: typeof candidate.githubBranch === "string" && candidate.githubBranch.length > 0 ? candidate.githubBranch : "master",
         releasesUrl: typeof candidate.releasesUrl === "string" ? candidate.releasesUrl : "",
-        assetNameIncludes: {
-            windows: normalizeAssetNameIncludes(candidate.assetNameIncludes?.windows),
-            linux: normalizeAssetNameIncludes(candidate.assetNameIncludes?.linux)
+        releaseDiscovery: candidate.releaseDiscovery,
+        releaseFilter: candidate.releaseFilter,
+        releaseAssets: {
+            windows: windowsReleaseAssets,
+            linux: linuxReleaseAssets
+        },
+        executableNames: {
+            windows: windowsExecutableNames,
+            linux: linuxExecutableNames
         },
         kind: candidate.kind === "stable" ? "stable" : "experimental",
         source: "custom"
@@ -353,9 +389,6 @@ function isWorkspaceConfig(value: unknown): value is WorkspaceConfig {
 
 function isBackupRotationLimit(value: unknown): value is TBackupRotationLimit {
     return value === "disabled" || value === "3" || value === "5" || value === "10";
-}
-function isReleaseAssetVariant(value: unknown): value is TReleaseAssetVariant {
-    return value === "graphics-and-sounds" || value === "graphics" || value === "tiles";
 }
 function isAutoBackupLimit(value: unknown): value is TAutoBackupLimit {
     return value === "disabled" || value === "3" || value === "5" || value === "10";

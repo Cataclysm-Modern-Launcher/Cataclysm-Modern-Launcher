@@ -1,11 +1,8 @@
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
 
-const WINDOWS_EXECUTABLE_CANDIDATES = new Set(["cataclysm-tiles.exe", "cataclysm.exe", "cataclysm-launcher.exe", "cataclysm-bn-tiles.exe", "cataclysm-bn.exe"]);
-const POSIX_EXECUTABLE_CANDIDATES = new Set(["cataclysm-tiles", "cataclysm", "cataclysm-bn-tiles", "cataclysm-bn"]);
-
-export async function findExecutable(rootPath: string): Promise<string | null> {
-    const candidates = process.platform === "win32" ? WINDOWS_EXECUTABLE_CANDIDATES : POSIX_EXECUTABLE_CANDIDATES;
+export async function findExecutable(rootPath: string, executableNames: string[]): Promise<string | null> {
+    const candidates = new Set(executableNames.map((name) => name.toLowerCase()));
     const queue = [rootPath];
     while (queue.length > 0) {
         const directory = queue.shift()!;

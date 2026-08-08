@@ -1,3 +1,11 @@
+import { TReleaseAssetSoundVariant } from "../release-asset/TReleaseAssetSoundVariant";
+
+export type GameReleaseAssetDefinition = {
+    soundVariant: TReleaseAssetSoundVariant;
+    nameIncludes: string[];
+    nameExcludes?: string[];
+};
+
 export type GameChannelDefinition = {
     id: string;
     gameId: string;
@@ -10,7 +18,13 @@ export type GameChannelDefinition = {
     githubRepo: string;
     githubBranch: string;
     releasesUrl: string;
-    assetNameIncludes: {
+    releaseDiscovery: "list" | "latest";
+    releaseFilter: "stable" | "experimental" | "all";
+    releaseAssets: {
+        windows: GameReleaseAssetDefinition[];
+        linux: GameReleaseAssetDefinition[];
+    };
+    executableNames: {
         windows: string[];
         linux: string[];
     };

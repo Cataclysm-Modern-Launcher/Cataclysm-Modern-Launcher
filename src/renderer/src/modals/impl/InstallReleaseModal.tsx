@@ -10,6 +10,7 @@ import { LocalizedText } from "@renderer/components/LocalizedText";
 import { getProgressTitle } from "@renderer/utils/getProgressTitle";
 import { getIndeterminateProgressValue } from "@renderer/utils/getIndeterminateProgressValue";
 import { getProgressDescription } from "@renderer/utils/getProgressDescription";
+import { selectGithubReleaseAsset } from "@shared/release-asset/selectGithubReleaseAsset";
 
 interface Props {
     release: GithubRelease;
@@ -20,9 +21,12 @@ export function InstallReleaseModal({ id, innerProps: { release, hasInstalledVer
     const t = useTranslate();
     const [copyUserdata, setCopyUserdata] = useState(true);
     const [removeOlderGameBundles, setRemoveOlderGameBundles] = useState(false);
+    const [withoutSounds, setWithoutSounds] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     const releaseName = useMemo(() => getReleaseNameDisplay(release.name), [release]);
+    const selectedAsset = useMemo(() => selectGithubReleaseAsset(release, withoutSounds), [release, withoutSounds]);
+    const canChooseWithoutSounds = release.assets.withSounds !== null && release.assets.withoutSounds !== null;
 
     const installLatestGameBundle = useGameBundleInstallStore((state) => state.installLatest);
     const isInstallingGameBundle = useGameBundleInstallStore((state) => state.isInstalling);
@@ -31,12 +35,14 @@ export function InstallReleaseModal({ id, innerProps: { release, hasInstalledVer
 
     const handleRemoveCheck = useCallback((event: ChangeEvent<HTMLInputElement>) => setRemoveOlderGameBundles(event.currentTarget.checked), []);
 
+    const handleWithoutSoundsCheck = useCallback((event: ChangeEvent<HTMLInputElement>) => setWithoutSounds(event.currentTarget.checked), []);
+
     const handleClose = useCallback(() => modals.close(id), [id]);
 
     const handleConfirm = useCallback(async () => {
         setError(null);
         try {
-            const result = await installLatestGameBundle({ releaseId: release.id, makeActive: true, copyUserdata, removeOlderGameBundles });
+            const result = await installLatestGameBundle({ releaseId: release.id, makeActive: true, copyUserdata, removeOlderGameBundles, withoutSounds });
             if (result.status === "installed") {
                 handleClose();
             } else if (result.status !== "cancelled") {
@@ -46,7 +52,7 @@ export function InstallReleaseModal({ id, innerProps: { release, hasInstalledVer
             console.error("Can't install", e);
             setError(getErrorMessage(e));
         }
-    }, [copyUserdata, handleClose, installLatestGameBundle, release.id, removeOlderGameBundles]);
+    }, [copyUserdata, handleClose, installLatestGameBundle, release.id, removeOlderGameBundles, withoutSounds]);
 
     useEffect(() => {
         modals.updateModal({
@@ -63,14 +69,21 @@ export function InstallReleaseModal({ id, innerProps: { release, hasInstalledVer
                 <LocalizedText size="sm" c="dimmed" i18nKey="install.modal.description" variables={{ version: releaseName }} />
 
                 <Text size="xs" c="dimmed">
-                    {release?.asset?.name}
+                    {selectedAsset?.name}
                 </Text>
             </Stack>
 
-            {hasInstalledVersions && (
+            {(canChooseWithoutSounds || hasInstalledVersions) && (
                 <Stack gap="xs" className="game-bundle-options">
-                    <Checkbox size="sm" checked={copyUserdata} onChange={handleCopyCheck} label={t("install.option.copy.userdata")} disabled={isInstallingGameBundle} />
-                    <Checkbox size="sm" checked={removeOlderGameBundles} onChange={handleRemoveCheck} label={t("install.option.remove.old.versions")} disabled={isInstallingGameBundle} />
+                    {canChooseWithoutSounds && (
+                        <Checkbox size="sm" checked={withoutSounds} onChange={handleWithoutSoundsCheck} label={t("install.option.without.sounds")} disabled={isInstallingGameBundle} />
+                    )}
+                    {hasInstalledVersions && (
+                        <>
+                            <Checkbox size="sm" checked={copyUserdata} onChange={handleCopyCheck} label={t("install.option.copy.userdata")} disabled={isInstallingGameBundle} />
+                            <Checkbox size="sm" checked={removeOlderGameBundles} onChange={handleRemoveCheck} label={t("install.option.remove.old.versions")} disabled={isInstallingGameBundle} />
+                        </>
+                    )}
                 </Stack>
             )}
 

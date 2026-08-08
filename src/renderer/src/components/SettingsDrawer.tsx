@@ -5,7 +5,6 @@ import { AutoBackupLimit } from "@renderer/components/AutoBackupLimit";
 import { AutoBackupCooldown } from "@renderer/components/AutoBackupCooldown";
 import { ManualBackupRotation } from "@renderer/components/ManualBackupRotation";
 import { BackupEnabledSwitch } from "@renderer/components/BackupEnabledSwitch";
-import { ReleaseAssertVariantView } from "@renderer/components/ReleaseAssertVariantView";
 import { useLocaleInfo, useSetLocale, useTranslate } from "@renderer/stores/useLocaleStore";
 import { useCloseDrawer, useIsDrawerOpened } from "@renderer/stores/useDrawerStore";
 import { useAppearanceStore } from "@renderer/stores/useAppearanceStore";
@@ -41,9 +40,6 @@ export function SettingsDrawer(): ReactNode {
 
                 <WorkspaceSettings />
 
-                <SheetSection title={t("settings.game.title")}>
-                    <ReleaseAssertVariantView />
-                </SheetSection>
 
                 <SheetSection title={t("settings.backups.title")} rightSection={<BackupEnabledSwitch />}>
                     <AutoBackupLimit />

@@ -15,6 +15,7 @@ import { broadcastIPC } from "../utils/broadcastIPC";
 import { gameFileOperationGuard } from "./GameFileOperationGuard";
 import { gameSaveCoordinator } from "./GameSaveCoordinator";
 import { gameBundleService } from "../GameBundleService";
+import { workspaceService } from "../WorkspaceService";
 
 class GameRuntimeService {
     private state: GameRuntimeState = { status: "idle" };
@@ -83,7 +84,12 @@ class GameRuntimeService {
     }
 
     private async resolveExecutablePath(gameBundle: GameBundle): Promise<string | null> {
-        return findExecutable(gameBundle.path);
+        const workspace = workspaceService.getReadyWorkspace();
+        const channel = workspace?.gameChannels.find((candidate) => candidate.id === gameBundle.manifest.channelId);
+        if (channel === undefined) return null;
+
+        const platformKey = process.platform === "win32" ? "windows" : "linux";
+        return findExecutable(gameBundle.path, channel.executableNames[platformKey]);
     }
 }
 

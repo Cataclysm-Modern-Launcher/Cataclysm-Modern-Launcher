@@ -18,7 +18,6 @@ export const Bridge = {
     Settings: {
         get: "settings:get",
         changed: "settings:changed",
-        setReleaseAssetVariant: "settings:set-release-asset-variant",
         setBackupsEnabled: "settings:set-backups-enabled",
         setAutoBackupLimit: "settings:set-auto-backup-limit",
         setAutoBackupCooldown: "settings:set-auto-backup-cooldown",

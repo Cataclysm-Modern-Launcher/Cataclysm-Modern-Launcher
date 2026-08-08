@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { DEFAULT_RELEASE_ASSET_VARIANT } from "@shared/release-asset/DEFAULT_RELEASE_ASSET_VARIANT";
 import { DEFAULT_BACKUP_SETTINGS } from "@shared/backups/DEFAULT_BACKUP_SETTINGS";
 import { getErrorMessage } from "@shared/getErrorMessage";
 import { SettingsIPC, SettingsIPCSetter } from "@shared/SettingsIPC";
@@ -13,7 +12,6 @@ interface ConfigState extends SettingsIPC, SettingsIPCSetter, IMountableState {
 }
 
 export const useConfigStore = create<ConfigState>()((set) => ({
-    releaseAssetVariant: DEFAULT_RELEASE_ASSET_VARIANT,
     backupsEnabled: DEFAULT_BACKUP_SETTINGS.backupsEnabled,
     autoBackupLimit: DEFAULT_BACKUP_SETTINGS.autoBackupLimit,
     autoBackupCooldown: DEFAULT_BACKUP_SETTINGS.autoBackupCooldown,
@@ -52,19 +50,6 @@ export const useConfigStore = create<ConfigState>()((set) => ({
                 error: null
             });
         });
-    },
-
-    setReleaseAssetVariant: async (value) => {
-        set({ error: null });
-        try {
-            const config = await window.api.settings.setReleaseAssetVariant(value);
-            set(config);
-            return config;
-        } catch (e) {
-            set({ error: getErrorMessage(e) });
-            console.error("Failed to set release asset variant", e);
-            throw e;
-        }
     },
 
     setBackupsEnabled: async (value) => {

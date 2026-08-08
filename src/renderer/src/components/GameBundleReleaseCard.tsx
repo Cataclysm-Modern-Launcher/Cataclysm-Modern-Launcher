@@ -7,6 +7,7 @@ import { toReleaseNotesTarget } from "@renderer/utils/toReleaseNotesTarget";
 import { useTranslate } from "@renderer/stores/useLocaleStore";
 import { openModal } from "@renderer/modals/contextModals";
 import { LocalizedText } from "@renderer/components/LocalizedText";
+import { selectGithubReleaseAsset } from "@shared/release-asset/selectGithubReleaseAsset";
 
 interface Props {
     release: GithubRelease;
@@ -19,6 +20,7 @@ interface Props {
 export function GameBundleReleaseCard({ release, isGameBundleReady, isInstallingGameBundle, actionDisabled, onRequestInstall }: Props): React.JSX.Element {
     const t = useTranslate();
     const openReleaseNotesModal = useCallback(() => openModal("showReleaseNotes", t("release.notes.modal.title"), { notes: toReleaseNotesTarget(release) }), [release, t]);
+    const defaultAsset = selectGithubReleaseAsset(release, false);
 
     return (
         <Card withBorder radius="md" p="sm" className="version-card">
@@ -30,7 +32,7 @@ export function GameBundleReleaseCard({ release, isGameBundleReady, isInstalling
                     </Group>
                     <LocalizedText size="xs" c="dimmed" i18nKey="versions.available.published.at" variables={{ date: formatDate(release.publishedAt) }} />
                     <Text size="xs" c="dimmed">
-                        {release.asset.name}
+                        {defaultAsset?.name}
                     </Text>
                 </Stack>
                 <Group gap="xs" wrap="nowrap">

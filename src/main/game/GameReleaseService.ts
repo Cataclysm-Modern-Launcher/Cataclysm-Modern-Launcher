@@ -12,13 +12,12 @@ import { WorkspaceConfig } from "@shared/WorkspaceConfig";
 import { GameBundle } from "@shared/game-bundle/GameBundle";
 import { GameBundleInstallOptions } from "@shared/game-bundle/GameBundleInstallOptions";
 import { GameChannelDefinition } from "@shared/game-channel/GameChannelDefinition";
-import { TReleaseAssetVariant } from "@shared/release-asset/TReleaseAssetVariant";
 import { GitHubNetworkManager } from "../network/GitHubNetworkManager";
 import { getReusableArchive } from "../utils/getReusableArchive";
 import { isNodeError } from "../utils/isNodeError";
 import { getReleaseCacheKey } from "../utils/releases/getReleaseCacheKey";
 import { isGitHubUrl } from "../utils/releases/isGitHubUrl";
-import { matchesChannelKind } from "../utils/releases/matchesChannelKind";
+import { matchesReleaseFilter } from "../utils/releases/matchesReleaseFilter";
 import { toGameRelease } from "../utils/releases/toGameRelease";
 import { withGitHubPageSize } from "../utils/releases/withGitHubPageSize";
 import { runCommand } from "../utils/runCommand";
@@ -31,6 +30,7 @@ import { DOWNLOADS_DIRECTORY_NAME, GAME_BUNDLE_MANIFEST_FILE_NAME, GAME_BUNDLES_
 import { safePathSegment } from "../utils/safePathSegment";
 import { broadcastInstallIPC } from "../utils/broadcastInstallIPC";
 import { GameBundleInstallCancelledError } from "./GameBundleInstallCancelledError";
+import { selectGithubReleaseAsset } from "@shared/release-asset/selectGithubReleaseAsset";
 
 const KEEP_DOWNLOADED_GAME_BUNDLES = 3;
 const DOWNLOAD_PROGRESS_MIN_INTERVAL_MS = 250;
@@ -51,15 +51,16 @@ class GameReleaseService {
     }
 
     async fetch(channel: GameChannelDefinition, forceRefresh: boolean): Promise<GithubRelease[]> {
-        const gameAssetVariant = workspaceService.getWorkspaceSettings().releaseAssetVariant;
-        return this.gitHubNetwork.getCached(getReleaseCacheKey(channel, gameAssetVariant), () => this.fetchFromGitHub(channel, forceRefresh, gameAssetVariant), { forceRefresh });
+        return this.gitHubNetwork.getCached(getReleaseCacheKey(channel), () => this.fetchFromGitHub(channel, forceRefresh), { forceRefresh });
     }
 
     async install(workspacePath: string, config: WorkspaceConfig, channel: GameChannelDefinition, release: GithubRelease, options: GameBundleInstallOptions, gameBundlesBefore: GameBundle[]): Promise<GameBundle> {
         const gameBundlePath = join(workspacePath, GAME_BUNDLES_DIRECTORY_NAME, channel.id, safePathSegment(release.id, "release"));
         const userdataPath = join(workspacePath, USERDATA_DIRECTORY_NAME, channel.id, safePathSegment(release.id, "release"));
         const tempPath = `${gameBundlePath}.tmp-${Date.now()}`;
-        const downloadPath = join(workspacePath, DOWNLOADS_DIRECTORY_NAME, channel.id, basename(release.asset.name));
+        const asset = selectGithubReleaseAsset(release, options.withoutSounds);
+        if (asset === null) throw new Error(`No compatible release asset found for ${release.name}`);
+        const downloadPath = join(workspacePath, DOWNLOADS_DIRECTORY_NAME, channel.id, basename(asset.name));
 
         await mkdir(dirname(gameBundlePath), { recursive: true });
         await mkdir(dirname(userdataPath), { recursive: true });
@@ -69,7 +70,7 @@ class GameReleaseService {
         const userdataExisted = await pathExists(userdataPath);
 
         try {
-            await this.downloadFile(release.asset.downloadUrl, downloadPath, release.name, release.asset.size);
+            await this.downloadFile(asset.downloadUrl, downloadPath, release.name, asset.size);
             await this.extractArchive(downloadPath, tempPath, release.name);
             broadcastInstallIPC({ status: "preparing-saves", releaseName: release.name });
 
@@ -130,25 +131,22 @@ class GameReleaseService {
         await Promise.all(files.map((file) => rm(file.path, { force: true })));
     }
 
-    private async fetchFromGitHub(channel: GameChannelDefinition, forceRefresh: boolean, gameAssetVariant: TReleaseAssetVariant): Promise<GithubRelease[]> {
-        const pageCount = channel.kind === "stable" ? 5 : 1;
-        const releases: GithubRelease[] = [];
-        for (let page = 1; page <= pageCount; page += 1) {
-            const value = await this.fetchPage(channel, page, forceRefresh);
-            if (!Array.isArray(value) || value.length === 0) break;
-            releases.push(
-                ...value
-                    .map((item) => toGameRelease(item, channel, gameAssetVariant))
-                    .filter((item): item is GithubRelease => item !== null)
-                    .filter((item) => matchesChannelKind(item, channel))
-            );
-            if (channel.kind === "stable" && releases.length > 0) break;
-        }
-        return releases.sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+    private async fetchFromGitHub(channel: GameChannelDefinition, forceRefresh: boolean): Promise<GithubRelease[]> {
+        const values = channel.releaseDiscovery === "latest" ? [await this.fetchLatestRelease(channel, forceRefresh)] : await this.fetchReleaseList(channel, forceRefresh);
+        return values
+            .map((item) => toGameRelease(item, channel))
+            .filter((item): item is GithubRelease => item !== null)
+            .filter((item) => matchesReleaseFilter(item, channel))
+            .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
     }
 
-    private async fetchPage(channel: GameChannelDefinition, page: number, forceRefresh: boolean): Promise<unknown> {
-        return this.gitHubNetwork.getJson<unknown>(withGitHubPageSize(channel.releasesUrl, page), { forceRefresh });
+    private async fetchLatestRelease(channel: GameChannelDefinition, forceRefresh: boolean): Promise<unknown> {
+        return this.gitHubNetwork.getJson<unknown>(`${channel.releasesUrl.replace(/\/$/, "")}/latest`, { forceRefresh });
+    }
+
+    private async fetchReleaseList(channel: GameChannelDefinition, forceRefresh: boolean): Promise<unknown[]> {
+        const value = await this.gitHubNetwork.getJson<unknown>(withGitHubPageSize(channel.releasesUrl, 1), { forceRefresh });
+        return Array.isArray(value) ? value : [];
     }
 
     private async downloadFile(url: string, targetPath: string, releaseName: string, expectedBytes: number): Promise<void> {

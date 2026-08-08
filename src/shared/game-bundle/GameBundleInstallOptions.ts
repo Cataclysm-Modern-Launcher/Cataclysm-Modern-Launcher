@@ -3,4 +3,5 @@ export type GameBundleInstallOptions = {
     makeActive: boolean;
     copyUserdata: boolean;
     removeOlderGameBundles: boolean;
+    withoutSounds: boolean;
 };

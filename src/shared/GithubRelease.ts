@@ -1,3 +1,9 @@
+export type GithubReleaseAsset = {
+    name: string;
+    size: number;
+    downloadUrl: string;
+};
+
 export type GithubRelease = {
     id: string;
     name: string;
@@ -6,9 +12,8 @@ export type GithubRelease = {
     htmlUrl: string;
     body: string;
     prerelease: boolean;
-    asset: {
-        name: string;
-        size: number;
-        downloadUrl: string;
+    assets: {
+        withSounds: GithubReleaseAsset | null;
+        withoutSounds: GithubReleaseAsset | null;
     };
 };

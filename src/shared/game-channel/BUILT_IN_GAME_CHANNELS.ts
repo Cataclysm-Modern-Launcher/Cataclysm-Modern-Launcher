@@ -13,9 +13,23 @@ export const BUILT_IN_GAME_CHANNELS: GameChannelDefinition[] = [
         githubRepo: "Cataclysm-DDA",
         githubBranch: "master",
         releasesUrl: "https://api.github.com/repos/CleverRaven/Cataclysm-DDA/releases",
-        assetNameIncludes: {
-            windows: ["windows-with-graphics-and-sounds-x64", "windows-with-graphics-x64", "cdda-windows-tiles-x64"],
-            linux: ["linux-with-graphics-and-sounds-x64", "linux-with-graphics-x64", "cdda-linux-tiles-x64"]
+        releaseDiscovery: "list",
+        releaseFilter: "experimental",
+        releaseAssets: {
+            windows: [
+                { soundVariant: "with-sounds", nameIncludes: ["windows-with-graphics-and-sounds-x64"] },
+                { soundVariant: "without-sounds", nameIncludes: ["windows-with-graphics-x64"] },
+                { soundVariant: "with-sounds", nameIncludes: ["cdda-windows-tiles-x64"] }
+            ],
+            linux: [
+                { soundVariant: "with-sounds", nameIncludes: ["linux-with-graphics-and-sounds-x64"] },
+                { soundVariant: "without-sounds", nameIncludes: ["linux-with-graphics-x64"] },
+                { soundVariant: "with-sounds", nameIncludes: ["cdda-linux-tiles-x64"] }
+            ]
+        },
+        executableNames: {
+            windows: ["cataclysm-tiles.exe", "cataclysm.exe"],
+            linux: ["cataclysm-tiles", "cataclysm"]
         },
         kind: "experimental",
         source: "built-in"
@@ -32,9 +46,23 @@ export const BUILT_IN_GAME_CHANNELS: GameChannelDefinition[] = [
         githubRepo: "Cataclysm-DDA",
         githubBranch: "0.I-branch",
         releasesUrl: "https://api.github.com/repos/CleverRaven/Cataclysm-DDA/releases",
-        assetNameIncludes: {
-            windows: ["windows-with-graphics-and-sounds-x64", "windows-with-graphics-x64", "cdda-windows-tiles-x64"],
-            linux: ["linux-with-graphics-and-sounds-x64", "linux-with-graphics-x64", "cdda-linux-tiles-x64"]
+        releaseDiscovery: "latest",
+        releaseFilter: "stable",
+        releaseAssets: {
+            windows: [
+                { soundVariant: "with-sounds", nameIncludes: ["windows-with-graphics-and-sounds-x64"] },
+                { soundVariant: "without-sounds", nameIncludes: ["windows-with-graphics-x64"] },
+                { soundVariant: "with-sounds", nameIncludes: ["cdda-windows-tiles-x64"] }
+            ],
+            linux: [
+                { soundVariant: "with-sounds", nameIncludes: ["linux-with-graphics-and-sounds-x64"] },
+                { soundVariant: "without-sounds", nameIncludes: ["linux-with-graphics-x64"] },
+                { soundVariant: "with-sounds", nameIncludes: ["cdda-linux-tiles-x64"] }
+            ]
+        },
+        executableNames: {
+            windows: ["cataclysm-tiles.exe", "cataclysm.exe"],
+            linux: ["cataclysm-tiles", "cataclysm", "cataclysm-launcher"]
         },
         kind: "stable",
         source: "built-in"
@@ -51,10 +79,18 @@ export const BUILT_IN_GAME_CHANNELS: GameChannelDefinition[] = [
         githubRepo: "Cataclysm-BN",
         githubBranch: "main",
         releasesUrl: "https://api.github.com/repos/cataclysmbn/Cataclysm-BN/releases",
-        assetNameIncludes: {
-            // todo: update this, currently using old asset names
-            windows: ["cbn-windows-tiles-x64"],
-            linux: ["cbn-linux-tiles-x64"]
+        releaseDiscovery: "list",
+        releaseFilter: "experimental",
+        releaseAssets: {
+            windows: [
+                { soundVariant: "with-sounds", nameIncludes: ["cbn-windows-tiles-x64-msvc-"], nameExcludes: ["no-soundpack", "-pdb"] },
+                { soundVariant: "without-sounds", nameIncludes: ["cbn-windows-tiles-x64-msvc-no-soundpack-"] }
+            ],
+            linux: [{ soundVariant: "with-sounds", nameIncludes: ["cbn-linux-tiles-x64-"] }]
+        },
+        executableNames: {
+            windows: ["cataclysm-bn-tiles.exe", "cataclysm-bn.exe"],
+            linux: ["cataclysm-bn-tiles", "cataclysm-bn", "cataclysm-launcher"]
         },
         kind: "experimental",
         source: "built-in"
@@ -71,10 +107,18 @@ export const BUILT_IN_GAME_CHANNELS: GameChannelDefinition[] = [
         githubRepo: "Cataclysm-BN",
         githubBranch: "main",
         releasesUrl: "https://api.github.com/repos/cataclysmbn/Cataclysm-BN/releases",
-        assetNameIncludes: {
-            // todo: update this, currently using old asset names
-            windows: ["cbn-windows-tiles-x64"],
-            linux: ["cbn-linux-tiles-x64"]
+        releaseDiscovery: "latest",
+        releaseFilter: "stable",
+        releaseAssets: {
+            windows: [
+                { soundVariant: "with-sounds", nameIncludes: ["cbn-windows-tiles-x64-msvc-"], nameExcludes: ["no-soundpack", "-pdb"] },
+                { soundVariant: "without-sounds", nameIncludes: ["cbn-windows-tiles-x64-msvc-no-soundpack-"] }
+            ],
+            linux: [{ soundVariant: "with-sounds", nameIncludes: ["cbn-linux-tiles-x64-"] }]
+        },
+        executableNames: {
+            windows: ["cataclysm-bn-tiles.exe", "cataclysm-bn.exe"],
+            linux: ["cataclysm-bn-tiles", "cataclysm-bn", "cataclysm-launcher"]
         },
         kind: "stable",
         source: "built-in"
@@ -91,10 +135,21 @@ export const BUILT_IN_GAME_CHANNELS: GameChannelDefinition[] = [
         githubRepo: "Cataclysm-TLG",
         githubBranch: "master",
         releasesUrl: "https://api.github.com/repos/Cataclysm-TLG/Cataclysm-TLG/releases",
-        assetNameIncludes: {
-            // todo: update this, currently using old asset names
-            windows: ["ctlg-windows-tiles-x64"],
-            linux: ["ctlg-linux-tiles-x64"]
+        releaseDiscovery: "list",
+        releaseFilter: "all",
+        releaseAssets: {
+            windows: [
+                { soundVariant: "with-sounds", nameIncludes: ["ctlg-windows-tiles-sounds-x64-msvc-"] },
+                { soundVariant: "without-sounds", nameIncludes: ["ctlg-windows-tiles-x64-msvc-"] }
+            ],
+            linux: [
+                { soundVariant: "with-sounds", nameIncludes: ["ctlg-linux-tiles-sounds-x64-"] },
+                { soundVariant: "without-sounds", nameIncludes: ["ctlg-linux-tiles-x64-"] }
+            ]
+        },
+        executableNames: {
+            windows: ["cataclysm-tlg-tiles.exe", "cataclysm-tlg.exe"],
+            linux: ["cataclysm-tlg-tiles", "cataclysm-tlg", "cataclysm-launcher"]
         },
         kind: "experimental",
         source: "built-in"
