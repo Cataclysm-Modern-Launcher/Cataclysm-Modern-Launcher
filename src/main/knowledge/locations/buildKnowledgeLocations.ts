@@ -534,17 +534,18 @@ function mostCommonTerrainName(points: Point[], by: Map<string, KnowledgeEntityD
     return [...counts].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
 }
 function oterAppearance(id: string, by: Map<string, KnowledgeEntityDetails>, linkTile: boolean): { symbol: string; color: string | null; name: string | null; entityKey: string | null } {
-    const terrain = by.get(`overmap_terrain:${normalizeOter(id, by)}`);
+    const resolved = resolveOter(id, by);
+    const terrain = resolved?.terrain;
     const raw = terrain?.raw;
     const rawSym = raw?.sym;
     const rawColor = raw?.color;
-    const sym = Array.isArray(rawSym) ? rawSym[0] : rawSym;
+    const sym = resolved?.symbol ?? (Array.isArray(rawSym) ? rawSym[0] : rawSym);
     const color = Array.isArray(rawColor) ? rawColor[0] : rawColor;
     return {
         symbol: typeof sym === "string" ? sym : typeof sym === "number" ? String.fromCodePoint(sym) : "?",
         color: typeof color === "string" ? color : null,
         name: terrain?.name ?? null,
-        entityKey: terrain === undefined || !linkTile ? null : tileLocationKey(normalizeOter(id, by))
+        entityKey: resolved === null || !linkTile ? null : tileLocationKey(resolved.id)
     };
 }
 
@@ -578,7 +579,7 @@ function locationAppearanceSignature(points: Point[], by: Map<string, KnowledgeE
 }
 
 function appearanceSignatureCell(id: string, by: Map<string, KnowledgeEntityDetails>): string {
-    const appearance = oterAppearance(stripRotation(normalizeOter(id, by)), by, false);
+    const appearance = oterAppearance(id, by, false);
     return `${appearance.symbol}\u001d${appearance.color ?? ""}\u001d${appearance.name ?? ""}`;
 }
 
@@ -657,10 +658,49 @@ function entityAliases(entity: KnowledgeEntityDetails): string[] {
     const aliases = flattenStrings(rawId);
     return aliases.length > 0 ? aliases : [entity.id];
 }
+// Keep this in sync with CDDA om_lines::all: LINEAR overmap terrains generate these runtime variants.
+const linearOterVariants = [
+    ["_isolated", "┼"],
+    ["_end_south", "│"],
+    ["_end_west", "─"],
+    ["_ne", "└"],
+    ["_end_north", "│"],
+    ["_ns", "│"],
+    ["_es", "┌"],
+    ["_nes", "├"],
+    ["_end_east", "─"],
+    ["_wn", "┘"],
+    ["_ew", "─"],
+    ["_new", "┴"],
+    ["_sw", "┐"],
+    ["_nsw", "┤"],
+    ["_esw", "┬"],
+    ["_nesw", "┼"]
+] as const;
+
+type ResolvedOter = { id: string; terrain: KnowledgeEntityDetails; symbol: string | null };
+
 function normalizeOter(id: string, by: Map<string, KnowledgeEntityDetails>): string {
-    if (by.has(`overmap_terrain:${id}`)) return id;
+    return resolveOter(id, by)?.id ?? id;
+}
+
+function resolveOter(id: string, by: Map<string, KnowledgeEntityDetails>): ResolvedOter | null {
+    const exact = by.get(`overmap_terrain:${id}`);
+    if (exact !== undefined) return { id, terrain: exact, symbol: null };
+
     const stripped = stripRotation(id);
-    return by.has(`overmap_terrain:${stripped}`) ? stripped : id;
+    const rotated = by.get(`overmap_terrain:${stripped}`);
+    if (rotated !== undefined) return { id: stripped, terrain: rotated, symbol: null };
+
+    for (const [suffix, symbol] of linearOterVariants) {
+        if (!id.endsWith(suffix)) continue;
+        const baseId = id.slice(0, -suffix.length);
+        const terrain = by.get(`overmap_terrain:${baseId}`);
+        if (terrain !== undefined && flattenStrings(terrain.raw.flags).includes("LINEAR")) {
+            return { id: baseId, terrain, symbol };
+        }
+    }
+    return null;
 }
 function readPositiveNumber(value: unknown): number | null {
     return typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : null;
