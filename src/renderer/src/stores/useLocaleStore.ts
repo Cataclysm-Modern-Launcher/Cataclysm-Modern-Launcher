@@ -4,7 +4,8 @@ import { IMountableState } from "@renderer/types/IMountableState";
 import { LocalizationBundle } from "@shared/localization/types/LocalizationBundle";
 import { TMountFn } from "@renderer/types/TMountFn";
 import { FormatArgs } from "@shared/FormatArgs";
-import { formatHtmlMessage, formatMessage } from "@shared/formatMessage";
+import { formatMessage } from "@shared/formatMessage";
+import { formatHtmlMessage } from "@shared/formatHtmlMessage";
 import { LocaleKeys } from "@shared/localization/types/LocaleFile";
 import { sanitizeLocalizedHtml } from "@renderer/utils/sanitizeLocalizedHtml";
 

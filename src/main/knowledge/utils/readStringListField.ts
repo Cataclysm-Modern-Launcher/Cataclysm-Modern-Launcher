@@ -1,4 +1,4 @@
-import { flattenStrings } from "../../utils/flattenStrings";
+import { flattenStrings } from "@shared/utils/flattenStrings";
 import { TJsonRecord } from "@shared/TJsonRecord";
 
 export function readStringListField(value: TJsonRecord, field: string): string[] {

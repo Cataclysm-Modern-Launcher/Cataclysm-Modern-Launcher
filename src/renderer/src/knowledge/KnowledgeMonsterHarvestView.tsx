@@ -16,8 +16,16 @@ export function KnowledgeMonsterHarvestView({ entries }: { entries: KnowledgeMon
                 {butcher.length > 0 && <Tabs.Tab value="butcher">{t("knowledge.monster.harvest.butcher", { count: butcher.length })}</Tabs.Tab>}
                 {dissect.length > 0 && <Tabs.Tab value="dissect">{t("knowledge.monster.harvest.dissect", { count: dissect.length })}</Tabs.Tab>}
             </Tabs.List>
-            {butcher.length > 0 && <Tabs.Panel value="butcher" pt="md"><HarvestEntries entries={butcher} /></Tabs.Panel>}
-            {dissect.length > 0 && <Tabs.Panel value="dissect" pt="md"><HarvestEntries entries={dissect} /></Tabs.Panel>}
+            {butcher.length > 0 && (
+                <Tabs.Panel value="butcher" pt="md">
+                    <HarvestEntries entries={butcher} />
+                </Tabs.Panel>
+            )}
+            {dissect.length > 0 && (
+                <Tabs.Panel value="dissect" pt="md">
+                    <HarvestEntries entries={dissect} />
+                </Tabs.Panel>
+            )}
         </Tabs>
     );
 }
@@ -33,11 +41,19 @@ function HarvestEntries({ entries }: { entries: KnowledgeMonsterHarvestEntry[] }
                         {entry.drop === undefined ? (
                             <Text size="sm">{entry.dropId}</Text>
                         ) : (
-                            <Anchor component="button" type="button" size="sm" onClick={() => navigate(entry.drop!.key)}>{entry.drop.name}</Anchor>
+                            <Anchor component="button" type="button" size="sm" onClick={() => navigate(entry.drop!.key)}>
+                                {entry.drop.name}
+                            </Anchor>
                         )}
-                        {entry.type !== null && <Badge size="xs" variant="light">{entry.type}</Badge>}
+                        {entry.type !== null && (
+                            <Badge size="xs" variant="light">
+                                {entry.type}
+                            </Badge>
+                        )}
                     </Group>
-                    <Text size="xs" c="dimmed" ta="right">{formatYield(entry, t)}</Text>
+                    <Text size="xs" c="dimmed" ta="right">
+                        {formatYield(entry, t)}
+                    </Text>
                 </Group>
             ))}
         </Stack>

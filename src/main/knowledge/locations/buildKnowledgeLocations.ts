@@ -2,6 +2,9 @@ import { KnowledgeEntityDetails } from "@shared/knowledge/KnowledgeEntityDetails
 import { KnowledgeEntityReference } from "@shared/knowledge/KnowledgeEntityReference";
 import { KnowledgeLocationDetails, KnowledgeLocationSpawn } from "@shared/knowledge/KnowledgeLocation";
 import { isRecord } from "@shared/utils/isRecord";
+import { appendMapValue } from "@shared/utils/appendMapValue";
+import { flattenStrings } from "@shared/utils/flattenStrings";
+import { clampProbability } from "../utils/clampProbability";
 
 type Point = { x: number; y: number; z: number; id: string };
 type Candidate = { type: "ITEM" | "MONSTER" | "furniture"; id: string; chance: number; approximate: boolean };
@@ -37,7 +40,7 @@ export function buildKnowledgeLocations(entities: KnowledgeEntityDetails[], inde
         const location = buildDetails(points, owner.raw.subtype === "mutable", index, owner.raw, points.length > 1);
         const entity = toLocation(owner, deriveLocationName(owner, points, by), location);
         locations.push(entity);
-        if (owner.jsonType === "overmap_special") appendArray(appearanceGroups, locationAppearanceSignature(points, by), entity);
+        if (owner.jsonType === "overmap_special") appendMapValue(appearanceGroups, locationAppearanceSignature(points, by), entity);
     };
 
     for (const owner of entities.filter((entity) => entity.jsonType === "overmap_special")) {
@@ -119,14 +122,14 @@ export function createKnowledgeLocationBuildIndex(entities: KnowledgeEntityDetai
 
         if (isNestedMapgen(mapgen.raw)) {
             const id = mapgen.raw.nested_mapgen_id;
-            if (typeof id === "string") appendArray(nestedMapgensById, id, mapgen);
+            if (typeof id === "string") appendMapValue(nestedMapgensById, id, mapgen);
             continue;
         }
 
         if (isMultiOmtMapgen(mapgen.raw)) {
             const terrainIds = [...new Set(flattenStrings(mapgen.raw.om_terrain).map((id) => stripRotation(normalizeOter(id, by))))];
             const signature = terrainIds.join("\u0000");
-            appendArray(multiOmtGroups, signature, mapgen);
+            appendMapValue(multiOmtGroups, signature, mapgen);
             for (const terrainId of terrainIds) {
                 let signatures = multiOmtGroupsByTerrain.get(terrainId);
                 if (signatures === undefined) {
@@ -139,7 +142,7 @@ export function createKnowledgeLocationBuildIndex(entities: KnowledgeEntityDetai
         }
 
         for (const terrainId of new Set(flattenStrings(mapgen.raw.om_terrain).map(stripRotation))) {
-            appendArray(mapgensByTerrain, terrainId, mapgen);
+            appendMapValue(mapgensByTerrain, terrainId, mapgen);
         }
     }
 
@@ -155,12 +158,6 @@ export function createKnowledgeLocationBuildIndex(entities: KnowledgeEntityDetai
         monsterGroupCache,
         paletteSpawnCache
     };
-}
-
-function appendArray<K, V>(map: Map<K, V[]>, key: K, value: V): void {
-    const values = map.get(key);
-    if (values === undefined) map.set(key, [value]);
-    else values.push(value);
 }
 
 function toLocation(source: KnowledgeEntityDetails, name: string, location: KnowledgeLocationDetails): KnowledgeEntityDetails {
@@ -242,7 +239,7 @@ function weightedMapgenVariants(variants: KnowledgeEntityDetails[], baseChance: 
             const current = sums.get(key);
             if (current === undefined) sums.set(key, { ...candidate, chance, approximate: candidate.approximate || variantApproximate });
             else {
-                current.chance = clamp(current.chance + chance);
+                current.chance = clampProbability(current.chance + chance);
                 current.approximate ||= candidate.approximate || variantApproximate;
             }
         }
@@ -478,9 +475,9 @@ function collapseCandidates(values: Candidate[]): Candidate[] {
     for (const value of values) {
         const key = `${value.type}:${value.id}`;
         const current = merged.get(key);
-        if (current === undefined) merged.set(key, { value: { ...value }, miss: 1 - clamp(value.chance) });
+        if (current === undefined) merged.set(key, { value: { ...value }, miss: 1 - clampProbability(value.chance) });
         else {
-            current.miss *= 1 - clamp(value.chance);
+            current.miss *= 1 - clampProbability(value.chance);
             current.value.approximate ||= value.approximate;
         }
     }
@@ -492,9 +489,9 @@ function merge(values: Candidate[], by: Map<string, KnowledgeEntityDetails>): Kn
     for (const value of values) {
         const key = `${value.type}:${value.id}`;
         const current = merged.get(key);
-        if (!current) merged.set(key, { value: { ...value }, miss: 1 - clamp(value.chance) });
+        if (!current) merged.set(key, { value: { ...value }, miss: 1 - clampProbability(value.chance) });
         else {
-            current.miss *= 1 - clamp(value.chance);
+            current.miss *= 1 - clampProbability(value.chance);
             current.value.approximate ||= value.approximate;
         }
     }
@@ -735,9 +732,6 @@ function records(v: unknown): Record<string, unknown>[] {
 function strings(v: unknown): string[] {
     return Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : [];
 }
-function flattenStrings(v: unknown): string[] {
-    return typeof v === "string" ? [v] : Array.isArray(v) ? v.flatMap(flattenStrings) : [];
-}
 function isPoint(v: unknown): v is [number, number, number] {
     return Array.isArray(v) && v.length >= 3 && v.slice(0, 3).every((x) => typeof x === "number");
 }
@@ -745,13 +739,10 @@ function oneInEstimate(v: unknown): number {
     return v === undefined ? 1 : typeof v === "number" && v > 0 ? 1 / v : 1;
 }
 function percentEstimate(v: unknown): number {
-    return v === undefined ? 1 : typeof v === "number" ? clamp(v / 100) : 1;
+    return v === undefined ? 1 : typeof v === "number" ? clampProbability(v / 100) : 1;
 }
 function mul(...values: number[]): number {
-    return clamp(values.reduce((result, value) => result * value, 1));
-}
-function clamp(v: number): number {
-    return Math.max(0, Math.min(1, v));
+    return clampProbability(values.reduce((result, value) => result * value, 1));
 }
 function stripRotation(id: string): string {
     return id.replace(/_(north|east|south|west)$/, "");

@@ -1,3 +1,5 @@
+import { createKnowledgeGraphKey } from "../createKnowledgeGraphKey";
+import { createItemRelationCandidate } from "./createItemRelationCandidate";
 import { TResolvedKnowledgeDefinition } from "../../types/TResolvedKnowledgeDefinition";
 import { TKnowledgeRelationCandidate } from "../types/TKnowledgeRelationCandidate";
 import { isRecord } from "@shared/utils/isRecord";
@@ -12,7 +14,7 @@ export function extractItemDestructionRelations(definitions: TResolvedKnowledgeD
     return definitions
         .filter((definition) => definition.canonicalType === "ITEM")
         .flatMap((definition) => {
-            const sourceKey = key(definition.canonicalType, definition.effectiveId);
+            const sourceKey = createKnowledgeGraphKey(definition.canonicalType, definition.effectiveId);
             return [...extractSalvageRelations(definition, sourceKey, materials), ...extractBreakageRelations(definition, sourceKey)];
         });
 }
@@ -28,7 +30,7 @@ function extractSalvageRelations(definition: TResolvedKnowledgeDefinition, sourc
         const salvagedInto = materials.get(id);
         if (salvagedInto === undefined) return [];
         return [
-            make(definition, sourceKey, "salvages-into", salvagedInto, `material[${index}]`, {
+            createItemRelationCandidate(definition, sourceKey, "salvages-into", salvagedInto, `material[${index}]`, {
                 materialId: id,
                 materialPortions: portions,
                 totalMaterialPortions: totalPortions
@@ -41,7 +43,7 @@ function extractBreakageRelations(definition: TResolvedKnowledgeDefinition, sour
     if (!Array.isArray(definition.raw.breaks_into)) return [];
     return definition.raw.breaks_into.flatMap((entry, index) => {
         if (!isRecord(entry) || typeof entry.item !== "string") return [];
-        return [make(definition, sourceKey, "breaks-into", entry.item, `breaks_into[${index}]`, readCountMetadata(entry.count))];
+        return [createItemRelationCandidate(definition, sourceKey, "breaks-into", entry.item, `breaks_into[${index}]`, readCountMetadata(entry.count))];
     });
 }
 
@@ -62,22 +64,4 @@ function readCountMetadata(value: unknown): Record<string, unknown> {
         return { countMin: value[0], countMax: value[1] };
     }
     return {};
-}
-
-function make(definition: TResolvedKnowledgeDefinition, sourceKey: string, kind: "salvages-into" | "breaks-into", targetId: string, jsonPath: string, metadata: Record<string, unknown>): TKnowledgeRelationCandidate {
-    return {
-        sourceKey,
-        sourceType: definition.canonicalType,
-        sourceModId: definition.sourceModId,
-        sourceFile: definition.sourceFile,
-        kind,
-        targetId,
-        expectedTargetTypes: ["ITEM"],
-        jsonPath,
-        metadata
-    };
-}
-
-function key(type: string, id: string): string {
-    return `${type}:${id}`;
 }

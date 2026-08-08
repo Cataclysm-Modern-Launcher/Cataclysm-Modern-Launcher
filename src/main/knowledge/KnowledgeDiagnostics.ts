@@ -124,9 +124,9 @@ export class KnowledgeDiagnostics {
         this.logInfo("known anonymous definitions", this.anonymousIdentityTypes);
         this.logInfo("cross-source overrides", this.crossSourceOverrideTypes);
         this.logInfo("same-source replacements", this.sameSourceReplacementTypes);
-        if (this.recipeReplacementExamples.size > 0) console.info("[knowledge:index] recipe replacement examples", sortedExamples(this.recipeReplacementExamples));
+        if (this.recipeReplacementExamples.size > 0) console.info("[knowledge:index] recipe replacement examples", sortedObject(this.recipeReplacementExamples));
         this.logInfo("unresolved self-overrides", this.unresolvedSelfOverrideTypes);
-        if (this.unresolvedSelfOverrideExamples.size > 0) console.info("[knowledge:index] unresolved self-overrides examples", sortedExamples(this.unresolvedSelfOverrideExamples));
+        if (this.unresolvedSelfOverrideExamples.size > 0) console.info("[knowledge:index] unresolved self-overrides examples", sortedObject(this.unresolvedSelfOverrideExamples));
         this.logWarning("missing inheritance parents", this.missingParentTypes, this.missingParentExamples);
         this.logWarning("inheritance cycles", this.inheritanceCycleTypes, this.inheritanceCycleExamples);
         this.logInfo("applied inheritance operations", this.appliedOperationTypes);
@@ -147,7 +147,7 @@ export class KnowledgeDiagnostics {
     private logWarning(label: string, values: Map<string, number>, examples?: Map<string, DiagnosticExample[]>): void {
         if (values.size === 0) return;
         console.warn(`[knowledge:index] ${label}`, sortedObject(values));
-        if (examples !== undefined && examples.size > 0) console.warn(`[knowledge:index] ${label} examples`, sortedExamples(examples));
+        if (examples !== undefined && examples.size > 0) console.warn(`[knowledge:index] ${label} examples`, sortedObject(examples));
     }
 }
 
@@ -195,11 +195,7 @@ function increment(values: Map<string, number>, key: string): void {
     values.set(key, (values.get(key) ?? 0) + 1);
 }
 
-function sortedObject(values: Map<string, number>): Record<string, number> {
-    return Object.fromEntries([...values].sort(([left], [right]) => left.localeCompare(right)));
-}
-
-function sortedExamples(values: Map<string, DiagnosticExample[]>): Record<string, DiagnosticExample[]> {
+function sortedObject<TValue>(values: Map<string, TValue>): Record<string, TValue> {
     return Object.fromEntries([...values].sort(([left], [right]) => left.localeCompare(right)));
 }
 

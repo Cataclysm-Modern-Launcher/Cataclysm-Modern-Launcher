@@ -1,3 +1,5 @@
+import { createKnowledgeGraphKey } from "../createKnowledgeGraphKey";
+import { createItemRelationCandidate } from "./createItemRelationCandidate";
 import { TResolvedKnowledgeDefinition } from "../../types/TResolvedKnowledgeDefinition";
 import { TKnowledgeRelationCandidate } from "../types/TKnowledgeRelationCandidate";
 
@@ -37,9 +39,9 @@ function extractRecipe(definition: TResolvedKnowledgeDefinition, requirements: R
     const resultId = typeof definition.raw.result === "string" ? definition.raw.result : null;
     if (resultId === null) return [];
 
-    const sourceKey = key(definition.canonicalType, definition.effectiveId);
+    const sourceKey = createKnowledgeGraphKey(definition.canonicalType, definition.effectiveId);
     const relations: TKnowledgeRelationCandidate[] = [
-        candidate(definition, sourceKey, "uncrafts-item", resultId, "result", {
+        createItemRelationCandidate(definition, sourceKey, "uncrafts-item", resultId, "result", {
             quantity: typeof definition.raw.result_mult === "number" ? definition.raw.result_mult : 1,
             generatedFromReversibleRecipe: true
         })
@@ -115,7 +117,7 @@ function extractComponents(
             }
 
             result.push(
-                candidate(owner, sourceKey, "recovers-component", entry[0], entryPath, {
+                createItemRelationCandidate(owner, sourceKey, "recovers-component", entry[0], entryPath, {
                     count,
                     groupIndex,
                     alternativeIndex,
@@ -173,31 +175,6 @@ function extractRequirement(
     });
 }
 
-function candidate(
-    definition: TResolvedKnowledgeDefinition,
-    sourceKey: string,
-    kind: "uncrafts-item" | "recovers-component",
-    targetId: string,
-    jsonPath: string,
-    metadata: Record<string, unknown>
-): TKnowledgeRelationCandidate {
-    return {
-        sourceKey,
-        sourceType: definition.canonicalType,
-        sourceModId: definition.sourceModId,
-        sourceFile: definition.sourceFile,
-        kind,
-        targetId,
-        expectedTargetTypes: ["ITEM"],
-        jsonPath,
-        metadata
-    };
-}
-
 function isReversible(value: unknown): boolean {
     return value === true || (typeof value === "object" && value !== null && !Array.isArray(value));
-}
-
-function key(type: string, id: string): string {
-    return `${type}:${id}`;
 }

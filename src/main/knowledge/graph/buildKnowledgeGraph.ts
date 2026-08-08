@@ -4,25 +4,31 @@ import { logKnowledgeGraphDiagnostics } from "./logKnowledgeGraphDiagnostics";
 import { extractRelations } from "./extractors/extractRelations";
 import { extractItemDestructionRelations } from "./extractors/extractItemDestructionRelations";
 import { extractReversibleRecipeRelations } from "./extractors/extractReversibleRecipeRelations";
-import { buildItemMigrationMap, resolveItemMigration } from "./resolveItemMigration";
+import { buildItemMigrationMap } from "./buildItemMigrationMap";
+import { resolveItemMigration } from "./resolveItemMigration";
+import { createKnowledgeGraphKey } from "./createKnowledgeGraphKey";
 import { extractMonsterDropRelations } from "./extractors/extractMonsterDropRelations";
 
 export function buildKnowledgeGraph(definitions: TResolvedKnowledgeDefinition[]): TKnowledgeGraph {
     const started = performance.now();
     const nodes: TKnowledgeGraph["nodes"] = definitions.map((definition) => ({
-        key: key(definition.canonicalType, definition.effectiveId),
+        key: createKnowledgeGraphKey(definition.canonicalType, definition.effectiveId),
         type: definition.canonicalType,
         id: definition.effectiveId,
         sourceModId: definition.sourceModId,
         sourceFile: definition.sourceFile
     }));
-    const definitionsByKey = new Map(definitions.map((definition) => [key(definition.canonicalType, definition.effectiveId), definition]));
+    const definitionsByKey = new Map(definitions.map((definition) => [createKnowledgeGraphKey(definition.canonicalType, definition.effectiveId), definition]));
     const aliases = new Map<string, string>();
-    definitions.forEach((definition) => [definition.effectiveId, ...definition.effectiveAliases].forEach((id) => aliases.set(key(definition.canonicalType, id), key(definition.canonicalType, definition.effectiveId))));
+    definitions.forEach((definition) =>
+        [definition.effectiveId, ...definition.effectiveAliases].forEach((id) =>
+            aliases.set(createKnowledgeGraphKey(definition.canonicalType, id), createKnowledgeGraphKey(definition.canonicalType, definition.effectiveId))
+        )
+    );
     const itemMigrations = buildItemMigrationMap(definitions);
     const extractionStarted = performance.now();
     const candidates = [
-        ...definitions.flatMap((definition) => extractRelations(definition, key(definition.canonicalType, definition.effectiveId))),
+        ...definitions.flatMap((definition) => extractRelations(definition, createKnowledgeGraphKey(definition.canonicalType, definition.effectiveId))),
         ...extractItemDestructionRelations(definitions),
         ...extractReversibleRecipeRelations(definitions),
         ...extractMonsterDropRelations(definitions)
@@ -30,7 +36,7 @@ export function buildKnowledgeGraph(definitions: TResolvedKnowledgeDefinition[])
     for (const candidate of candidates) {
         const target = candidate.virtualTarget;
         if (target === undefined) continue;
-        const targetKey = key(target.type, target.id);
+        const targetKey = createKnowledgeGraphKey(target.type, target.id);
         if (!aliases.has(targetKey)) {
             aliases.set(targetKey, targetKey);
             nodes.push({ key: targetKey, type: target.type, id: target.id, sourceModId: target.sourceModId, sourceFile: target.sourceFile, virtual: true, metadata: target.metadata });
@@ -44,7 +50,7 @@ export function buildKnowledgeGraph(definitions: TResolvedKnowledgeDefinition[])
         let resolvedTargetType: string | undefined;
         let targetKey: string | undefined;
         for (const type of candidate.expectedTargetTypes) {
-            const resolved = aliases.get(key(type, candidate.targetId));
+            const resolved = aliases.get(createKnowledgeGraphKey(type, candidate.targetId));
             if (resolved === undefined) continue;
             resolvedTargetType = type;
             targetKey = resolved;
@@ -52,10 +58,10 @@ export function buildKnowledgeGraph(definitions: TResolvedKnowledgeDefinition[])
         }
         let metadata = candidate.metadata;
         if (targetKey === undefined && candidate.expectedTargetTypes.includes("ITEM") && allowsItemMigration(candidate.kind)) {
-            const migration = resolveItemMigration(itemMigrations, candidate.targetId, (id) => aliases.has(key("ITEM", id)));
+            const migration = resolveItemMigration(itemMigrations, candidate.targetId, (id) => aliases.has(createKnowledgeGraphKey("ITEM", id)));
             if (migration !== null) {
                 resolvedTargetType = "ITEM";
-                targetKey = aliases.get(key("ITEM", migration.targetId));
+                targetKey = aliases.get(createKnowledgeGraphKey("ITEM", migration.targetId));
                 metadata = {
                     ...metadata,
                     originalTargetId: candidate.targetId,
@@ -80,10 +86,6 @@ export function buildKnowledgeGraph(definitions: TResolvedKnowledgeDefinition[])
 
 function allowsItemMigration(kind: TKnowledgeGraph["edges"][number]["kind"]): boolean {
     return kind !== "uncrafts-item" && kind !== "recovers-component" && kind !== "salvages-into" && kind !== "breaks-into";
-}
-
-function key(type: string, id: string): string {
-    return `${type}:${id}`;
 }
 
 function resolveMetadata(kind: TKnowledgeGraph["edges"][number]["kind"], metadata: Record<string, unknown>, target: TResolvedKnowledgeDefinition | undefined): Record<string, unknown> {

@@ -4,6 +4,7 @@ import { useKnowledgeNavigate } from "@renderer/stores/useKnowledgeNavigationSto
 import { KnowledgeEntityDetails } from "@shared/knowledge/KnowledgeEntityDetails";
 import { KnowledgeLocationCell, KnowledgeLocationLayout } from "@shared/knowledge/KnowledgeLocation";
 import React, { useEffect, useMemo, useState } from "react";
+import { getCataColor } from "./getCataColor";
 
 export function KnowledgeLocationInfo({ entity }: { entity: KnowledgeEntityDetails }): React.JSX.Element {
     const t = useTranslate();
@@ -140,7 +141,7 @@ function LocationCell({ cell }: { cell: KnowledgeLocationCell }): React.JSX.Elem
         justifyContent: "center",
         fontSize: 18,
         lineHeight: 1,
-        color: cataColor(cell.color),
+        color: getCataColor(cell.color),
         userSelect: "text"
     };
 
@@ -158,28 +159,4 @@ function LocationCell({ cell }: { cell: KnowledgeLocationCell }): React.JSX.Elem
 
 function formatOccurrences([min, max]: [number, number]): string {
     return min === max ? String(min) : `${min}–${max}`;
-}
-
-function cataColor(value: string | null): string | undefined {
-    if (value === null) return undefined;
-    const color = value.replace(/^c_/, "");
-    const colors: Record<string, string> = {
-        black: "#000000",
-        dark_gray: "#555555",
-        light_gray: "#aaaaaa",
-        white: "#ffffff",
-        red: "#aa0000",
-        light_red: "#ff5555",
-        green: "#00aa00",
-        light_green: "#55ff55",
-        brown: "#aa5500",
-        yellow: "#ffff55",
-        blue: "#0000aa",
-        light_blue: "#5555ff",
-        magenta: "#aa00aa",
-        pink: "#ff55ff",
-        cyan: "#00aaaa",
-        light_cyan: "#55ffff"
-    };
-    return colors[color];
 }

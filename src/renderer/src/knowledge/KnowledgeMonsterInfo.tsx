@@ -32,8 +32,12 @@ export function KnowledgeMonsterInfo({ entity }: { entity: KnowledgeEntityDetail
                 <SimpleGrid cols={{ base: 2, md: 4 }} spacing="sm">
                     {stats.map(([label, value]) => (
                         <Stack key={label} gap={1}>
-                            <Text size="xs" c="dimmed">{label}</Text>
-                            <Text size="sm" fw={500}>{value}</Text>
+                            <Text size="xs" c="dimmed">
+                                {label}
+                            </Text>
+                            <Text size="sm" fw={500}>
+                                {value}
+                            </Text>
                         </Stack>
                     ))}
                 </SimpleGrid>
@@ -47,9 +51,15 @@ export function KnowledgeMonsterInfo({ entity }: { entity: KnowledgeEntityDetail
 function BadgeList({ label, values }: { label: string; values: string[] }): React.JSX.Element {
     return (
         <Stack gap={4}>
-            <Text size="xs" c="dimmed">{label}</Text>
+            <Text size="xs" c="dimmed">
+                {label}
+            </Text>
             <Group gap={6} wrap="wrap">
-                {values.map((value) => <Badge key={value} size="sm" variant="light">{value}</Badge>)}
+                {values.map((value) => (
+                    <Badge key={value} size="sm" variant="light">
+                        {value}
+                    </Badge>
+                ))}
             </Group>
         </Stack>
     );

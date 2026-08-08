@@ -1,3 +1,5 @@
+import { createKnowledgeGraphKey } from "../createKnowledgeGraphKey";
+import { clampProbability } from "../../utils/clampProbability";
 import { TResolvedKnowledgeDefinition } from "../../types/TResolvedKnowledgeDefinition";
 import { TKnowledgeRelationCandidate } from "../types/TKnowledgeRelationCandidate";
 import { isRecord } from "@shared/utils/isRecord";
@@ -13,7 +15,7 @@ export function extractMonsterDropRelations(definitions: TResolvedKnowledgeDefin
         if (typeof deathDrops !== "string") continue;
         flattenGroup(deathDrops, groups, 1, new Set(), []).forEach((drop, index) => {
             result.push({
-                sourceKey: `MONSTER:${monster.effectiveId}`,
+                sourceKey: createKnowledgeGraphKey("MONSTER", monster.effectiveId),
                 sourceType: "MONSTER",
                 sourceModId: monster.sourceModId,
                 sourceFile: monster.sourceFile,
@@ -97,8 +99,4 @@ function readDropMetadata(value: Record<string, unknown>): Record<string, unknow
         if (value[key] !== undefined) metadata[key] = value[key];
     }
     return metadata;
-}
-
-function clampProbability(value: number): number {
-    return Math.max(0, Math.min(1, value));
 }

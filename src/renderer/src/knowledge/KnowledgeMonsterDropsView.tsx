@@ -11,8 +11,12 @@ export function KnowledgeMonsterDropsView({ drops }: { drops: KnowledgeEntityRel
         <Stack gap="xs">
             {drops.map((drop, index) => (
                 <Group key={`${drop.entity.key}:${index}`} justify="space-between" wrap="nowrap">
-                    <Anchor component="button" type="button" size="sm" onClick={() => navigate(drop.entity.key)}>{drop.entity.name}</Anchor>
-                    <Text size="xs" c="dimmed">{formatDropMetadata(drop.metadata, t)}</Text>
+                    <Anchor component="button" type="button" size="sm" onClick={() => navigate(drop.entity.key)}>
+                        {drop.entity.name}
+                    </Anchor>
+                    <Text size="xs" c="dimmed">
+                        {formatDropMetadata(drop.metadata, t)}
+                    </Text>
                 </Group>
             ))}
         </Stack>

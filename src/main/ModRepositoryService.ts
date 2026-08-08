@@ -1,3 +1,4 @@
+import { getErrorMessage } from "@shared/getErrorMessage";
 import { cp, mkdir, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
@@ -480,9 +481,6 @@ class ModRepositoryService {
 
 type ReadyContext = { status: "ready"; repositoryPath: string; channelId: string; coreModId?: string };
 type UnavailableContext = { status: "unavailable"; kind: "unconfigured" | "error"; message: string };
-function getErrorMessage(error: unknown): string {
-    return error instanceof Error ? error.message : String(error);
-}
 function getRepositoryUnavailableMessage(workspace: WorkspaceStatus): string {
     return workspace.status === "invalid" ? workspace.message : translate("mods.error.workspace.unavailable");
 }

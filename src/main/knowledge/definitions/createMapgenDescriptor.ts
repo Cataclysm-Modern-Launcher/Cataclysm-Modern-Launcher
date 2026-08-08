@@ -1,4 +1,4 @@
-import { flattenStrings } from "../../utils/flattenStrings";
+import { flattenStrings } from "@shared/utils/flattenStrings";
 import { TKnowledgeTypeDescriptor } from "../types/TKnowledgeTypeDescriptor";
 import { readStringField } from "../utils/readStringField";
 

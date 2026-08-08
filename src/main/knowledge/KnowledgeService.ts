@@ -26,10 +26,12 @@ import { KnowledgeRecipeRequirementGroup } from "@shared/knowledge/KnowledgeReci
 import { KnowledgeRecipeRequirementAlternative } from "@shared/knowledge/KnowledgeRecipeRequirementAlternative";
 import { KnowledgeItemDestruction, KnowledgeItemDestructionAction, KnowledgeItemDestructionResult } from "@shared/knowledge/KnowledgeItemDestruction";
 import { isRecord } from "@shared/utils/isRecord";
+import { readNumber } from "@shared/utils/readNumber";
 import { KnowledgeMonsterHarvest, KnowledgeMonsterHarvestEntry } from "@shared/knowledge/KnowledgeMonsterHarvest";
 import { KnowledgeLocationSpawn } from "@shared/knowledge/KnowledgeLocation";
 import type { LocationBuildIndex } from "./locations/buildKnowledgeLocations";
 import { buildKnowledgeLocations, buildKnowledgeTerrainLocation, createKnowledgeLocationBuildIndex } from "./locations/buildKnowledgeLocations";
+import { appendMapValue } from "@shared/utils/appendMapValue";
 
 function normalizeSearchText(value: string): string {
     return value.toLocaleLowerCase().replaceAll("ё", "е");
@@ -411,9 +413,9 @@ class KnowledgeService {
             .filter((edge) => edge.kind === kind)
             .map((edge) => ({
                 entity: this.getEntityReference(edge.targetKey, localized),
-                count: readFiniteNumber(edge.metadata.count) ?? undefined,
-                countMin: readFiniteNumber(edge.metadata.countMin) ?? undefined,
-                countMax: readFiniteNumber(edge.metadata.countMax) ?? undefined,
+                count: readNumber(edge.metadata.count) ?? undefined,
+                countMin: readNumber(edge.metadata.countMin) ?? undefined,
+                countMax: readNumber(edge.metadata.countMax) ?? undefined,
                 note: readMetadataString(edge.metadata.materialId) ?? undefined
             }));
     }
@@ -430,7 +432,7 @@ class KnowledgeService {
         for (const entity of this.entityByKey.values()) {
             if (entity.jsonType !== "ITEM") continue;
             for (const action of readUseActions(entity.raw.use_action)) {
-                if (action.type === "salvage") values.push(readFiniteNumber(action.moves_per_part) ?? 25);
+                if (action.type === "salvage") values.push(readNumber(action.moves_per_part) ?? 25);
             }
         }
         return values;
@@ -445,7 +447,7 @@ class KnowledgeService {
         const appendEdge = (edge: TKnowledgeGraphEdge, groupKey: string, multiplier: number): void => {
             const target = edge.kind === "uses-tool" ? tools : edge.kind === "requires-quality" ? qualities : edge.kind === "uses-component" ? components : edge.kind === "recovers-component" ? recoveredComponents : null;
             if (target === null) return;
-            const count = readFiniteNumber(edge.metadata.count);
+            const count = readNumber(edge.metadata.count);
             const metadata = {
                 ...edge.metadata,
                 groupKey,
@@ -468,7 +470,7 @@ class KnowledgeService {
                 const localGroup = readMetadataString(edge.metadata.groupKey) ?? `${edge.kind}:${index}`;
                 const nestedPath = `${path}/${localGroup}`;
                 if (edge.kind === "uses-requirement") {
-                    visitRequirement(edge.targetKey, multiplier * (readFiniteNumber(edge.metadata.multiplier) ?? readFiniteNumber(edge.metadata.count) ?? 1), nestedPath, nextVisited);
+                    visitRequirement(edge.targetKey, multiplier * (readNumber(edge.metadata.multiplier) ?? readNumber(edge.metadata.count) ?? 1), nestedPath, nextVisited);
                 } else {
                     appendEdge(edge, nestedPath, multiplier);
                 }
@@ -478,9 +480,9 @@ class KnowledgeService {
         for (const [index, edge] of (this.outgoingEdgesByKey.get(recipeKey) ?? []).entries()) {
             const localGroup = readMetadataString(edge.metadata.groupKey) ?? `${edge.kind}:${index}`;
             if (edge.kind === "uses-requirement") {
-                const alternativeIndex = readFiniteNumber(edge.metadata.alternativeIndex);
+                const alternativeIndex = readNumber(edge.metadata.alternativeIndex);
                 const path = `${localGroup}:${edge.targetKey}${alternativeIndex === null ? "" : `:${alternativeIndex}`}`;
-                visitRequirement(edge.targetKey, readFiniteNumber(edge.metadata.multiplier) ?? readFiniteNumber(edge.metadata.count) ?? 1, path, new Set());
+                visitRequirement(edge.targetKey, readNumber(edge.metadata.multiplier) ?? readNumber(edge.metadata.count) ?? 1, path, new Set());
             } else {
                 appendEdge(edge, localGroup, 1);
             }
@@ -505,8 +507,8 @@ class KnowledgeService {
         for (const entity of this.locationEntities) this.entityByKey.set(entity.key, entity);
         for (const node of index.graph.nodes) this.nodeByKey.set(node.key, node);
         for (const edge of index.graph.edges) {
-            append(this.outgoingEdgesByKey, edge.sourceKey, edge);
-            append(this.incomingEdgesByKey, edge.targetKey, edge);
+            appendMapValue(this.outgoingEdgesByKey, edge.sourceKey, edge);
+            appendMapValue(this.incomingEdgesByKey, edge.targetKey, edge);
         }
     }
 
@@ -549,13 +551,9 @@ function toRequirementGroups(groups: Map<string, KnowledgeRecipeRequirementAlter
     return [...groups.entries()]
         .map(([key, alternatives]) => ({
             key,
-            alternatives: alternatives.sort((left, right) => (readFiniteNumber(left.metadata.alternativeIndex) ?? 0) - (readFiniteNumber(right.metadata.alternativeIndex) ?? 0))
+            alternatives: alternatives.sort((left, right) => (readNumber(left.metadata.alternativeIndex) ?? 0) - (readNumber(right.metadata.alternativeIndex) ?? 0))
         }))
         .sort((left, right) => right.alternatives.length - left.alternatives.length);
-}
-
-function readFiniteNumber(value: unknown): number | null {
-    return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
 function readMetadataString(value: unknown): string | null {
@@ -577,12 +575,6 @@ function readTime(value: unknown): string | number | undefined {
 function readUseActions(value: unknown): Record<string, unknown>[] {
     if (isRecord(value)) return [value];
     return Array.isArray(value) ? value.filter(isRecord) : [];
-}
-
-function append<TKey, TValue>(map: Map<TKey, TValue[]>, key: TKey, value: TValue): void {
-    const values = map.get(key);
-    if (values === undefined) map.set(key, [value]);
-    else values.push(value);
 }
 
 function readHarvestNumberField<K extends "baseNum" | "scaleNum">(key: K, value: unknown): Partial<Record<K, number | [number, number]>> {

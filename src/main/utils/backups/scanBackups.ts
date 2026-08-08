@@ -1,12 +1,13 @@
 import { GameBundle } from "@shared/game-bundle/GameBundle";
 import { BackupSummary } from "@shared/backups/types/BackupSummary";
-import { access, readdir, readFile, stat } from "node:fs/promises";
+import { readdir, readFile, stat } from "node:fs/promises";
 import { isNodeError } from "../isNodeError";
 import { BackupInstanceInfo } from "@shared/backups/types/BackupInstanceInfo";
 import { join } from "node:path";
 import { BACKUP_ARCHIVE_FILE_NAME, BACKUP_INFO_FILE_NAME } from "@shared/Const";
 import { BackupInfo } from "@shared/backups/types/BackupInfo";
 
+import { pathExists } from "../pathExists";
 import { getBackupsPath } from "./getBackupsPath";
 
 export async function scanBackups(gameBundle: GameBundle): Promise<BackupSummary> {
@@ -60,13 +61,4 @@ function isGameBackupInfo(value: unknown): value is BackupInfo {
         (candidate.type === "manual" || candidate.type === "auto") &&
         typeof candidate.comment === "string"
     );
-}
-
-async function pathExists(path: string): Promise<boolean> {
-    try {
-        await access(path);
-        return true;
-    } catch {
-        return false;
-    }
 }
