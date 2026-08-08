@@ -21,7 +21,6 @@ import { matchesReleaseFilter } from "../utils/releases/matchesReleaseFilter";
 import { toGameRelease } from "../utils/releases/toGameRelease";
 import { withGitHubPageSize } from "../utils/releases/withGitHubPageSize";
 import { runCommand } from "../utils/runCommand";
-import { workspaceService } from "../WorkspaceService";
 import { findUserdataSource } from "../utils/findUserdataSource";
 import { pathExists } from "../utils/pathExists";
 import { copyDirectoryContents } from "../utils/copyDirectoryContents";

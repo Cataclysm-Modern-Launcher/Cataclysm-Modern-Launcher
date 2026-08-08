@@ -40,7 +40,6 @@ export function SettingsDrawer(): ReactNode {
 
                 <WorkspaceSettings />
 
-
                 <SheetSection title={t("settings.backups.title")} rightSection={<BackupEnabledSwitch />}>
                     <AutoBackupLimit />
                     <AutoBackupCooldown />

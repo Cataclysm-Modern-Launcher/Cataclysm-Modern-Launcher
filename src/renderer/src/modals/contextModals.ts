@@ -13,7 +13,7 @@ import { SelectModsModal, SelectModsModalPayload } from "@renderer/modals/impl/S
 import { ModsHelpModal } from "@renderer/modals/impl/ModsHelpModal";
 
 export type ModalPayloads = {
-    deleteBackup: { gameBundle: GameBundle };
+    deleteBackup: { gameBundle: GameBundle; isLastInstalledVersion: boolean };
     showReleaseNotes: { notes: ReleaseNotesTarget };
     renameBackup: { backup: BackupInstanceInfo };
     installRelease: { release: GithubRelease; hasInstalledVersions: boolean };

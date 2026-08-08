@@ -119,6 +119,7 @@ export const RU_LOCALE = {
         "content.sheet.mods.url.placeholder": "https://github.com/example/example-mod.git",
         "content.sheet.selection.open.folder": "Открыть папку",
         "delete.game.bundle.modal.description": "Версия {version} будет удалена. Это действие нельзя отменить.",
+        "delete.game.bundle.modal.last.version.userdata.warning": "Это последняя установленная версия этого бандла. Связанные игровые настройки и сохранённые миры будут безвозвратно удалены.",
         "dock.game.add.custom": "Добавить свою платформу…",
         "dock.game.menu.title": "Платформа игры",
         "dock.game.unavailable": "Нет рабочей папки",

@@ -14,12 +14,13 @@ interface Props {
     release: GithubRelease | null;
     onSetActive: (gameBundleId: string) => Promise<boolean>;
     actionDisabled: boolean;
+    isLastInstalledVersion: boolean;
 }
 
-export function GameBundleCard({ gameBundle, release, actionDisabled, onSetActive }: Props): React.JSX.Element {
+export function GameBundleCard({ gameBundle, release, actionDisabled, isLastInstalledVersion, onSetActive }: Props): React.JSX.Element {
     const t = useTranslate();
     const openReleaseNotesModal = useCallback(() => openModal("showReleaseNotes", t("release.notes.modal.title"), { notes: toInstalledReleaseNotesTarget(gameBundle, release) }), [gameBundle, release, t]);
-    const handleDeleteClick = useCallback(() => openModal("deleteBackup", t("versions.delete.modal.title"), { gameBundle }), [gameBundle, t]);
+    const handleDeleteClick = useCallback(() => openModal("deleteBackup", t("versions.delete.modal.title"), { gameBundle, isLastInstalledVersion }), [gameBundle, isLastInstalledVersion, t]);
 
     return (
         <Card withBorder radius="md" p="sm" className="version-card">
@@ -47,7 +48,7 @@ export function GameBundleCard({ gameBundle, release, actionDisabled, onSetActiv
                     <Button size="xs" variant="subtle" onClick={openReleaseNotesModal}>
                         {t("versions.action.show.changes")}
                     </Button>
-                    <Button size="xs" variant="subtle" disabled={gameBundle.isActive || actionDisabled} color="red" onClick={handleDeleteClick}>
+                    <Button size="xs" variant="subtle" disabled={(gameBundle.isActive && !isLastInstalledVersion) || actionDisabled} color="red" onClick={handleDeleteClick}>
                         {t("versions.action.delete")}
                     </Button>
                 </Group>

@@ -221,12 +221,22 @@ class GameBundleService {
         const ws = workspaceService.getReadyWorkspace();
         if (ws === null) return { status: "unavailable", message: translate("game.error.workspace.not.ready") };
         const channel = ws.selectedGameChannel;
-        const gameBundle = (await this.read(ws.path, ws.config, channel.id)).find((candidate) => candidate.id === gameBundleId);
+        const gameBundles = await this.read(ws.path, ws.config, channel.id);
+        const gameBundle = gameBundles.find((candidate) => candidate.id === gameBundleId);
         if (gameBundle === undefined) return { status: "error", message: translate("game.error.game.bundle.missing") };
-        if (gameBundle.isActive) return { status: "blocked", message: translate("game.error.active.game.bundle.delete.blocked") };
+        const isLastInstalledVersion = gameBundles.length === 1;
+        if (gameBundle.isActive && !isLastInstalledVersion) return { status: "blocked", message: translate("game.error.active.game.bundle.delete.blocked") };
 
         await rm(gameBundle.path, { recursive: true, force: true });
         if (options.deleteUserdata) await rm(gameBundle.userdataPath, { recursive: true, force: true });
+        this.preferredWorldByGameBundleId.delete(gameBundle.id);
+
+        if (gameBundle.isActive) {
+            const activeGameBundleByChannel = { ...ws.config.activeGameBundleByChannel };
+            delete activeGameBundleByChannel[channel.id];
+            await workspaceService.saveConfig({ ...ws.config, activeGameBundleByChannel });
+            await gameSaveCoordinator.updateActiveGameBundle(null);
+        }
 
         await publishGameState(await this.safeFindLatest(channel));
         return { status: "deleted" };

@@ -121,6 +121,7 @@ export const EN_LOCALE = {
         "content.sheet.mods.url.placeholder": "https://github.com/example/example-mod.git",
         "content.sheet.selection.open.folder": "Open folder",
         "delete.game.bundle.modal.description": "Version {version} will be deleted. This action cannot be undone.",
+        "delete.game.bundle.modal.last.version.userdata.warning": "This is the last installed version of this bundle. Linked game settings and saved worlds will be permanently deleted.",
         "dock.game.add.custom": "Add custom platform…",
         "dock.game.menu.title": "Game platform",
         "dock.game.unavailable": "No workspace",

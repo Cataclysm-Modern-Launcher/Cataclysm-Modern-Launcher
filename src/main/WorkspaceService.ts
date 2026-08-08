@@ -277,12 +277,7 @@ function normalizeReleaseAssetDefinitions(value: unknown): GameReleaseAssetDefin
         const candidate = item as Partial<GameReleaseAssetDefinition>;
         const nameIncludes = normalizeStringArray(candidate.nameIncludes);
         const nameExcludes = candidate.nameExcludes === undefined ? undefined : normalizeStringArray(candidate.nameExcludes);
-        if (
-            (candidate.soundVariant !== "with-sounds" && candidate.soundVariant !== "without-sounds") ||
-            nameIncludes === null ||
-            nameIncludes.length === 0 ||
-            nameExcludes === null
-        ) {
+        if ((candidate.soundVariant !== "with-sounds" && candidate.soundVariant !== "without-sounds") || nameIncludes === null || nameIncludes.length === 0 || nameExcludes === null) {
             return null;
         }
         result.push({ soundVariant: candidate.soundVariant, nameIncludes, ...(nameExcludes === undefined ? {} : { nameExcludes }) });

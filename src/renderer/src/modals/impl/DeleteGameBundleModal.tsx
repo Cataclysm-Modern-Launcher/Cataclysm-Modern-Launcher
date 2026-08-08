@@ -8,7 +8,7 @@ import { ContextModalProps, modals } from "@mantine/modals";
 import { GameBundle } from "@shared/game-bundle/GameBundle";
 import { LocalizedText } from "@renderer/components/LocalizedText";
 
-export function DeleteGameBundleModal({ id, innerProps: { gameBundle } }: ContextModalProps<{ gameBundle: GameBundle }>): React.JSX.Element | null {
+export function DeleteGameBundleModal({ id, innerProps: { gameBundle, isLastInstalledVersion } }: ContextModalProps<{ gameBundle: GameBundle; isLastInstalledVersion: boolean }>): React.JSX.Element | null {
     const t = useTranslate();
 
     const deleteGameBundle = useGameBundleInstallStore((state) => state.delete);
@@ -50,6 +50,12 @@ export function DeleteGameBundleModal({ id, innerProps: { gameBundle } }: Contex
             <LocalizedText size="sm" c="dimmed" i18nKey="delete.game.bundle.modal.description" variables={{ version: getReleaseDisplayName(gameBundle) }} />
 
             <Checkbox size="sm" checked={deleteUserdata} onChange={handleCheck} label={t("versions.option.delete.userdata")} disabled={deleting} />
+
+            {isLastInstalledVersion && deleteUserdata && (
+                <Alert variant="light" color="red">
+                    <LocalizedText size="sm" i18nKey="delete.game.bundle.modal.last.version.userdata.warning" />
+                </Alert>
+            )}
 
             {!!error && (
                 <Alert variant="light" color="red" title={t("common.error.title")}>

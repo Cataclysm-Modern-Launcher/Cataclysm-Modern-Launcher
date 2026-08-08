@@ -82,6 +82,7 @@ export function GameBundlesDrawer(): React.JSX.Element {
                                 release={releaseById.get(gameBundle.id) ?? null}
                                 onSetActive={async (gameBundleId) => await setActiveGameBundle(gameBundleId)}
                                 actionDisabled={fileOperationRunning}
+                                isLastInstalledVersion={gameState.gameBundles.length === 1}
                             />
                         ))
                     )}
@@ -103,6 +104,7 @@ export function GameBundlesDrawer(): React.JSX.Element {
                                     isGameBundleReady={gameBundleIds.has(release.id)}
                                     isInstallingGameBundle={isInstallingGameBundle}
                                     actionDisabled={fileOperationRunning}
+                                    isLastInstalledVersion={gameState.gameBundles.length === 1}
                                     onRequestInstall={openInstallModal}
                                 />
                             ))

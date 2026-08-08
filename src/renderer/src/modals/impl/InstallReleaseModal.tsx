@@ -75,9 +75,7 @@ export function InstallReleaseModal({ id, innerProps: { release, hasInstalledVer
 
             {(canChooseWithoutSounds || hasInstalledVersions) && (
                 <Stack gap="xs" className="game-bundle-options">
-                    {canChooseWithoutSounds && (
-                        <Checkbox size="sm" checked={withoutSounds} onChange={handleWithoutSoundsCheck} label={t("install.option.without.sounds")} disabled={isInstallingGameBundle} />
-                    )}
+                    {canChooseWithoutSounds && <Checkbox size="sm" checked={withoutSounds} onChange={handleWithoutSoundsCheck} label={t("install.option.without.sounds")} disabled={isInstallingGameBundle} />}
                     {hasInstalledVersions && (
                         <>
                             <Checkbox size="sm" checked={copyUserdata} onChange={handleCopyCheck} label={t("install.option.copy.userdata")} disabled={isInstallingGameBundle} />
